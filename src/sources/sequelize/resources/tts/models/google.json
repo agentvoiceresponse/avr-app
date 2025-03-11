@@ -1,0 +1,1309 @@
+{
+    "data": [
+        {
+            "name": "af-ZA-Standard-A"
+        },
+        {
+            "name": "ar-XA-Standard-A"
+        },
+        {
+            "name": "ar-XA-Standard-B"
+        },
+        {
+            "name": "ar-XA-Standard-C"
+        },
+        {
+            "name": "ar-XA-Standard-D"
+        },
+        {
+            "name": "ar-XA-Wavenet-A"
+        },
+        {
+            "name": "ar-XA-Wavenet-B"
+        },
+        {
+            "name": "ar-XA-Wavenet-C"
+        },
+        {
+            "name": "ar-XA-Wavenet-D"
+        },
+        {
+            "name": "bg-BG-Standard-A"
+        },
+        {
+            "name": "bn-IN-Standard-A"
+        },
+        {
+            "name": "bn-IN-Standard-B"
+        },
+        {
+            "name": "bn-IN-Wavenet-A"
+        },
+        {
+            "name": "bn-IN-Wavenet-B"
+        },
+        {
+            "name": "ca-ES-Standard-A"
+        },
+        {
+            "name": "cmn-CN-Standard-A"
+        },
+        {
+            "name": "cmn-CN-Standard-B"
+        },
+        {
+            "name": "cmn-CN-Standard-C"
+        },
+        {
+            "name": "cmn-CN-Standard-D"
+        },
+        {
+            "name": "cmn-CN-Wavenet-A"
+        },
+        {
+            "name": "cmn-CN-Wavenet-B"
+        },
+        {
+            "name": "cmn-CN-Wavenet-C"
+        },
+        {
+            "name": "cmn-CN-Wavenet-D"
+        },
+        {
+            "name": "cmn-TW-Standard-A"
+        },
+        {
+            "name": "cmn-TW-Standard-B"
+        },
+        {
+            "name": "cmn-TW-Standard-C"
+        },
+        {
+            "name": "cmn-TW-Wavenet-A"
+        },
+        {
+            "name": "cmn-TW-Wavenet-B"
+        },
+        {
+            "name": "cmn-TW-Wavenet-C"
+        },
+        {
+            "name": "cs-CZ-Standard-A"
+        },
+        {
+            "name": "cs-CZ-Wavenet-A"
+        },
+        {
+            "name": "da-DK-Neural2-D"
+        },
+        {
+            "name": "da-DK-Standard-A"
+        },
+        {
+            "name": "da-DK-Standard-C"
+        },
+        {
+            "name": "da-DK-Standard-D"
+        },
+        {
+            "name": "da-DK-Standard-E"
+        },
+        {
+            "name": "da-DK-Wavenet-A"
+        },
+        {
+            "name": "da-DK-Wavenet-C"
+        },
+        {
+            "name": "da-DK-Wavenet-D"
+        },
+        {
+            "name": "da-DK-Wavenet-E"
+        },
+        {
+            "name": "de-DE-Neural2-A"
+        },
+        {
+            "name": "de-DE-Neural2-B"
+        },
+        {
+            "name": "de-DE-Neural2-C"
+        },
+        {
+            "name": "de-DE-Neural2-D"
+        },
+        {
+            "name": "de-DE-Neural2-F"
+        },
+        {
+            "name": "de-DE-Polyglot-1"
+        },
+        {
+            "name": "de-DE-Standard-A"
+        },
+        {
+            "name": "de-DE-Standard-B"
+        },
+        {
+            "name": "de-DE-Standard-C"
+        },
+        {
+            "name": "de-DE-Standard-D"
+        },
+        {
+            "name": "de-DE-Standard-E"
+        },
+        {
+            "name": "de-DE-Standard-F"
+        },
+        {
+            "name": "de-DE-Wavenet-A"
+        },
+        {
+            "name": "de-DE-Wavenet-B"
+        },
+        {
+            "name": "de-DE-Wavenet-C"
+        },
+        {
+            "name": "de-DE-Wavenet-D"
+        },
+        {
+            "name": "de-DE-Wavenet-E"
+        },
+        {
+            "name": "de-DE-Wavenet-F"
+        },
+        {
+            "name": "el-GR-Standard-A"
+        },
+        {
+            "name": "el-GR-Wavenet-A"
+        },
+        {
+            "name": "en-AU-Neural2-A"
+        },
+        {
+            "name": "en-AU-Neural2-B"
+        },
+        {
+            "name": "en-AU-Neural2-C"
+        },
+        {
+            "name": "en-AU-Neural2-D"
+        },
+        {
+            "name": "en-AU-News-E"
+        },
+        {
+            "name": "en-AU-News-F"
+        },
+        {
+            "name": "en-AU-News-G"
+        },
+        {
+            "name": "en-AU-Polyglot-1"
+        },
+        {
+            "name": "en-AU-Standard-A"
+        },
+        {
+            "name": "en-AU-Standard-B"
+        },
+        {
+            "name": "en-AU-Standard-C"
+        },
+        {
+            "name": "en-AU-Standard-D"
+        },
+        {
+            "name": "en-AU-Wavenet-A"
+        },
+        {
+            "name": "en-AU-Wavenet-B"
+        },
+        {
+            "name": "en-AU-Wavenet-C"
+        },
+        {
+            "name": "en-AU-Wavenet-D"
+        },
+        {
+            "name": "en-GB-Neural2-A"
+        },
+        {
+            "name": "en-GB-Neural2-B"
+        },
+        {
+            "name": "en-GB-Neural2-C"
+        },
+        {
+            "name": "en-GB-Neural2-D"
+        },
+        {
+            "name": "en-GB-Neural2-F"
+        },
+        {
+            "name": "en-GB-News-G"
+        },
+        {
+            "name": "en-GB-News-H"
+        },
+        {
+            "name": "en-GB-News-I"
+        },
+        {
+            "name": "en-GB-News-J"
+        },
+        {
+            "name": "en-GB-News-K"
+        },
+        {
+            "name": "en-GB-News-L"
+        },
+        {
+            "name": "en-GB-News-M"
+        },
+        {
+            "name": "en-GB-Standard-A"
+        },
+        {
+            "name": "en-GB-Standard-B"
+        },
+        {
+            "name": "en-GB-Standard-C"
+        },
+        {
+            "name": "en-GB-Standard-D"
+        },
+        {
+            "name": "en-GB-Standard-F"
+        },
+        {
+            "name": "en-GB-Studio-B"
+        },
+        {
+            "name": "en-GB-Studio-C"
+        },
+        {
+            "name": "en-GB-Wavenet-A"
+        },
+        {
+            "name": "en-GB-Wavenet-B"
+        },
+        {
+            "name": "en-GB-Wavenet-C"
+        },
+        {
+            "name": "en-GB-Wavenet-D"
+        },
+        {
+            "name": "en-GB-Wavenet-F"
+        },
+        {
+            "name": "en-IN-Neural2-A"
+        },
+        {
+            "name": "en-IN-Neural2-B"
+        },
+        {
+            "name": "en-IN-Neural2-C"
+        },
+        {
+            "name": "en-IN-Neural2-D"
+        },
+        {
+            "name": "en-IN-Standard-A"
+        },
+        {
+            "name": "en-IN-Standard-B"
+        },
+        {
+            "name": "en-IN-Standard-C"
+        },
+        {
+            "name": "en-IN-Standard-D"
+        },
+        {
+            "name": "en-IN-Wavenet-A"
+        },
+        {
+            "name": "en-IN-Wavenet-B"
+        },
+        {
+            "name": "en-IN-Wavenet-C"
+        },
+        {
+            "name": "en-IN-Wavenet-D"
+        },
+        {
+            "name": "en-US-Neural2-A"
+        },
+        {
+            "name": "en-US-Neural2-C"
+        },
+        {
+            "name": "en-US-Neural2-D"
+        },
+        {
+            "name": "en-US-Neural2-E"
+        },
+        {
+            "name": "en-US-Neural2-F"
+        },
+        {
+            "name": "en-US-Neural2-G"
+        },
+        {
+            "name": "en-US-Neural2-H"
+        },
+        {
+            "name": "en-US-Neural2-I"
+        },
+        {
+            "name": "en-US-Neural2-J"
+        },
+        {
+            "name": "en-US-News-K"
+        },
+        {
+            "name": "en-US-News-L"
+        },
+        {
+            "name": "en-US-News-M"
+        },
+        {
+            "name": "en-US-News-N"
+        },
+        {
+            "name": "en-US-Polyglot-1"
+        },
+        {
+            "name": "en-US-Standard-A"
+        },
+        {
+            "name": "en-US-Standard-B"
+        },
+        {
+            "name": "en-US-Standard-C"
+        },
+        {
+            "name": "en-US-Standard-D"
+        },
+        {
+            "name": "en-US-Standard-E"
+        },
+        {
+            "name": "en-US-Standard-F"
+        },
+        {
+            "name": "en-US-Standard-G"
+        },
+        {
+            "name": "en-US-Standard-H"
+        },
+        {
+            "name": "en-US-Standard-I"
+        },
+        {
+            "name": "en-US-Standard-J"
+        },
+        {
+            "name": "en-US-Studio-M"
+        },
+        {
+            "name": "en-US-Studio-O"
+        },
+        {
+            "name": "en-US-Studio-Q"
+        },
+        {
+            "name": "en-US-Wavenet-A"
+        },
+        {
+            "name": "en-US-Wavenet-B"
+        },
+        {
+            "name": "en-US-Wavenet-C"
+        },
+        {
+            "name": "en-US-Wavenet-D"
+        },
+        {
+            "name": "en-US-Wavenet-E"
+        },
+        {
+            "name": "en-US-Wavenet-F"
+        },
+        {
+            "name": "en-US-Wavenet-G"
+        },
+        {
+            "name": "en-US-Wavenet-H"
+        },
+        {
+            "name": "en-US-Wavenet-I"
+        },
+        {
+            "name": "en-US-Wavenet-J"
+        },
+        {
+            "name": "es-ES-Neural2-A"
+        },
+        {
+            "name": "es-ES-Neural2-B"
+        },
+        {
+            "name": "es-ES-Neural2-C"
+        },
+        {
+            "name": "es-ES-Neural2-D"
+        },
+        {
+            "name": "es-ES-Neural2-E"
+        },
+        {
+            "name": "es-ES-Neural2-F"
+        },
+        {
+            "name": "es-ES-Polyglot-1"
+        },
+        {
+            "name": "es-ES-Standard-A"
+        },
+        {
+            "name": "es-ES-Standard-B"
+        },
+        {
+            "name": "es-ES-Standard-C"
+        },
+        {
+            "name": "es-ES-Standard-D"
+        },
+        {
+            "name": "es-ES-Wavenet-B"
+        },
+        {
+            "name": "es-ES-Wavenet-C"
+        },
+        {
+            "name": "es-ES-Wavenet-D"
+        },
+        {
+            "name": "es-US-Neural2-A"
+        },
+        {
+            "name": "es-US-Neural2-B"
+        },
+        {
+            "name": "es-US-Neural2-C"
+        },
+        {
+            "name": "es-US-News-D"
+        },
+        {
+            "name": "es-US-News-E"
+        },
+        {
+            "name": "es-US-News-F"
+        },
+        {
+            "name": "es-US-News-G"
+        },
+        {
+            "name": "es-US-Polyglot-1"
+        },
+        {
+            "name": "es-US-Standard-A"
+        },
+        {
+            "name": "es-US-Standard-B"
+        },
+        {
+            "name": "es-US-Standard-C"
+        },
+        {
+            "name": "es-US-Studio-B"
+        },
+        {
+            "name": "es-US-Wavenet-A"
+        },
+        {
+            "name": "es-US-Wavenet-B"
+        },
+        {
+            "name": "es-US-Wavenet-C"
+        },
+        {
+            "name": "eu-ES-Standard-A"
+        },
+        {
+            "name": "fi-FI-Standard-A"
+        },
+        {
+            "name": "fi-FI-Wavenet-A"
+        },
+        {
+            "name": "fil-PH-Standard-A"
+        },
+        {
+            "name": "fil-PH-Standard-B"
+        },
+        {
+            "name": "fil-PH-Standard-C"
+        },
+        {
+            "name": "fil-PH-Standard-D"
+        },
+        {
+            "name": "fil-PH-Wavenet-A"
+        },
+        {
+            "name": "fil-PH-Wavenet-B"
+        },
+        {
+            "name": "fil-PH-Wavenet-C"
+        },
+        {
+            "name": "fil-PH-Wavenet-D"
+        },
+        {
+            "name": "fil-ph-Neural2-A"
+        },
+        {
+            "name": "fil-ph-Neural2-D"
+        },
+        {
+            "name": "fr-CA-Neural2-A"
+        },
+        {
+            "name": "fr-CA-Neural2-B"
+        },
+        {
+            "name": "fr-CA-Neural2-C"
+        },
+        {
+            "name": "fr-CA-Neural2-D"
+        },
+        {
+            "name": "fr-CA-Standard-A"
+        },
+        {
+            "name": "fr-CA-Standard-B"
+        },
+        {
+            "name": "fr-CA-Standard-C"
+        },
+        {
+            "name": "fr-CA-Standard-D"
+        },
+        {
+            "name": "fr-CA-Wavenet-A"
+        },
+        {
+            "name": "fr-CA-Wavenet-B"
+        },
+        {
+            "name": "fr-CA-Wavenet-C"
+        },
+        {
+            "name": "fr-CA-Wavenet-D"
+        },
+        {
+            "name": "fr-FR-Neural2-A"
+        },
+        {
+            "name": "fr-FR-Neural2-B"
+        },
+        {
+            "name": "fr-FR-Neural2-C"
+        },
+        {
+            "name": "fr-FR-Neural2-D"
+        },
+        {
+            "name": "fr-FR-Neural2-E"
+        },
+        {
+            "name": "fr-FR-Polyglot-1"
+        },
+        {
+            "name": "fr-FR-Standard-A"
+        },
+        {
+            "name": "fr-FR-Standard-B"
+        },
+        {
+            "name": "fr-FR-Standard-C"
+        },
+        {
+            "name": "fr-FR-Standard-D"
+        },
+        {
+            "name": "fr-FR-Standard-E"
+        },
+        {
+            "name": "fr-FR-Wavenet-A"
+        },
+        {
+            "name": "fr-FR-Wavenet-B"
+        },
+        {
+            "name": "fr-FR-Wavenet-C"
+        },
+        {
+            "name": "fr-FR-Wavenet-D"
+        },
+        {
+            "name": "fr-FR-Wavenet-E"
+        },
+        {
+            "name": "gl-ES-Standard-A"
+        },
+        {
+            "name": "gu-IN-Standard-A"
+        },
+        {
+            "name": "gu-IN-Standard-B"
+        },
+        {
+            "name": "gu-IN-Wavenet-A"
+        },
+        {
+            "name": "gu-IN-Wavenet-B"
+        },
+        {
+            "name": "he-IL-Standard-A"
+        },
+        {
+            "name": "he-IL-Standard-B"
+        },
+        {
+            "name": "he-IL-Standard-C"
+        },
+        {
+            "name": "he-IL-Standard-D"
+        },
+        {
+            "name": "he-IL-Wavenet-A"
+        },
+        {
+            "name": "he-IL-Wavenet-B"
+        },
+        {
+            "name": "he-IL-Wavenet-C"
+        },
+        {
+            "name": "he-IL-Wavenet-D"
+        },
+        {
+            "name": "hi-IN-Neural2-A"
+        },
+        {
+            "name": "hi-IN-Neural2-B"
+        },
+        {
+            "name": "hi-IN-Neural2-C"
+        },
+        {
+            "name": "hi-IN-Neural2-D"
+        },
+        {
+            "name": "hi-IN-Standard-A"
+        },
+        {
+            "name": "hi-IN-Standard-B"
+        },
+        {
+            "name": "hi-IN-Standard-C"
+        },
+        {
+            "name": "hi-IN-Standard-D"
+        },
+        {
+            "name": "hi-IN-Wavenet-A"
+        },
+        {
+            "name": "hi-IN-Wavenet-B"
+        },
+        {
+            "name": "hi-IN-Wavenet-C"
+        },
+        {
+            "name": "hi-IN-Wavenet-D"
+        },
+        {
+            "name": "hu-HU-Standard-A"
+        },
+        {
+            "name": "hu-HU-Wavenet-A"
+        },
+        {
+            "name": "id-ID-Standard-A"
+        },
+        {
+            "name": "id-ID-Standard-B"
+        },
+        {
+            "name": "id-ID-Standard-C"
+        },
+        {
+            "name": "id-ID-Standard-D"
+        },
+        {
+            "name": "id-ID-Wavenet-A"
+        },
+        {
+            "name": "id-ID-Wavenet-B"
+        },
+        {
+            "name": "id-ID-Wavenet-C"
+        },
+        {
+            "name": "id-ID-Wavenet-D"
+        },
+        {
+            "name": "is-IS-Standard-A"
+        },
+        {
+            "name": "it-IT-Neural2-A"
+        },
+        {
+            "name": "it-IT-Neural2-C"
+        },
+        {
+            "name": "it-IT-Standard-A"
+        },
+        {
+            "name": "it-IT-Standard-B"
+        },
+        {
+            "name": "it-IT-Standard-C"
+        },
+        {
+            "name": "it-IT-Standard-D"
+        },
+        {
+            "name": "it-IT-Wavenet-A"
+        },
+        {
+            "name": "it-IT-Wavenet-B"
+        },
+        {
+            "name": "it-IT-Wavenet-C"
+        },
+        {
+            "name": "it-IT-Wavenet-D"
+        },
+        {
+            "name": "ja-JP-Neural2-B"
+        },
+        {
+            "name": "ja-JP-Neural2-C"
+        },
+        {
+            "name": "ja-JP-Neural2-D"
+        },
+        {
+            "name": "ja-JP-Standard-A"
+        },
+        {
+            "name": "ja-JP-Standard-B"
+        },
+        {
+            "name": "ja-JP-Standard-C"
+        },
+        {
+            "name": "ja-JP-Standard-D"
+        },
+        {
+            "name": "ja-JP-Wavenet-A"
+        },
+        {
+            "name": "ja-JP-Wavenet-B"
+        },
+        {
+            "name": "ja-JP-Wavenet-C"
+        },
+        {
+            "name": "ja-JP-Wavenet-D"
+        },
+        {
+            "name": "kn-IN-Standard-A"
+        },
+        {
+            "name": "kn-IN-Standard-B"
+        },
+        {
+            "name": "kn-IN-Wavenet-A"
+        },
+        {
+            "name": "kn-IN-Wavenet-B"
+        },
+        {
+            "name": "ko-KR-Neural2-A"
+        },
+        {
+            "name": "ko-KR-Neural2-B"
+        },
+        {
+            "name": "ko-KR-Neural2-C"
+        },
+        {
+            "name": "ko-KR-Standard-A"
+        },
+        {
+            "name": "ko-KR-Standard-B"
+        },
+        {
+            "name": "ko-KR-Standard-C"
+        },
+        {
+            "name": "ko-KR-Standard-D"
+        },
+        {
+            "name": "ko-KR-Wavenet-A"
+        },
+        {
+            "name": "ko-KR-Wavenet-B"
+        },
+        {
+            "name": "ko-KR-Wavenet-C"
+        },
+        {
+            "name": "ko-KR-Wavenet-D"
+        },
+        {
+            "name": "lt-LT-Standard-A"
+        },
+        {
+            "name": "lv-LV-Standard-A"
+        },
+        {
+            "name": "ml-IN-Standard-A"
+        },
+        {
+            "name": "ml-IN-Standard-B"
+        },
+        {
+            "name": "ml-IN-Wavenet-A"
+        },
+        {
+            "name": "ml-IN-Wavenet-B"
+        },
+        {
+            "name": "ml-IN-Wavenet-C"
+        },
+        {
+            "name": "ml-IN-Wavenet-D"
+        },
+        {
+            "name": "mr-IN-Standard-A"
+        },
+        {
+            "name": "mr-IN-Standard-B"
+        },
+        {
+            "name": "mr-IN-Standard-C"
+        },
+        {
+            "name": "mr-IN-Wavenet-A"
+        },
+        {
+            "name": "mr-IN-Wavenet-B"
+        },
+        {
+            "name": "mr-IN-Wavenet-C"
+        },
+        {
+            "name": "ms-MY-Standard-A"
+        },
+        {
+            "name": "ms-MY-Standard-B"
+        },
+        {
+            "name": "ms-MY-Standard-C"
+        },
+        {
+            "name": "ms-MY-Standard-D"
+        },
+        {
+            "name": "ms-MY-Wavenet-A"
+        },
+        {
+            "name": "ms-MY-Wavenet-B"
+        },
+        {
+            "name": "ms-MY-Wavenet-C"
+        },
+        {
+            "name": "ms-MY-Wavenet-D"
+        },
+        {
+            "name": "nb-NO-Standard-A"
+        },
+        {
+            "name": "nb-NO-Standard-B"
+        },
+        {
+            "name": "nb-NO-Standard-C"
+        },
+        {
+            "name": "nb-NO-Standard-D"
+        },
+        {
+            "name": "nb-NO-Standard-E"
+        },
+        {
+            "name": "nb-NO-Wavenet-A"
+        },
+        {
+            "name": "nb-NO-Wavenet-B"
+        },
+        {
+            "name": "nb-NO-Wavenet-C"
+        },
+        {
+            "name": "nb-NO-Wavenet-D"
+        },
+        {
+            "name": "nb-NO-Wavenet-E"
+        },
+        {
+            "name": "nl-BE-Standard-A"
+        },
+        {
+            "name": "nl-BE-Standard-B"
+        },
+        {
+            "name": "nl-BE-Wavenet-A"
+        },
+        {
+            "name": "nl-BE-Wavenet-B"
+        },
+        {
+            "name": "nl-NL-Standard-A"
+        },
+        {
+            "name": "nl-NL-Standard-B"
+        },
+        {
+            "name": "nl-NL-Standard-C"
+        },
+        {
+            "name": "nl-NL-Standard-D"
+        },
+        {
+            "name": "nl-NL-Standard-E"
+        },
+        {
+            "name": "nl-NL-Wavenet-A"
+        },
+        {
+            "name": "nl-NL-Wavenet-B"
+        },
+        {
+            "name": "nl-NL-Wavenet-C"
+        },
+        {
+            "name": "nl-NL-Wavenet-D"
+        },
+        {
+            "name": "nl-NL-Wavenet-E"
+        },
+        {
+            "name": "pa-IN-Standard-A"
+        },
+        {
+            "name": "pa-IN-Standard-B"
+        },
+        {
+            "name": "pa-IN-Standard-C"
+        },
+        {
+            "name": "pa-IN-Standard-D"
+        },
+        {
+            "name": "pa-IN-Wavenet-A"
+        },
+        {
+            "name": "pa-IN-Wavenet-B"
+        },
+        {
+            "name": "pa-IN-Wavenet-C"
+        },
+        {
+            "name": "pa-IN-Wavenet-D"
+        },
+        {
+            "name": "pl-PL-Standard-A"
+        },
+        {
+            "name": "pl-PL-Standard-B"
+        },
+        {
+            "name": "pl-PL-Standard-C"
+        },
+        {
+            "name": "pl-PL-Standard-D"
+        },
+        {
+            "name": "pl-PL-Standard-E"
+        },
+        {
+            "name": "pl-PL-Wavenet-A"
+        },
+        {
+            "name": "pl-PL-Wavenet-B"
+        },
+        {
+            "name": "pl-PL-Wavenet-C"
+        },
+        {
+            "name": "pl-PL-Wavenet-D"
+        },
+        {
+            "name": "pl-PL-Wavenet-E"
+        },
+        {
+            "name": "pt-BR-Neural2-A"
+        },
+        {
+            "name": "pt-BR-Neural2-B"
+        },
+        {
+            "name": "pt-BR-Neural2-C"
+        },
+        {
+            "name": "pt-BR-Standard-A"
+        },
+        {
+            "name": "pt-BR-Standard-B"
+        },
+        {
+            "name": "pt-BR-Standard-C"
+        },
+        {
+            "name": "pt-BR-Wavenet-A"
+        },
+        {
+            "name": "pt-BR-Wavenet-B"
+        },
+        {
+            "name": "pt-BR-Wavenet-C"
+        },
+        {
+            "name": "pt-PT-Standard-A"
+        },
+        {
+            "name": "pt-PT-Standard-B"
+        },
+        {
+            "name": "pt-PT-Standard-C"
+        },
+        {
+            "name": "pt-PT-Standard-D"
+        },
+        {
+            "name": "pt-PT-Wavenet-A"
+        },
+        {
+            "name": "pt-PT-Wavenet-B"
+        },
+        {
+            "name": "pt-PT-Wavenet-C"
+        },
+        {
+            "name": "pt-PT-Wavenet-D"
+        },
+        {
+            "name": "ro-RO-Standard-A"
+        },
+        {
+            "name": "ro-RO-Wavenet-A"
+        },
+        {
+            "name": "ru-RU-Standard-A"
+        },
+        {
+            "name": "ru-RU-Standard-B"
+        },
+        {
+            "name": "ru-RU-Standard-C"
+        },
+        {
+            "name": "ru-RU-Standard-D"
+        },
+        {
+            "name": "ru-RU-Standard-E"
+        },
+        {
+            "name": "ru-RU-Wavenet-A"
+        },
+        {
+            "name": "ru-RU-Wavenet-B"
+        },
+        {
+            "name": "ru-RU-Wavenet-C"
+        },
+        {
+            "name": "ru-RU-Wavenet-D"
+        },
+        {
+            "name": "ru-RU-Wavenet-E"
+        },
+        {
+            "name": "sk-SK-Standard-A"
+        },
+        {
+            "name": "sk-SK-Wavenet-A"
+        },
+        {
+            "name": "sr-RS-Standard-A"
+        },
+        {
+            "name": "sv-SE-Standard-A"
+        },
+        {
+            "name": "sv-SE-Standard-B"
+        },
+        {
+            "name": "sv-SE-Standard-C"
+        },
+        {
+            "name": "sv-SE-Standard-D"
+        },
+        {
+            "name": "sv-SE-Standard-E"
+        },
+        {
+            "name": "sv-SE-Wavenet-A"
+        },
+        {
+            "name": "sv-SE-Wavenet-B"
+        },
+        {
+            "name": "sv-SE-Wavenet-C"
+        },
+        {
+            "name": "sv-SE-Wavenet-D"
+        },
+        {
+            "name": "sv-SE-Wavenet-E"
+        },
+        {
+            "name": "ta-IN-Standard-A"
+        },
+        {
+            "name": "ta-IN-Standard-B"
+        },
+        {
+            "name": "ta-IN-Standard-C"
+        },
+        {
+            "name": "ta-IN-Standard-D"
+        },
+        {
+            "name": "ta-IN-Wavenet-A"
+        },
+        {
+            "name": "ta-IN-Wavenet-B"
+        },
+        {
+            "name": "ta-IN-Wavenet-C"
+        },
+        {
+            "name": "ta-IN-Wavenet-D"
+        },
+        {
+            "name": "te-IN-Standard-A"
+        },
+        {
+            "name": "te-IN-Standard-B"
+        },
+        {
+            "name": "th-TH-Neural2-C"
+        },
+        {
+            "name": "th-TH-Standard-A"
+        },
+        {
+            "name": "tr-TR-Standard-A"
+        },
+        {
+            "name": "tr-TR-Standard-B"
+        },
+        {
+            "name": "tr-TR-Standard-C"
+        },
+        {
+            "name": "tr-TR-Standard-D"
+        },
+        {
+            "name": "tr-TR-Standard-E"
+        },
+        {
+            "name": "tr-TR-Wavenet-A"
+        },
+        {
+            "name": "tr-TR-Wavenet-B"
+        },
+        {
+            "name": "tr-TR-Wavenet-C"
+        },
+        {
+            "name": "tr-TR-Wavenet-D"
+        },
+        {
+            "name": "tr-TR-Wavenet-E"
+        },
+        {
+            "name": "uk-UA-Standard-A"
+        },
+        {
+            "name": "uk-UA-Wavenet-A"
+        },
+        {
+            "name": "vi-VN-Neural2-A"
+        },
+        {
+            "name": "vi-VN-Neural2-D"
+        },
+        {
+            "name": "vi-VN-Standard-A"
+        },
+        {
+            "name": "vi-VN-Standard-B"
+        },
+        {
+            "name": "vi-VN-Standard-C"
+        },
+        {
+            "name": "vi-VN-Standard-D"
+        },
+        {
+            "name": "vi-VN-Wavenet-A"
+        },
+        {
+            "name": "vi-VN-Wavenet-B"
+        },
+        {
+            "name": "vi-VN-Wavenet-C"
+        },
+        {
+            "name": "vi-VN-Wavenet-D"
+        },
+        {
+            "name": "yue-HK-Standard-A"
+        },
+        {
+            "name": "yue-HK-Standard-B"
+        },
+        {
+            "name": "yue-HK-Standard-C"
+        },
+        {
+            "name": "yue-HK-Standard-D"
+        }
+    ]
+}

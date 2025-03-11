@@ -1,0 +1,80 @@
+services:
+  avr-app:
+    build:
+      context: .
+    platform: linux/x86_64
+    container_name: avr-app
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - APP_VERSION=${APP_VERSION}
+      - PORT=3000
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - DATABASE_HOST=avr-app-db
+      - DATABASE_PORT=3306
+      - DATABASE_NAME=${DATABASE_NAME:-avr}
+      - DATABASE_USERNAME=${DATABASE_USERNAME:-avr}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - AMI_PORT=${AMI_PORT:-9000}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./asterisk:/usr/src/app/asterisk 
+      - ./keys:/usr/src/app/keys
+    ports:
+      - 3000:3000
+    networks:
+      - avr
+  avr-app-db:
+    image: mysql:8.0.15
+    platform: linux/x86_64
+    container_name: avr-app-db
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      - MYSQL_DATABASE=${DATABASE_NAME:-avr}
+      - MYSQL_USER=${DATABASE_USERNAME:-avr}
+      - MYSQL_PASSWORD=${DATABASE_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
+    volumes:
+      - ./db:/var/lib/mysql
+    networks:
+      - avr
+
+  avr-ami:
+    image: agentvoiceresponse/avr-ami
+    platform: linux/x86_64
+    container_name: avr-ami
+    restart: always
+    environment:
+      - PORT=${AMI_PORT:-9000}
+      - AMI_HOST=${AMI_HOST:-avr-asterisk}
+      - AMI_PORT=${AMI_PORT:-5038}
+      - AMI_USERNAME=${AMI_USERNAME:-avr}
+      - AMI_PASSWORD=${AMI_PASSWORD:-avr}
+    networks:
+      - avr
+
+  avr-asterisk:
+    image: agentvoiceresponse/avr-asterisk
+    platform: linux/x86_64
+    container_name: avr-asterisk
+    restart: always
+    ports:
+      - 5060:5060
+      - 10000-10050:10000-10050/udp
+    volumes:
+      - ./asterisk/conf/manager.conf:/etc/asterisk/my_manager.conf
+      - ./asterisk/conf/pjsip.conf:/etc/asterisk/my_pjsip.conf
+      - ./asterisk/conf/extensions.conf:/etc/asterisk/my_extensions.conf
+      - ./asterisk/conf/queues.conf:/etc/asterisk/my_queues.conf
+    networks:
+      - avr
+
+networks:
+  avr:
+    name: avr
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24

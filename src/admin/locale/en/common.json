@@ -1,0 +1,28 @@
+{
+  "messages": {
+    "welcomeOnBoard_title": "Welcome",
+    "welcomeOnBoard_subtitle": "Summary of your account",
+    "community_subtitle": "Talk with the creators of AVR and other AVR users",
+    "needMoreSolutions_title": "Looking for more advanced solutions?",
+    "needMoreSolutions_subtitle": "Experience the ultimate Voicebot powered by Asterisk PBX—designed to transform your customer interactions with AI-driven efficiency, seamless automation, and unmatched reliability."
+  },
+  "components": {
+    "Login": {
+      "welcomeMessage": "Transform Your Customer Service with Agent Voice Response"
+    }
+  },
+  "properties": {
+    "id": "#",
+    "asrId": "Speech To Text",
+    "llmId": "Speech Processing",
+    "ttsId": "Text To Speech",
+    "did": "Direct Inward Dialing"
+  },
+  "labels": {
+    "core": "AI Agents",
+    "asr": "Speech To Text",
+    "llm": "Speech Processing",
+    "tts": "Text To Speech",
+    "userId": "User ID"
+  }
+}

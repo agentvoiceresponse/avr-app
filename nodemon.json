@@ -1,0 +1,11 @@
+{
+    "watch": [
+      "dist"
+    ],
+    "ext": "js,json",
+    "ignore": [
+      "*.spec.*",
+      "test"
+    ],
+    "exec": "node ./dist/index.js"
+  }
