@@ -3,3 +3,7 @@ db
 dist
 node_modules
 .env
+functions
+!functions/REAME.md
+keys
+!keys/README.md
