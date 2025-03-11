@@ -10,7 +10,9 @@
     "build": "tsc",
     "build:watch": "tsc -w",
     "build:theme": "npm clean && tsc && npm copy-theme",
-    "copy-theme": "copyfiles -u 1 src/themes/**/theme.bundle.js src/themes/**/*.css dist/"
+    "copy-theme": "copyfiles -u 1 src/themes/**/theme.bundle.js src/themes/**/*.css dist/",
+    "dc:up": "docker compose up -d --build",
+    "dc:down": "docker compose down"
   },
   "license": "MIT",
   "dependencies": {

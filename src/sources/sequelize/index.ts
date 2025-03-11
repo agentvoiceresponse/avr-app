@@ -36,20 +36,6 @@ sequelize.query = async function () {
   }
 };
 
-// sequelize.query = async (
-//   sql: string | { query: string; values: unknown[] },
-//   options?: QueryOptions | QueryOptionsWithType<QueryTypes.RAW> | undefined,
-// ) => {
-//   console.log(sql);
-//   console.log(options);
-//   try {
-//     return Sequelize.prototype.query.apply(this, [sql, options || {}]);
-//   } catch (err: any) {
-//     console.error('Error executing query:', err.message);
-//     throw new Error('Error executing query');
-//   }
-// };
-
 async function initializeDatabase() {
   try {
     await sequelize.authenticate();
