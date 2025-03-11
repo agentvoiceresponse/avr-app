@@ -22,8 +22,7 @@ export class SessionModel extends Model<Session, SessionCreationAttributes> {
 SessionModel.init(
   {
     sid: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.STRING(36),
       primaryKey: true,
     },
     expires: {
