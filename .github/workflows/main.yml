@@ -1,0 +1,26 @@
+name: Build Docker Image
+on:
+  push:
+    branches:
+      - main
+jobs:
+    build:
+      name: push docker image to docker hub
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: login to docker hub
+          id: docker-hub
+          env:
+            username: ${{secrets.DOCKERHUB_USERNAME}}
+            password: ${{secrets.DOCKERHUB_PASSWORD}}
+          run: docker login -u $username -p $password 
+        - name: get-npm-version
+          id: package-version
+          uses: martinbeentjes/npm-get-version-action@v1.3.1
+        - name: build the docker image
+          id: build-docker-image
+          run: docker build -t agentvoiceresponse/avr-app:latest -t agentvoiceresponse/avr-app:${{ steps.package-version.outputs.current-version}} .
+        - name: push the docker image
+          id: push-docker-image
+          run: docker push agentvoiceresponse/avr-app:latest && docker push agentvoiceresponse/avr-app:${{ steps.package-version.outputs.current-version}}

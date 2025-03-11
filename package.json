@@ -2,6 +2,7 @@
   "name": "avr-app",
   "type": "module",
   "version": "1.0.0",
+  "author": "Giuseppe Careri",
   "description": "",
   "scripts": {
     "start:dev": "nodemon",
@@ -11,14 +12,12 @@
     "build:theme": "npm clean && tsc && npm copy-theme",
     "copy-theme": "copyfiles -u 1 src/themes/**/theme.bundle.js src/themes/**/*.css dist/"
   },
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@adminjs/express": "^6.1.1",
     "@adminjs/logger": "^5.0.1",
     "@adminjs/sequelize": "^4.1.1",
     "@adminjs/themes": "^1.0.1",
-    "@types/react-syntax-highlighter": "^15.5.13",
     "adminjs": "^7.8.15",
     "connect-session-sequelize": "^7.1.7",
     "cors": "^2.8.5",
@@ -34,6 +33,7 @@
     "@types/express-session": "^1.17.7",
     "@types/lodash": "^4.14.191",
     "@types/node": "^18.15.5",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "@types/uuid": "^9.0.1",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
