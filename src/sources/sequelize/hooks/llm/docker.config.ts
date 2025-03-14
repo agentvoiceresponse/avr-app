@@ -15,7 +15,6 @@ export const getLlmConfig = (params: any) => {
     Env: [`PORT=${containerPort}`],
     HostConfig: {
       NetworkMode: process.env.AVR_NETWORK || 'avr',
-      Binds: [],
     },
     Labels: {
       app: 'avr',
@@ -37,8 +36,6 @@ export const getLlmConfig = (params: any) => {
       config.Env.push(`OPENAI_WAITING_MESSAGE="Please wait while I check the information."`);
       config.Env.push(`OPENAI_WAITING_TIMEOUT=2000`);
       config.Env.push(`AMI_URL=http://avr-ami:${process.env.AMI_PORT || 9000}`);
-      const functionsPath = path.join(__dirname, '../../../../../functions');
-      config.HostConfig.Binds.push(`${functionsPath}:/usr/src/app/functions`);
       config.Image = 'agentvoiceresponse/avr-llm-openai-assistant';
       break;
     }

@@ -13,8 +13,8 @@ const attachAdminJS = async (app: Express) => {
   const config = generateAdminJSConfig();
   const adminJS = new AdminJS(config);
 
-  if (process.env.NODE_ENV === 'production') await adminJS.initialize();
-  else adminJS.watch();
+  if (process.env.NODE_ENV === 'development') adminJS.watch();
+  else await adminJS.initialize();
 
   const adminRouter = expressAuthenticatedRouter(adminJS);
 

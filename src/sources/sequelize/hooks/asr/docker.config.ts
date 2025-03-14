@@ -17,7 +17,6 @@ export const getAsrConfig = (params: any) => {
     Env: [`SPEECH_RECOGNITION_MODEL=${model}`, `SPEECH_RECOGNITION_LANGUAGE=${language}`, `PORT=${containerPort}`],
     HostConfig: {
       NetworkMode: process.env.AVR_NETWORK || 'avr',
-      Binds: [],
     },
     Labels: {
       app: 'avr',
@@ -35,7 +34,6 @@ export const getAsrConfig = (params: any) => {
       const googleCredentialsPath = path.join(__dirname, '../../../../../keys', `avr-asr-${id}.json`);
       fs.writeFileSync(googleCredentialsPath, key);
       config.Env.push(`GOOGLE_APPLICATION_CREDENTIALS=/usr/src/app/google.json`);
-      config.HostConfig.Binds.push(`${googleCredentialsPath}:/usr/src/app/google.json`);
       config.Image = 'agentvoiceresponse/avr-asr-google-cloud-speech';
       break;
     }

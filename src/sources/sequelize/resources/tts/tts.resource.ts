@@ -14,6 +14,7 @@ import {
   createAndStartContainer,
   ensureContainer,
   logContainer,
+  removeContainerKey,
   statusContainer,
   stopAndRemoveContainer,
   validateKey,
@@ -66,7 +67,7 @@ export const CreateTTSResource: ResourceFunction<typeof TTSModel> = () => ({
       },
       delete: {
         before: [validateKey(NAME + 'Id')],
-        after: [stopAndRemoveContainer(NAME)],
+        after: [stopAndRemoveContainer(NAME), removeContainerKey(NAME)],
       },
       containerLogs: {
         actionType: 'record',

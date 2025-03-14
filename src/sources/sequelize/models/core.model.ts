@@ -57,7 +57,7 @@ CoreModel.init(
     },
     stopAgent: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      defaultValue: false,
     },
     description: {
       type: DataTypes.TEXT,

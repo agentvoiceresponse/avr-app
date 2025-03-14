@@ -16,7 +16,6 @@ export const getTtsConfig = (params: any) => {
     Env: [`PORT=${containerPort}`],
     HostConfig: {
       NetworkMode: process.env.AVR_NETWORK || 'avr',
-      Binds: [],
     },
     Labels: {
       app: 'avr',
@@ -35,7 +34,6 @@ export const getTtsConfig = (params: any) => {
       const googleCredentialsPath = path.join(__dirname, '../../../../../keys', `avr-tts-${id}.json`);
       fs.writeFileSync(googleCredentialsPath, key);
       config.Env.push(`GOOGLE_APPLICATION_CREDENTIALS=/usr/src/app/google.json`);
-      config.HostConfig.Binds.push(`${googleCredentialsPath}:/usr/src/app/google.json`);
       const language = model.split('-').slice(0, 2).join('-');
       config.Env.push(`TEXT_TO_SPEECH_LANGUAGE=${language}`);
       config.Env.push(`TEXT_TO_SPEECH_GENDER=${gender}`);

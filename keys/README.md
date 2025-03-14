@@ -1,1 +1,0 @@
-# In this directory, all the application keys will be generated.

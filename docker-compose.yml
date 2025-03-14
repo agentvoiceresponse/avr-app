@@ -7,7 +7,6 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
-      - APP_VERSION=${APP_VERSION}
       - PORT=3000
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
@@ -21,10 +20,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./asterisk:/usr/src/app/asterisk 
       - ./keys:/usr/src/app/keys
+      - ./functions:/usr/src/app/functions
     ports:
       - 3000:3000
     networks:
       - avr
+    user: root
   avr-app-db:
     image: mysql:8.0.15
     platform: linux/x86_64

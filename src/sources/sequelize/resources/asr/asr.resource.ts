@@ -16,6 +16,7 @@ import {
   logContainer,
   statusContainer,
   validateKey,
+  removeContainerKey,
 } from '../../hooks/general/index.js';
 import { ASRModel } from '../../models/index.js';
 import { allModels } from './models/index.js';
@@ -55,7 +56,7 @@ export const CreateASRResource: ResourceFunction<typeof ASRModel> = () => ({
       },
       delete: {
         before: [validateKey(NAME + 'Id')],
-        after: [stopAndRemoveContainer(NAME)],
+        after: [stopAndRemoveContainer(NAME), removeContainerKey(NAME)],
       },
       containerLogs: {
         actionType: 'record',
