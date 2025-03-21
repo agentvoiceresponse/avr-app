@@ -4,6 +4,7 @@ import * as url from 'url';
 
 import { ActionRequest, ActionResponse, After } from 'adminjs';
 import { CoreModel } from '../../models/index.js';
+import { reloadModule } from '../../utils/asterisk.js';
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
@@ -39,6 +40,7 @@ exten => s,1,Answer()
       const config = template.replace('{{GOSUBS}}', gosubLines);
       const extensions = path.join(__dirname, '../../../../../asterisk/conf', 'extensions.conf');
       fs.writeFileSync(extensions, config, 'utf8');
+      await reloadModule('pbx_config.so');
     } catch (error) {
       console.error('Error creating Asterisk extensions:', error);
     }

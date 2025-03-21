@@ -1,7 +1,7 @@
 {
   "name": "avr-app",
   "type": "module",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "Giuseppe Careri <info@gcareri.com> (https://gcareri.com)",
   "description": "AdminJS application for AgentVoiceResponse.com",
   "scripts": {
@@ -21,6 +21,7 @@
     "@adminjs/sequelize": "^4.1.1",
     "@adminjs/themes": "^1.0.1",
     "adminjs": "^7.8.15",
+    "ari-client": "^2.2.0",
     "connect-session-sequelize": "^7.1.7",
     "cors": "^2.8.5",
     "dockerode": "^4.0.4",
@@ -33,6 +34,7 @@
     "tar-stream": "^3.1.7"
   },
   "devDependencies": {
+    "@types/ari-client": "^2.2.13",
     "@types/cors": "^2.8.13",
     "@types/express-session": "^1.17.7",
     "@types/lodash": "^4.14.191",

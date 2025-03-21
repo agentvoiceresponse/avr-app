@@ -1,4 +1,5 @@
 services:
+  
   avr-app:
     build:
       context: .
@@ -16,6 +17,9 @@ services:
       - DATABASE_USERNAME=${DATABASE_USERNAME:-avr}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - AMI_URL=${AMI_URL:-http://avr-ami:9000}
+      - ARI_URL=${ARI_URL:-http://avr-asterisk:8088/ari}
+      - ARI_USERNAME=${ARI_USERNAME:-avr}
+      - ARI_PASSWORD=${ARI_PASSWORD:-avr}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./asterisk:/usr/src/app/asterisk 
@@ -26,6 +30,7 @@ services:
     networks:
       - avr
     user: root
+
   avr-app-db:
     image: mysql:8.0.15
     platform: linux/x86_64
@@ -71,6 +76,7 @@ services:
       - ./asterisk/conf/pjsip.conf:/etc/asterisk/my_pjsip.conf
       - ./asterisk/conf/extensions.conf:/etc/asterisk/my_extensions.conf
       - ./asterisk/conf/queues.conf:/etc/asterisk/my_queues.conf
+      - ./asterisk/conf/ari.conf:/etc/asterisk/my_ari.conf
     networks:
       - avr
 
