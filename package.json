@@ -1,7 +1,7 @@
 {
   "name": "avr-app",
   "type": "module",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Giuseppe Careri <info@gcareri.com> (https://gcareri.com)",
   "description": "AdminJS application for AgentVoiceResponse.com",
   "scripts": {
