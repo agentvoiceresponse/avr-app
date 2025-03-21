@@ -15,7 +15,7 @@ services:
       - DATABASE_NAME=${DATABASE_NAME:-avr}
       - DATABASE_USERNAME=${DATABASE_USERNAME:-avr}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - AMI_PORT=${AMI_PORT:-9000}
+      - AMI_URL=${AMI_URL:-http://avr-ami:9000}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./asterisk:/usr/src/app/asterisk 
@@ -62,6 +62,8 @@ services:
     container_name: avr-asterisk
     restart: always
     ports:
+      - 5038:5038
+      - 8088:8088
       - 5060:5060
       - 10000-10050:10000-10050/udp
     volumes:

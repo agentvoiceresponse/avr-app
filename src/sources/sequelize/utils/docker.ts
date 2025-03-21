@@ -42,8 +42,8 @@ export const createAndStartContainer = async (
   config: ContainerCreateOptions,
 ): Promise<Container> => {
   try {
-    console.log(`Creating and starting the container ${containerName}...`);
-    console.log(config);
+    console.log(`Creating and starting the container ${containerName}: ${config.Image}`);
+    await docker.pull(config.Image);
     const newContainer = await docker.createContainer(config);
     await newContainer.start();
     console.log(`Container ${containerName} started successfully.`);

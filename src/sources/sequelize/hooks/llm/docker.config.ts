@@ -35,7 +35,7 @@ export const getLlmConfig = (params: any) => {
       config.Env.push(`OPENAI_ASSISTANT_ID=${assistant}`);
       config.Env.push(`OPENAI_WAITING_MESSAGE="Please wait while I check the information."`);
       config.Env.push(`OPENAI_WAITING_TIMEOUT=2000`);
-      config.Env.push(`AMI_URL=http://avr-ami:${process.env.AMI_PORT || 9000}`);
+      config.Env.push(`AMI_URL=${process.env.AMI_URL || 'http://avr-ami:9000'}`);
       config.Image = 'agentvoiceresponse/avr-llm-openai-assistant';
       break;
     }
