@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize';
+import { DataTypes, Sequelize } from 'sequelize';
 import { ErrorTypeEnum, ValidationError } from 'adminjs';
 import { ASRModel, LLMModel, CoreModel, TTSModel } from './models/index.js';
 

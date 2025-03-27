@@ -3,8 +3,6 @@ import { inspectContainer } from '../../utils/docker.js';
 
 const updateRecord = (name: string) => async (record) => {
   const containerName = `avr-${name}-${record.params.id}`;
-  const port = (+process.env.CORE_PORT_START || 5000) + Number(record.params.id);
-  record.params.did = port;
   try {
     const inspect = await inspectContainer(containerName);
     record.params.status = inspect.State.Status;

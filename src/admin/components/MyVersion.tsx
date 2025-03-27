@@ -1,9 +1,9 @@
 import { Box, Button, Icon, Text } from '@adminjs/design-system';
-import { ReduxState } from 'adminjs';
+import { ReduxState, VersionProps } from 'adminjs';
 import React, { FC } from 'react';
 import { useSelector } from 'react-redux';
 
-const TopBar: FC = () => {
+const MyVersion: FC<VersionProps> = () => {
   const versions = useSelector((state: ReduxState) => state.versions);
   const GITHUB_URL = (window as any).AdminJS.env.GITHUB_URL;
   const DOCUMENTATION_URL = (window as any).AdminJS.env.DOCUMENTATION_URL;
@@ -30,5 +30,4 @@ const TopBar: FC = () => {
   );
 };
 
-export { TopBar };
-export default TopBar;
+export default MyVersion;

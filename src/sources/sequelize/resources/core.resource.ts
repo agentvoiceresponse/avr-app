@@ -97,7 +97,7 @@ export const CreateCoreResource: ResourceFunction<typeof CoreModel> = () => ({
         type: 'string',
       },
       did: {
-        type: 'string',
+        type: 'number',
       },
     },
   },

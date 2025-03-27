@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, H1, H2, H5, Illustration, IllustrationProps, Text } from '@adminjs/design-system';
+import { Box, Button, H1, H2, H5, Illustration, Text } from '@adminjs/design-system';
 import { styled } from '@adminjs/design-system/styled-components';
 
 import RocketSVG from './utils/rocket-svg.js';
@@ -97,7 +97,6 @@ export const Dashboard: React.FC = () => {
     api
       .getDashboard()
       .then((response) => {
-        console.log(response.data);
         setData(response.data);
       })
       .catch((error) => {
@@ -120,8 +119,7 @@ export const Dashboard: React.FC = () => {
         width={[1, 1, 1, 1024]}
       >
         {boxes({ data, translateLabel }).map((box, index) => (
-          // eslint-disable-next-line react/no-array-index-key
-          <Box key={index} width={[1, 1 / 2, 1 / 2, 1 / 3]} p="lg">
+          <Box key={index} width={[1, 1 / 2, 1 / 2, 1 / 2]} p="lg">
             <Card as="a" href={box.href}>
               <Text textAlign="center">
                 <H1>{box.counter}</H1>

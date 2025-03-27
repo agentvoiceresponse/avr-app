@@ -6,7 +6,6 @@ import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const ContainerLogs = (props: BasePropertyProps) => {
   const { record } = props;
-  console.log(record);
   return (
     <Box variant="container" boxShadow="card" padding="lg">
       <Box maxHeight={500} overflowY="scroll">

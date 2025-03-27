@@ -9,6 +9,7 @@ type Core = {
   ttsId: number;
   firstMessage: string;
   stopAgent: boolean;
+  did: number;
   description: string;
   createdAt: Date;
   updatedAt: Date;
@@ -24,6 +25,7 @@ export class CoreModel extends Model<Core, CoreCreationAttributes> {
   declare ttsId: number;
   declare firstMessage: string;
   declare stopAgent: boolean;
+  declare did: number;
   declare description: string;
   declare createdAt: Date;
   declare updatedAt: Date;
@@ -58,6 +60,12 @@ CoreModel.init(
     stopAgent: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    did: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return (+process.env.CORE_PORT_START || 5000) + Number(this.id);
+      },
     },
     description: {
       type: DataTypes.TEXT,

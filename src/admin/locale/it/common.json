@@ -41,7 +41,8 @@
     "port": "Porta",
     "firstMessage": "Primo Messaggio",
     "stopAgent": "Interrompi Agente",
-    "did": "Numero Virtuale"
+    "did": "Numero Virtuale",
+    "internal": "Interno"
   },
   "labels": {
     "navigation": "Navigazione",
@@ -49,6 +50,8 @@
     "asr": "Speech To Text",
     "llm": "Speech Processing",
     "tts": "Text To Speech",
-    "providers": "Fornitori"
+    "providers": "Fornitori",
+    "userId": "ID Utente",
+    "pbx": "PBX"
   }
 }

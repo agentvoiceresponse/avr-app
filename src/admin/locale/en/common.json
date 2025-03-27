@@ -23,6 +23,7 @@
     "asr": "Speech To Text",
     "llm": "Speech Processing",
     "tts": "Text To Speech",
-    "userId": "User ID"
+    "userId": "User ID",
+    "pbx": "PBX"
   }
 }

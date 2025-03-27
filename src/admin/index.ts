@@ -10,6 +10,7 @@ import {
   CreateLLMResource,
   CreateTTSResource,
   CreateLogResource,
+  CreateEndpointResource,
 } from '../sources/sequelize/resources/index.js';
 
 import { componentLoader } from './components.bundler.js';
@@ -22,6 +23,7 @@ AdminJS.registerAdapter({ Database: SequelizeDatabase, Resource: SequelizeResour
 
 export const menu: Record<string, ResourceOptions['navigation']> = {
   providers: { name: 'cloudProviders', icon: 'Cloud' },
+  pbx: { name: 'pbx', icon: 'Phone' },
 };
 
 export const generateAdminJSConfig: () => AdminJSOptions = () => ({
@@ -51,5 +53,12 @@ export const generateAdminJSConfig: () => AdminJSOptions = () => ({
     DOCUMENTATION_URL: process.env.DOCUMENTATION_URL || 'https://wiki.agentvoiceresponse.com',
     DISCORD_URL: process.env.DISCORD_URL || 'https://discord.gg/mzsZ4Unk',
   },
-  resources: [CreateCoreResource(), CreateASRResource(), CreateLLMResource(), CreateTTSResource(), CreateLogResource()],
+  resources: [
+    CreateCoreResource(),
+    CreateASRResource(),
+    CreateLLMResource(),
+    CreateTTSResource(),
+    CreateEndpointResource(),
+    CreateLogResource(),
+  ],
 });
