@@ -3,9 +3,8 @@ import loggerFeature from '@adminjs/logger';
 import { ResourceFunction } from '../../../../admin/types/index.js';
 import { TTSModel } from '../../models/index.js';
 import { menu } from '../../../../admin/index.js';
-import { disableBulkDelete } from '../../../../admin/fatures/disableBulkDelete.js';
+import { disableBulkDelete, addTenant } from '../../../../admin/fatures/index.js';
 import {
-  componentLoader,
   CONTAINER_LOGS,
   EDIT_PASSWORD_PROPERTY,
   EDIT_PROPERTY,
@@ -27,12 +26,7 @@ export const CreateTTSResource: ResourceFunction<typeof TTSModel> = () => ({
   resource: TTSModel,
   features: [
     disableBulkDelete(),
-    loggerFeature({
-      componentLoader,
-      propertiesMapping: {
-        user: 'userId',
-      },
-    }),
+    addTenant({ model: TTSModel }),
   ],
   options: {
     listProperties: ['id', 'name', 'provider', 'model', 'gender', 'speekingRate', 'status', 'description', 'createdAt'],

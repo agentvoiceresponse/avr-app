@@ -32,4 +32,4 @@ RUN mkdir -p /usr/src/app/.adminjs && chown -R node:node /usr/src/app/.adminjs
 
 USER node
 
-CMD [ "node", "dist/index.js" ]
+CMD [ "npm", "run", "start" ]

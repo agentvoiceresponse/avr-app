@@ -9,7 +9,6 @@ import {
   CreateASRResource,
   CreateLLMResource,
   CreateTTSResource,
-  CreateLogResource,
   CreateEndpointResource,
 } from '../sources/sequelize/resources/index.js';
 
@@ -51,7 +50,7 @@ export const generateAdminJSConfig: () => AdminJSOptions = () => ({
   env: {
     GITHUB_URL: process.env.GITHUB_URL || 'https://github.com/agentvoiceresponse',
     DOCUMENTATION_URL: process.env.DOCUMENTATION_URL || 'https://wiki.agentvoiceresponse.com',
-    DISCORD_URL: process.env.DISCORD_URL || 'https://discord.gg/mzsZ4Unk',
+    DISCORD_URL: process.env.DISCORD_URL || 'https://discord.gg/DFTU69Hg74',
   },
   resources: [
     CreateCoreResource(),
@@ -59,6 +58,5 @@ export const generateAdminJSConfig: () => AdminJSOptions = () => ({
     CreateLLMResource(),
     CreateTTSResource(),
     CreateEndpointResource(),
-    CreateLogResource(),
   ],
 });

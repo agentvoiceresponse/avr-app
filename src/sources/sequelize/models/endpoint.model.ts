@@ -5,6 +5,7 @@ import { sequelize } from '../index.js';
 type Endpoint = {
   id: number;
   name: string;
+  tenant: string;
   secret: string;
   internal: number;
   description: string;
@@ -17,6 +18,7 @@ export type EndpointCreationAttributes = Optional<Endpoint, 'id'>;
 export class EndpointModel extends Model<Endpoint, EndpointCreationAttributes> {
   declare id: number;
   declare name: string;
+  declare tenant: string;
   declare secret: string;
   declare internal: number;
   declare description: string;
@@ -30,6 +32,10 @@ EndpointModel.init(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    tenant: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     name: {
       type: DataTypes.STRING,
@@ -62,5 +68,11 @@ EndpointModel.init(
     sequelize,
     tableName: 'endpoints',
     modelName: 'endpoints',
+    indexes: [
+      {
+        unique: false,
+        fields: ['tenant'],
+      },
+    ],
   },
 );

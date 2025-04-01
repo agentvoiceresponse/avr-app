@@ -1,15 +1,18 @@
 import { DataTypes, Sequelize } from 'sequelize';
 import { ErrorTypeEnum, ValidationError } from 'adminjs';
 import { ASRModel, LLMModel, CoreModel, TTSModel } from './models/index.js';
+import dbConfig from './config.js';
+
+const config = dbConfig[process.env.NODE_ENV];
 
 const sequelize = new Sequelize(
-  process.env.DATABASE_NAME,
-  process.env.DATABASE_USERNAME,
-  process.env.DATABASE_PASSWORD,
+  config.database,
+  config.username,
+  config.password,
   {
-    host: process.env.DATABASE_HOST,
-    port: +process.env.DATABASE_PORT,
-    dialect: 'mysql',
+    host: config.host,
+    port: config.port,
+    dialect: config.dialect,
     logging: false,
   },
 );

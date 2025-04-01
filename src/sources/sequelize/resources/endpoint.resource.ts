@@ -3,8 +3,7 @@ import loggerFeature from '@adminjs/logger';
 import { ResourceFunction } from '../../../admin/types/index.js';
 import { EndpointModel } from '../models/index.js';
 
-import { componentLoader } from '../../../admin/components.bundler.js';
-import { disableBulkDelete } from '../../../admin/fatures/disableBulkDelete.js';
+import { disableBulkDelete, addTenant } from '../../../admin/fatures/index.js';
 
 import { menu } from '../../../admin/index.js';
 
@@ -14,12 +13,7 @@ export const CreateEndpointResource: ResourceFunction<typeof EndpointModel> = ()
   resource: EndpointModel,
   features: [
     disableBulkDelete(),
-    loggerFeature({
-      componentLoader,
-      propertiesMapping: {
-        user: 'userId',
-      },
-    }),
+    addTenant({ model: EndpointModel }),
   ],
   options: {
     listProperties: ['id', 'internal', 'name', 'createdAt'],

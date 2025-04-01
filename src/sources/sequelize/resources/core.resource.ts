@@ -4,7 +4,7 @@ import { ResourceFunction } from '../../../admin/types/index.js';
 import { CoreModel } from '../models/index.js';
 
 import { componentLoader, CONTAINER_LOGS } from '../../../admin/components.bundler.js';
-import { disableBulkDelete } from '../../../admin/fatures/disableBulkDelete.js';
+import { disableBulkDelete, addTenant } from '../../../admin/fatures/index.js';
 import {
   createAndStartContainer,
   ensureContainer,
@@ -20,12 +20,7 @@ export const CreateCoreResource: ResourceFunction<typeof CoreModel> = () => ({
   resource: CoreModel,
   features: [
     disableBulkDelete(),
-    loggerFeature({
-      componentLoader,
-      propertiesMapping: {
-        user: 'userId',
-      },
-    }),
+    addTenant({ model: CoreModel }),
   ],
   options: {
     listProperties: ['id', 'name', 'asrId', 'llmId', 'ttsId', 'stopAgent', 'status', 'did', 'createdAt'],

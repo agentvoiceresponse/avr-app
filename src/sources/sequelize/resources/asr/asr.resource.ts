@@ -1,9 +1,8 @@
 import loggerFeature from '@adminjs/logger';
 
 import { menu } from '../../../../admin/index.js';
-import { disableBulkDelete } from '../../../../admin/fatures/disableBulkDelete.js';
+import { disableBulkDelete, addTenant } from '../../../../admin/fatures/index.js';
 import {
-  componentLoader,
   CONTAINER_LOGS,
   EDIT_PASSWORD_PROPERTY,
   EDIT_PROPERTY,
@@ -28,12 +27,7 @@ export const CreateASRResource: ResourceFunction<typeof ASRModel> = () => ({
   resource: ASRModel,
   features: [
     disableBulkDelete(),
-    loggerFeature({
-      componentLoader,
-      propertiesMapping: {
-        user: 'userId',
-      },
-    }),
+    addTenant({ model: ASRModel }),
   ],
   options: {
     listProperties: ['id', 'name', 'provider', 'model', 'language', 'status', 'description', 'createdAt'],

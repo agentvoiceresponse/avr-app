@@ -5,6 +5,7 @@ import { sequelize } from '../index.js';
 type LLM = {
   id: number;
   name: string;
+  tenant: string;
   provider: 'openai' | 'openai-assistant' | 'openrouter';
   key: string;
   systemPrompt: string;
@@ -20,6 +21,7 @@ export type LLMCreationAttributes = Optional<LLM, 'id'>;
 export class LLMModel extends Model<LLM, LLMCreationAttributes> {
   declare id: number;
   declare name: string;
+  declare tenant: string;
   declare provider: 'openai' | 'openai-assistant' | 'openrouter';
   declare key: string;
   declare systemPrompt: string;
@@ -38,6 +40,10 @@ LLMModel.init(
       primaryKey: true,
     },
     name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    tenant: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -72,5 +78,11 @@ LLMModel.init(
     sequelize,
     tableName: 'llm',
     modelName: 'llm',
+    indexes: [
+      {
+        unique: false,
+        fields: ['tenant'],
+      },
+    ],
   },
 );

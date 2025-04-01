@@ -2,9 +2,8 @@ import loggerFeature from '@adminjs/logger';
 
 import { menu } from '../../../../admin/index.js';
 import { LLMModel } from '../../models/index.js';
-import { disableBulkDelete } from '../../../../admin/fatures/disableBulkDelete.js';
+import { disableBulkDelete, addTenant } from '../../../../admin/fatures/index.js';
 import {
-  componentLoader,
   CONTAINER_LOGS,
   EDIT_PASSWORD_PROPERTY,
   EDIT_PROPERTY,
@@ -26,12 +25,7 @@ export const CreateLLMResource: ResourceFunction<typeof LLMModel> = () => ({
   resource: LLMModel,
   features: [
     disableBulkDelete(),
-    loggerFeature({
-      componentLoader,
-      propertiesMapping: {
-        user: 'userId',
-      },
-    }),
+    addTenant({ model: LLMModel }),
   ],
   options: {
     listProperties: ['id', 'name', 'provider', 'model', 'status', 'description', 'createdAt'],

@@ -5,6 +5,7 @@ import { sequelize } from '../index.js';
 type ASR = {
   id: number;
   name: string;
+  tenant: string;
   provider: 'deepgram' | 'google';
   language: string;
   model: string;
@@ -19,6 +20,7 @@ export type ASRCreationAttributes = Optional<ASR, 'id'>;
 export class ASRModel extends Model<ASR, ASRCreationAttributes> {
   declare id: number;
   declare name: string;
+  declare tenant: string;
   declare provider: 'deepgram' | 'google';
   declare language: string;
   declare model: string;
@@ -36,6 +38,10 @@ ASRModel.init(
       primaryKey: true,
     },
     name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    tenant: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -69,5 +75,11 @@ ASRModel.init(
     sequelize,
     tableName: 'asr',
     modelName: 'asr',
+    indexes: [
+      {
+        unique: false,
+        fields: ['tenant'],
+      },
+    ],
   },
 );

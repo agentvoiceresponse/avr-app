@@ -5,14 +5,22 @@
   "author": "Giuseppe Careri <info@gcareri.com> (https://gcareri.com)",
   "description": "AdminJS application for AgentVoiceResponse.com",
   "scripts": {
-    "start:dev": "nodemon",
-    "start": "node dist/index.js",
+    "start:dev": "npm run sequelize:migrate && nodemon",
+    "start": "npm run sequelize:migrate && node dist/index.js",
     "build": "tsc",
     "build:watch": "tsc -w",
     "build:theme": "npm clean && tsc && npm copy-theme",
     "copy-theme": "copyfiles -u 1 src/themes/**/theme.bundle.js src/themes/**/*.css dist/",
     "dc:up": "docker compose up -d --build",
-    "dc:down": "docker compose down"
+    "dc:down": "docker compose down",
+    "sequelize:migrate": "npx sequelize-cli db:migrate",
+    "sequelize:migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "sequelize:migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
+    "sequelize:migrate:status": "npx sequelize-cli db:migrate:status",
+    "sequelize:seed": "npx sequelize-cli db:seed",
+    "sequelize:seed:undo": "npx sequelize-cli db:seed:undo",
+    "sequelize:seed:undo:all": "npx sequelize-cli db:seed:undo:all",
+    "sequelize:seed:generate": "npx sequelize-cli seed:generate"
   },
   "license": "MIT",
   "dependencies": {
@@ -22,6 +30,7 @@
     "@adminjs/themes": "^1.0.1",
     "adminjs": "^7.8.15",
     "ari-client": "^2.2.0",
+    "cors": "^2.8.5",
     "dockerode": "^4.0.5",
     "dotenv": "^16.4.7",
     "express-session": "^1.18.1",

@@ -4,6 +4,7 @@ import { sequelize } from '../index.js';
 type Core = {
   id: number;
   name: string;
+  tenant: string;
   asrId: number;
   llmId: number;
   ttsId: number;
@@ -20,6 +21,7 @@ export type CoreCreationAttributes = Optional<Core, 'id'>;
 export class CoreModel extends Model<Core, CoreCreationAttributes> {
   declare id: number;
   declare name: string;
+  declare tenant: string;
   declare asrId: number;
   declare llmId: number;
   declare ttsId: number;
@@ -39,6 +41,10 @@ CoreModel.init(
       primaryKey: true,
     },
     name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    tenant: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -81,5 +87,11 @@ CoreModel.init(
     sequelize,
     tableName: 'core',
     modelName: 'core',
+    indexes: [
+      {
+        unique: false,
+        fields: ['tenant'],
+      },
+    ],
   },
 );

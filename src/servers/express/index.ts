@@ -3,6 +3,7 @@ import AdminJS from 'adminjs';
 import path from 'path';
 import * as url from 'url';
 import session from 'express-session';
+import cors from 'cors';
 
 import { generateAdminJSConfig } from '../../admin/index.js';
 import { expressRouter } from '../../admin/router.js';
@@ -46,7 +47,7 @@ const attachAdminJS = async (app: Express) => {
 const start = async () => {
   const app = express();
   app.enable('trust proxy');
-
+  app.use(cors());
   app.use(
     session({
       name: 'avr-app',
@@ -66,3 +67,4 @@ const start = async () => {
 };
 
 start();
+

@@ -5,6 +5,7 @@ import { sequelize } from '../index.js';
 type TTS = {
   id: number;
   name: string;
+  tenant: string;
   provider: 'deepgram' | 'google';
   voice: string;
   model: string;
@@ -21,6 +22,7 @@ export type TTSCreationAttributes = Optional<TTS, 'id'>;
 export class TTSModel extends Model<TTS, TTSCreationAttributes> {
   declare id: number;
   declare name: string;
+  declare tenant: string;
   declare provider: 'deepgram' | 'google';
   declare voice: string;
   declare model: string;
@@ -38,6 +40,10 @@ TTSModel.init(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    tenant: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     name: {
       type: DataTypes.STRING,
@@ -79,5 +85,11 @@ TTSModel.init(
     sequelize,
     tableName: 'tts',
     modelName: 'tts',
+    indexes: [
+      {
+        unique: false,
+        fields: ['tenant'],
+      },
+    ],
   },
 );
