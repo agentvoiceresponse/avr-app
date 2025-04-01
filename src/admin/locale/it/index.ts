@@ -1,6 +1,6 @@
 import type { LocaleTranslations } from 'adminjs';
 
-import common from './common.json' assert { type: 'json' };
+import common from './common.json' with { type: 'json' };
 
 const itLocale: LocaleTranslations = {
   ...common,

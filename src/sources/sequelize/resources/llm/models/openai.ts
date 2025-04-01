@@ -1,4 +1,4 @@
-import openaiJSON from './openai.json' assert { type: 'json' };
+import openaiJSON from './openai.json' with { type: 'json' };
 
 export const models = openaiJSON.data.map((value) => ({
   value: value.id,

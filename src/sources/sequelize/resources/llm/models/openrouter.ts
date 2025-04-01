@@ -1,4 +1,4 @@
-import openrouterJSON from './openrouter.json' assert { type: 'json' };
+import openrouterJSON from './openrouter.json' with { type: 'json' };
 
 export const models = openrouterJSON.data.map((value) => ({
   value: value.id,

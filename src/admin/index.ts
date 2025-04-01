@@ -2,7 +2,7 @@ import { Database as SequelizeDatabase, Resource as SequelizeResource } from '@a
 import { dark, light, noSidebar } from '@adminjs/themes';
 import AdminJS, { AdminJSOptions, ResourceOptions } from 'adminjs';
 
-import packageJSON from '../../package.json' assert { type: 'json' };
+import packageJSON from '../../package.json' with { type: 'json' };
 
 import {
   CreateCoreResource,

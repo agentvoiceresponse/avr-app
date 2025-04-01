@@ -14,7 +14,6 @@ export const override = (url: string, componentName: OverridableComponent): stri
  * Overridable components
  */
 override('components/MyVersion', 'Version');
-// override('components/MyLogin', 'Login');
 override('components/MySidebarResourceSection', 'SidebarResourceSection');
 
 /**
