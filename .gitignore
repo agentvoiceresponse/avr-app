@@ -1,6 +1,11 @@
-.adminjs
-db
-dist
-node_modules
+# Root ignores
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+backend/node_modules/
+backend/dist/
+data/*.db
+data/*.sqlite
 .env
-tsconfig.tsbuildinfo
+docker-compose-asterisk.yml

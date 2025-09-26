@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+npm-debug.log*
+yarn-error.log
+.pnpm-store/
+data/*.db
+data/*.sqlite
+coverage/

@@ -1,7 +1,0 @@
-import AdminJSExpress from '@adminjs/express';
-import AdminJS from 'adminjs';
-import { Router } from 'express';
-
-export const expressRouter = (adminJs: AdminJS, router?: Router | null): Router => {
-  return AdminJSExpress.buildRouter(adminJs, router);
-};
