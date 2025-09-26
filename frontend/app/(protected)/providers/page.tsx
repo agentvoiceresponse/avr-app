@@ -380,7 +380,7 @@ export default function ProvidersPage() {
 
       const currentImage = form.getValues('image');
       const imageState = form.getFieldState('image');
-      const shouldUpdateImage = resetImageOnTemplateChange ? !imageState.isDirty : !currentImage;
+      const shouldUpdateImage = resetImageOnTemplateChange || !imageState.isDirty;
 
       if (shouldUpdateImage && selectedTemplate.defaultImage) {
         form.setValue('image', selectedTemplate.defaultImage, { shouldDirty: false });
@@ -436,7 +436,7 @@ export default function ProvidersPage() {
   });
 
   const { filteredTemplates: createTemplates, selectedTemplate: createSelectedTemplate } =
-    useProviderTemplateController(form);
+    useProviderTemplateController(form, { resetImageOnTemplateChange: true });
   const { filteredTemplates: editTemplates, selectedTemplate: editSelectedTemplate } =
     useProviderTemplateController(editForm, { skipInitialPopulate: true });
 
@@ -696,7 +696,6 @@ export default function ProvidersPage() {
                                 <Input
                                   type={fieldConfig.inputType === 'password' ? 'password' : 'text'}
                                   placeholder={fieldConfig.placeholder}
-                                  value={field.value ?? ''}
                                   {...field}
                                 />
                               )}
