@@ -53,6 +53,8 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { env } from 'next-runtime-env';
+
 
 type NavItem = {
   href: string;
@@ -70,7 +72,7 @@ export function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { dictionary } = useI18n();
-  const webRtcClientUrl = process.env.NEXT_PUBLIC_WEBRTC_CLIENT_URL;
+  const webRtcClientUrl = env('NEXT_PUBLIC_WEBRTC_CLIENT_URL');
   const [isPhoneOpen, setIsPhoneOpen] = useState(false);
 
   const navPrimaryItems = useMemo<NavItem[]>(

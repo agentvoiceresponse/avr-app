@@ -196,7 +196,7 @@ export default function UsersPage() {
     setEditDialogOpen(true);
   };
 
-  const handleUpdate = async (values: z.infer<typeof updateUserSchema>) => {
+  const handleUpdate = async (values: z.infer<typeof updateSchema>) => {
     if (!editingUser) {
       return;
     }
