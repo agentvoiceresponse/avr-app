@@ -1,7 +1,7 @@
 'use client';
 import { env } from 'next-runtime-env';
 
-const API_URL = env('NEXT_PUBLIC_API_URL');
+const API_URL = env('NEXT_PUBLIC_API_URL') ?? 'http://localhost:3001';
 const TOKEN_KEY = 'avr-admin-token';
 
 export class ApiError extends Error {
