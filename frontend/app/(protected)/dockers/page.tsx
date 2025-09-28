@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCcw, Play, Square, FileText } from 'lucide-react';
+import { RefreshCcw, Play, Square, FileText, Shield, RotateCcw } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
@@ -41,7 +41,7 @@ export default function DockersPage() {
   const [logsContent, setLogsContent] = useState('');
   const [logsLoading, setLogsLoading] = useState(false);
 
-  const isViewer = user?.role === 'viewer';
+  const isReadOnly = user?.role === 'viewer';
 
   const loadContainers = useCallback(async () => {
     setLoading(true);
@@ -65,6 +65,9 @@ export default function DockersPage() {
   }, [loadContainers]);
 
   const handleStart = async (container: DockerContainerDto) => {
+    if (isReadOnly) {
+      return;
+    }
     setActionMap((prev) => ({ ...prev, [container.id]: true }));
     try {
       await apiFetch(`/docker/containers/${container.id}/start`, { method: 'POST' });
@@ -77,12 +80,31 @@ export default function DockersPage() {
   };
 
   const handleStop = async (container: DockerContainerDto) => {
+    if (isReadOnly) {
+      return;
+    }
     setActionMap((prev) => ({ ...prev, [container.id]: true }));
     try {
       await apiFetch(`/docker/containers/${container.id}/stop`, { method: 'POST' });
       await loadContainers();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : dictionary.dockers.errors.stop);
+    } finally {
+      setActionMap((prev) => ({ ...prev, [container.id]: false }));
+    }
+  };
+
+  const handlePullAndRestart = async (container: DockerContainerDto) => {
+    if (isReadOnly) {
+      return;
+    }
+    setActionMap((prev) => ({ ...prev, [container.id]: true }));
+    try {
+      await apiFetch(`/docker/containers/${container.id}/pull`, { method: 'POST' });
+      await loadContainers();
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof ApiError ? err.message : dictionary.dockers.errors.pull);
     } finally {
       setActionMap((prev) => ({ ...prev, [container.id]: false }));
     }
@@ -138,9 +160,17 @@ export default function DockersPage() {
           <h1 className="text-2xl font-semibold tracking-tight">{dictionary.dockers.title}</h1>
           <p className="text-sm text-muted-foreground">{dictionary.dockers.subtitle}</p>
         </div>
-        <Button variant="outline" onClick={loadContainers} disabled={loading}>
-          <RefreshCcw className="mr-2 h-4 w-4" /> {dictionary.dockers.refresh}
-        </Button>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {isReadOnly ? (
+            <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted px-3 py-2 text-xs text-muted-foreground">
+              <Shield className="h-4 w-4" />
+              {dictionary.dockers.notices.readOnly}
+            </div>
+          ) : null}
+          <Button variant="outline" onClick={loadContainers} disabled={loading}>
+            <RefreshCcw className="mr-2 h-4 w-4" /> {dictionary.dockers.refresh}
+          </Button>
+        </div>
       </div>
 
       <Card className="border-border/60">
@@ -195,11 +225,22 @@ export default function DockersPage() {
                             >
                               <FileText className="h-4 w-4" />
                             </Button>
+                            {isReadOnly ? null : (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handlePullAndRestart(container)}
+                                disabled={actionMap[container.id]}
+                                aria-label={dictionary.dockers.buttons.pull}
+                              >
+                                <RotateCcw className="h-4 w-4" />
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="icon"
                               onClick={() => handleStart(container)}
-                              disabled={isViewer || actionMap[container.id] || container.state === 'running'}
+                              disabled={isReadOnly || actionMap[container.id] || container.state === 'running'}
                               aria-label={dictionary.dockers.buttons.start}
                             >
                               <Play className="h-4 w-4" />
@@ -208,7 +249,7 @@ export default function DockersPage() {
                               variant="destructive"
                               size="icon"
                               onClick={() => handleStop(container)}
-                              disabled={isViewer || actionMap[container.id] || container.state !== 'running'}
+                              disabled={isReadOnly || actionMap[container.id] || container.state !== 'running'}
                               aria-label={dictionary.dockers.buttons.stop}
                             >
                               <Square className="h-4 w-4" />

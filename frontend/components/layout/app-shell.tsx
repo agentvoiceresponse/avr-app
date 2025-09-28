@@ -1,10 +1,10 @@
 /* eslint-disable react/no-children-prop */
-'use client';
+"use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   Users,
@@ -21,21 +21,21 @@ import {
   Github,
   BookOpen,
   type LucideIcon,
-} from 'lucide-react';
-import { PropsWithChildren, useEffect, useMemo, useState } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
-import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { useAuth } from '@/lib/auth';
+} from "lucide-react";
+import { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/lib/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useI18n } from '@/lib/i18n';
-import { LanguageToggle } from '@/components/language-toggle';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dropdown-menu";
+import { useI18n } from "@/lib/i18n";
+import { LanguageToggle } from "@/components/language-toggle";
+import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
@@ -52,9 +52,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
   useSidebar,
-} from '@/components/ui/sidebar';
-import { env } from 'next-runtime-env';
-
+} from "@/components/ui/sidebar";
+import { env } from "next-runtime-env";
 
 type NavItem = {
   href: string;
@@ -72,67 +71,73 @@ export function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { dictionary } = useI18n();
-  const webRtcClientUrl = env('NEXT_PUBLIC_WEBRTC_CLIENT_URL');
+  const webRtcClientUrl = env("NEXT_PUBLIC_WEBRTC_CLIENT_URL");
   const [isPhoneOpen, setIsPhoneOpen] = useState(false);
 
   const navPrimaryItems = useMemo<NavItem[]>(
     () => [
-      { href: '/overview', label: dictionary.navigation.dashboard, icon: LayoutDashboard },
+      {
+        href: "/overview",
+        label: dictionary.navigation.dashboard,
+        icon: LayoutDashboard,
+      },
     ],
-    [dictionary],
+    [dictionary]
   );
 
   const navBuildItems = useMemo<NavItem[]>(
     () => [
-      { href: '/providers', label: dictionary.navigation.providers, icon: Server },
-      { href: '/agents', label: dictionary.navigation.agents, icon: Bot },
+      {
+        href: "/providers",
+        label: dictionary.navigation.providers,
+        icon: Server,
+      },
+      { href: "/agents", label: dictionary.navigation.agents, icon: Bot },
     ],
-    [dictionary],
+    [dictionary]
   );
 
   const navTelephonyItems = useMemo<NavItem[]>(
     () => [
-      { href: '/numbers', label: dictionary.navigation.numbers, icon: Hash },
-      { href: '/trunks', label: dictionary.navigation.trunks, icon: Shield },
-      { href: '/phones', label: dictionary.navigation.phones, icon: Phone },
+      { href: "/numbers", label: dictionary.navigation.numbers, icon: Hash },
+      { href: "/trunks", label: dictionary.navigation.trunks, icon: Shield },
+      { href: "/phones", label: dictionary.navigation.phones, icon: Phone },
     ],
-    [dictionary],
+    [dictionary]
   );
 
   const navAdministrationItems = useMemo<NavItem[]>(
-    () => [
-      { href: '/users', label: dictionary.navigation.users, icon: Users },
-    ],
-    [dictionary],
+    () => [{ href: "/users", label: dictionary.navigation.users, icon: Users }],
+    [dictionary]
   );
 
   const navObserveItems = useMemo<NavItem[]>(
     () => [
-      { href: '/calls', label: dictionary.navigation.calls, icon: PhoneCall },
-      { href: '/dockers', label: dictionary.navigation.dockers, icon: Server },
+      { href: "/calls", label: dictionary.navigation.calls, icon: PhoneCall },
+      { href: "/dockers", label: dictionary.navigation.dockers, icon: Server },
     ],
-    [dictionary],
+    [dictionary]
   );
 
   const socialLinks = useMemo<SocialLink[]>(
     () => [
       {
-        href: 'https://discord.gg/DFTU69Hg74',
-        label: 'Discord community',
+        href: "https://discord.gg/DFTU69Hg74",
+        label: "Discord community",
         icon: MessageCircle,
       },
       {
-        href: 'https://github.com/orgs/agentvoiceresponse/repositories',
-        label: 'GitHub repositories',
+        href: "https://github.com/orgs/agentvoiceresponse/repositories",
+        label: "GitHub repositories",
         icon: Github,
       },
       {
-        href: 'https://wiki.agentvoiceresponse.com/',
-        label: 'AVR wiki',
+        href: "https://wiki.agentvoiceresponse.com/",
+        label: "AVR wiki",
         icon: BookOpen,
       },
     ],
-    [],
+    []
   );
 
   return (
@@ -145,8 +150,8 @@ export function AppShell({ children }: PropsWithChildren) {
         navAdministrationItems={navAdministrationItems}
         navObserveItems={navObserveItems}
         socialLinks={socialLinks}
-        userName={user?.username ?? ''}
-        userRole={user?.role ?? ''}
+        userName={user?.username ?? ""}
+        userRole={user?.role ?? ""}
         onLogout={logout}
         dictionary={dictionary}
         children={children}
@@ -169,8 +174,8 @@ type AppShellContentProps = {
   userName: string;
   userRole: string;
   onLogout: () => void;
-  dictionary: ReturnType<typeof useI18n>['dictionary'];
-  children: PropsWithChildren['children'];
+  dictionary: ReturnType<typeof useI18n>["dictionary"];
+  children: PropsWithChildren["children"];
   webRtcClientUrl?: string;
   isPhoneOpen: boolean;
   setIsPhoneOpen: Dispatch<SetStateAction<boolean>>;
@@ -194,14 +199,16 @@ function AppShellContent({
   setIsPhoneOpen,
 }: AppShellContentProps) {
   const { setOpen } = useSidebar();
-  const isMobile = useMediaQuery('(max-width: 767px)');
-  const isViewer = userRole === 'viewer';
-  const displayednavBuildItems = isViewer
-    ? navBuildItems.filter((item) => item.href === '/numbers')
-    : navBuildItems;
-  const displayednavAdministrationItems = isViewer ? [] : navAdministrationItems;
-  const displayednavTelephonyItems = isViewer ? [] : navTelephonyItems;
-  const displayednavObserveItems = isViewer ? [] : navObserveItems;
+  const isMobile = useMediaQuery("(max-width: 767px)");
+  const isViewer = userRole === "viewer";
+  const displayednavBuildItems = isViewer ? navBuildItems : navBuildItems;
+  const displayednavAdministrationItems = isViewer
+    ? navAdministrationItems
+    : navAdministrationItems;
+  const displayednavTelephonyItems = isViewer
+    ? navTelephonyItems.filter((item) => item.href !== "/trunks")
+    : navTelephonyItems;
+  const displayednavObserveItems = isViewer ? navObserveItems : navObserveItems;
 
   const handleNavigate = () => {
     if (isMobile) {
@@ -216,7 +223,12 @@ function AppShellContent({
         <div className="flex h-full flex-col gap-6 px-6 py-8">
           <SidebarHeader className="border-none p-0">
             <div className="flex items-center gap-3">
-              <Image src="/logo.svg" alt={dictionary.common.appName} width={36} height={36} />
+              <Image
+                src="/logo.svg"
+                alt={dictionary.common.appName}
+                width={36}
+                height={36}
+              />
               <div className="text-lg font-semibold tracking-tight">
                 {dictionary.common.panelName}
               </div>
@@ -231,7 +243,11 @@ function AppShellContent({
                     const isActive = pathname.startsWith(item.href);
                     return (
                       <SidebarMenuItem key={item.href}>
-                        <SidebarMenuButton asChild isActive={isActive} className="flex items-center gap-3">
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive}
+                          className="flex items-center gap-3"
+                        >
                           <Link href={item.href} onClick={handleNavigate}>
                             <Icon className="h-4 w-4" />
                             <span>{item.label}</span>
@@ -245,7 +261,9 @@ function AppShellContent({
             </SidebarGroup>
             {displayednavBuildItems.length > 0 ? (
               <SidebarGroup className="gap-3">
-                <SidebarGroupLabel>{dictionary.sidebarGroups.build}</SidebarGroupLabel>
+                <SidebarGroupLabel>
+                  {dictionary.sidebarGroups.build}
+                </SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {displayednavBuildItems.map((item) => {
@@ -253,7 +271,11 @@ function AppShellContent({
                       const isActive = pathname.startsWith(item.href);
                       return (
                         <SidebarMenuItem key={item.href}>
-                          <SidebarMenuButton asChild isActive={isActive} className="flex items-center gap-3">
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive}
+                            className="flex items-center gap-3"
+                          >
                             <Link href={item.href} onClick={handleNavigate}>
                               <Icon className="h-4 w-4" />
                               <span>{item.label}</span>
@@ -268,15 +290,21 @@ function AppShellContent({
             ) : null}
             {displayednavTelephonyItems.length > 0 ? (
               <SidebarGroup className="gap-3">
-                <SidebarGroupLabel>{dictionary.sidebarGroups.telephony}</SidebarGroupLabel>
+                <SidebarGroupLabel>
+                  {dictionary.sidebarGroups.telephony}
+                </SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                      {displayednavTelephonyItems.map((item) => {
+                    {displayednavTelephonyItems.map((item) => {
                       const Icon = item.icon;
                       const isActive = pathname.startsWith(item.href);
                       return (
                         <SidebarMenuItem key={item.href}>
-                          <SidebarMenuButton asChild isActive={isActive} className="flex items-center gap-3">
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive}
+                            className="flex items-center gap-3"
+                          >
                             <Link href={item.href} onClick={handleNavigate}>
                               <Icon className="h-4 w-4" />
                               <span>{item.label}</span>
@@ -291,7 +319,9 @@ function AppShellContent({
             ) : null}
             {displayednavAdministrationItems.length > 0 ? (
               <SidebarGroup className="gap-3">
-                <SidebarGroupLabel>{dictionary.sidebarGroups.administration}</SidebarGroupLabel>
+                <SidebarGroupLabel>
+                  {dictionary.sidebarGroups.administration}
+                </SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {displayednavAdministrationItems.map((item) => {
@@ -299,7 +329,11 @@ function AppShellContent({
                       const isActive = pathname.startsWith(item.href);
                       return (
                         <SidebarMenuItem key={item.href}>
-                          <SidebarMenuButton asChild isActive={isActive} className="flex items-center gap-3">
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive}
+                            className="flex items-center gap-3"
+                          >
                             <Link href={item.href} onClick={handleNavigate}>
                               <Icon className="h-4 w-4" />
                               <span>{item.label}</span>
@@ -314,7 +348,9 @@ function AppShellContent({
             ) : null}
             {displayednavObserveItems.length > 0 ? (
               <SidebarGroup className="mt-auto gap-3">
-                <SidebarGroupLabel>{dictionary.sidebarGroups.observe}</SidebarGroupLabel>
+                <SidebarGroupLabel>
+                  {dictionary.sidebarGroups.observe}
+                </SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {displayednavObserveItems.map((item) => {
@@ -322,7 +358,11 @@ function AppShellContent({
                       const isActive = pathname.startsWith(item.href);
                       return (
                         <SidebarMenuItem key={item.href}>
-                          <SidebarMenuButton asChild isActive={isActive} className="flex items-center gap-3">
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive}
+                            className="flex items-center gap-3"
+                          >
                             <Link href={item.href} onClick={handleNavigate}>
                               <Icon className="h-4 w-4" />
                               <span>{item.label}</span>
@@ -337,10 +377,10 @@ function AppShellContent({
             ) : null}
           </SidebarContent>
           <SidebarFooter className="border border-border/60 bg-muted/40 p-4 text-xs text-muted-foreground">
-            {dictionary.common.loggedInAs}{' '}
+            {dictionary.common.loggedInAs}{" "}
             <span className="font-medium text-foreground">{userName}</span>
             <br />
-            {dictionary.common.role}:{' '}
+            {dictionary.common.role}:{" "}
             <span className="font-medium text-foreground">{userRole}</span>
           </SidebarFooter>
         </div>
@@ -349,7 +389,12 @@ function AppShellContent({
         <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border/80 bg-background/80 px-6 py-4 backdrop-blur">
           <div className="flex items-center gap-3">
             <SidebarTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Toggle navigation">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                aria-label="Toggle navigation"
+              >
                 <Menu className="h-5 w-5" />
               </Button>
             </SidebarTrigger>
@@ -375,7 +420,12 @@ function AppShellContent({
             <LanguageToggle />
             {socialLinks.map(({ href, label, icon: Icon }) => (
               <Button key={href} variant="ghost" size="icon" asChild>
-                <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                >
                   <Icon className="h-4 w-4" />
                 </a>
               </Button>
@@ -409,13 +459,13 @@ function AppShellContent({
         <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
           <div
             className={cn(
-              'flex h-[640px] w-[360px] flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-xl transition-all duration-300',
+              "flex h-[640px] w-[360px] flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-xl transition-all duration-300",
               isPhoneOpen
-                ? 'pointer-events-auto translate-y-0 opacity-100'
-                : 'pointer-events-none translate-y-6 opacity-0'
+                ? "pointer-events-auto translate-y-0 opacity-100"
+                : "pointer-events-none translate-y-6 opacity-0"
             )}
             aria-hidden={!isPhoneOpen}
-            style={{ transformOrigin: 'bottom right' }}
+            style={{ transformOrigin: "bottom right" }}
           >
             <div className="flex items-center justify-between border-b border-border/80 bg-muted/40 px-3 py-2 text-sm font-medium">
               <span>AVR Phone</span>
@@ -458,14 +508,14 @@ function AppShellContent({
 
 function useMediaQuery(query: string) {
   const [matches, setMatches] = useState<boolean>(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return false;
     }
     return window.matchMedia(query).matches;
   });
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return;
     }
 
@@ -474,8 +524,8 @@ function useMediaQuery(query: string) {
 
     handler();
 
-    mediaQueryList.addEventListener('change', handler);
-    return () => mediaQueryList.removeEventListener('change', handler);
+    mediaQueryList.addEventListener("change", handler);
+    return () => mediaQueryList.removeEventListener("change", handler);
   }, [query]);
 
   return matches;

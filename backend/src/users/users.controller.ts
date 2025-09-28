@@ -51,10 +51,11 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @HttpCode(204)
   @Roles(UserRole.ADMIN)
-  async remove(@Param('id') id: string): Promise<void> {
+  @HttpCode(200)
+  async remove(@Param('id') id: string): Promise<{ success: true }> {
     await this.usersService.remove(id);
+    return { success: true };
   }
 
   private toSafeUser(user: User) {

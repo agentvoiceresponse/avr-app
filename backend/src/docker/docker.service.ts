@@ -132,6 +132,64 @@ export class DockerService {
     }
   }
 
+  async pullAndRestartContainer(containerId: string): Promise<void> {
+    const container = this.docker.getContainer(containerId);
+    try {
+      const inspect = await container.inspect();
+      const image = inspect.Config?.Image;
+      if (!image) {
+        throw new InternalServerErrorException('Container image not available');
+      }
+
+      await this.pullImage(image);
+
+      if (inspect.State.Running) {
+        try {
+          await container.stop();
+          await container.wait({ condition: 'not-running' });
+        } catch (stopError: any) {
+          if (stopError?.statusCode !== 304 && stopError?.statusCode !== 409) {
+            throw stopError;
+          }
+          this.logger.debug(
+            `Container ${containerId} already stopped while refreshing image`,
+          );
+        }
+      }
+
+      try {
+        await container.start();
+      } catch (startError: any) {
+        if (startError?.statusCode === 304 || startError?.statusCode === 409) {
+          this.logger.debug(
+            `Container ${containerId} already running after refresh request`,
+          );
+        } else {
+          throw startError;
+        }
+      }
+      this.logger.debug(`Pulled image and restarted container ${containerId}`);
+    } catch (error: any) {
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+
+      if (error?.statusCode === 404) {
+        throw new NotFoundException('Container not found');
+      }
+
+      this.logger.error(
+        `Unable to pull and restart container ${containerId}`,
+        error as Error,
+      );
+      const errorMessage =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Unable to refresh container';
+      throw new InternalServerErrorException(errorMessage);
+    }
+  }
+
   async getContainerLogs(containerId: string, tail = 200): Promise<string> {
     const container = this.docker.getContainer(containerId);
     try {

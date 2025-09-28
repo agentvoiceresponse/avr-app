@@ -12,9 +12,10 @@ import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ServerCog, Pencil, Trash2 } from 'lucide-react';
+import { ServerCog, Pencil, Trash2, Shield } from 'lucide-react';
 import { apiFetch, ApiError, type PaginatedResponse } from '@/lib/api';
 import { useI18n, type Dictionary } from '@/lib/i18n';
+import { useAuth } from '@/lib/auth';
 import {
   Dialog,
   DialogContent,
@@ -107,6 +108,8 @@ type FormValues = {
 
 export default function ProvidersPage() {
   const { dictionary } = useI18n();
+  const { user } = useAuth();
+  const isReadOnly = user?.role === 'viewer';
 
   const providerTemplates: ProviderTemplate[] = [
     {
@@ -472,6 +475,9 @@ export default function ProvidersPage() {
   }, [loadProviders]);
 
   const onSubmit = async (values: FormValues) => {
+    if (isReadOnly) {
+      return;
+    }
     setSubmitting(true);
     try {
       const body = buildProviderPayload(values);
@@ -502,6 +508,9 @@ export default function ProvidersPage() {
   };
 
   const openEditDialog = (provider: ProviderDto) => {
+    if (isReadOnly) {
+      return;
+    }
     setError(null);
     setEditingProvider(provider);
     editForm.reset(providerToFormValues(provider));
@@ -510,6 +519,9 @@ export default function ProvidersPage() {
 
   const handleUpdate = async (values: FormValues) => {
     if (!editingProvider) {
+      return;
+    }
+    if (isReadOnly) {
       return;
     }
     setUpdating(true);
@@ -552,6 +564,9 @@ export default function ProvidersPage() {
     if (!deleteTarget) {
       return;
     }
+    if (isReadOnly) {
+      return;
+    }
     setDeleting(true);
     try {
       await apiFetch(`/providers/${deleteTarget.id}`, {
@@ -578,19 +593,25 @@ export default function ProvidersPage() {
           <h1 className="text-2xl font-semibold tracking-tight">{dictionary.providers.title}</h1>
           <p className="text-sm text-muted-foreground">{dictionary.providers.subtitle}</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <ServerCog className="mr-2 h-4 w-4" /> {dictionary.providers.buttons.new}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[520px]">
-            <DialogHeader>
-              <DialogTitle>{dictionary.providers.createTitle}</DialogTitle>
-              <DialogDescription>{dictionary.providers.createDescription}</DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-              <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+        {isReadOnly ? (
+          <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted px-3 py-2 text-xs text-muted-foreground">
+            <Shield className="h-4 w-4" />
+            {dictionary.providers.notices.readOnly}
+          </div>
+        ) : (
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <ServerCog className="mr-2 h-4 w-4" /> {dictionary.providers.buttons.new}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[520px]">
+              <DialogHeader>
+                <DialogTitle>{dictionary.providers.createTitle}</DialogTitle>
+                <DialogDescription>{dictionary.providers.createDescription}</DialogDescription>
+              </DialogHeader>
+              <Form {...form}>
+                <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
                 <FormField
                   control={form.control}
                   name="name"
@@ -709,7 +730,7 @@ export default function ProvidersPage() {
                 ) : null}
 
                 <DialogFooter>
-                  <Button type="submit" disabled={submitting}>
+                  <Button type="submit" disabled={submitting || isReadOnly}>
                     {submitting ? dictionary.providers.buttons.saving : dictionary.providers.buttons.create}
                   </Button>
                 </DialogFooter>
@@ -717,6 +738,7 @@ export default function ProvidersPage() {
             </Form>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <Card className="border-border/60">
@@ -747,7 +769,12 @@ export default function ProvidersPage() {
                       <TableCell>{provider.config?.image ?? '—'}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="icon" onClick={() => openEditDialog(provider)}>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => openEditDialog(provider)}
+                            disabled={isReadOnly}
+                          >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
@@ -758,7 +785,7 @@ export default function ProvidersPage() {
                               setDeleteTarget(provider);
                               setDeleteDialogOpen(true);
                             }}
-                            disabled={deleting && deleteTarget?.id === provider.id}
+                            disabled={isReadOnly || (deleting && deleteTarget?.id === provider.id)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -923,7 +950,7 @@ export default function ProvidersPage() {
               ) : null}
 
               <DialogFooter>
-                <Button type="submit" disabled={updating}>
+                <Button type="submit" disabled={updating || isReadOnly}>
                   {updating ? dictionary.providers.buttons.saving : dictionary.providers.buttons.update}
                 </Button>
               </DialogFooter>
@@ -949,11 +976,13 @@ export default function ProvidersPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>{dictionary.common.buttons.cancel}</AlertDialogCancel>
+            <AlertDialogCancel disabled={isReadOnly || deleting}>
+              {dictionary.common.buttons.cancel}
+            </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleDelete}
-              disabled={deleting}
+              disabled={isReadOnly || deleting}
             >
               {deleting ? dictionary.providers.delete.processing : dictionary.providers.delete.confirm}
             </AlertDialogAction>

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PlusCircle, Pencil, Trash2, ShieldQuestion, Eye, EyeOff } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Shield, Eye, EyeOff } from 'lucide-react';
 import { apiFetch, ApiError, type PaginatedResponse } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
@@ -79,7 +79,7 @@ export default function TrunksPage() {
   const [deleting, setDeleting] = useState(false);
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
 
-  const isViewer = user?.role === 'viewer';
+  const isReadOnly = user?.role === 'viewer';
 
   const form = useForm<TrunkFormValues>({
     resolver: zodResolver(trunkSchema),
@@ -128,6 +128,9 @@ export default function TrunksPage() {
   };
 
   const onSubmit = async (values: TrunkFormValues) => {
+    if (isReadOnly) {
+      return;
+    }
     setSubmitting(true);
     try {
       await apiFetch<TrunkDto>('/trunks', {
@@ -151,6 +154,9 @@ export default function TrunksPage() {
   };
 
   const openEditDialog = (trunk: TrunkDto) => {
+    if (isReadOnly) {
+      return;
+    }
     setError(null);
     setEditingTrunk(trunk);
     editForm.reset({ name: trunk.name });
@@ -159,6 +165,9 @@ export default function TrunksPage() {
 
   const handleUpdate = async (values: TrunkFormValues) => {
     if (!editingTrunk) {
+      return;
+    }
+    if (isReadOnly) {
       return;
     }
     setUpdating(true);
@@ -185,6 +194,9 @@ export default function TrunksPage() {
   };
 
   const confirmDelete = (trunk: TrunkDto) => {
+    if (isReadOnly) {
+      return;
+    }
     setDeleteTarget(trunk);
     setDeleteDialogOpen(true);
   };
@@ -192,6 +204,9 @@ export default function TrunksPage() {
   const handleDelete = async (event?: MouseEvent<HTMLButtonElement>) => {
     event?.preventDefault();
     if (!deleteTarget) {
+      return;
+    }
+    if (isReadOnly) {
       return;
     }
     setDeleting(true);
@@ -218,9 +233,9 @@ export default function TrunksPage() {
           <h1 className="text-2xl font-semibold tracking-tight">{dictionary.trunks.title}</h1>
           <p className="text-sm text-muted-foreground">{dictionary.trunks.subtitle}</p>
         </div>
-        {isViewer ? (
+        {isReadOnly ? (
           <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted px-3 py-2 text-xs text-muted-foreground">
-            <ShieldQuestion className="h-4 w-4" /> {dictionary.trunks.notices.readOnly}
+            <Shield className="h-4 w-4" /> {dictionary.trunks.notices.readOnly}
           </div>
         ) : (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -250,7 +265,7 @@ export default function TrunksPage() {
                     )}
                   />
                   <DialogFooter>
-                    <Button type="submit" disabled={submitting}>
+                    <Button type="submit" disabled={submitting || isReadOnly}>
                       {submitting ? dictionary.trunks.buttons.creating : dictionary.trunks.buttons.create}
                     </Button>
                   </DialogFooter>
@@ -326,7 +341,7 @@ export default function TrunksPage() {
                             variant="outline"
                             size="icon"
                             onClick={() => openEditDialog(trunk)}
-                            disabled={isViewer}
+                            disabled={isReadOnly}
                             aria-label={dictionary.trunks.editTitle}
                           >
                             <Pencil className="h-4 w-4" />
@@ -335,7 +350,7 @@ export default function TrunksPage() {
                             variant="destructive"
                             size="icon"
                             onClick={() => confirmDelete(trunk)}
-                            disabled={isViewer}
+                            disabled={isReadOnly}
                             aria-label={dictionary.trunks.delete.confirm}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -388,7 +403,7 @@ export default function TrunksPage() {
                 )}
               />
               <DialogFooter>
-                <Button type="submit" disabled={updating}>
+                <Button type="submit" disabled={updating || isReadOnly}>
                   {updating ? dictionary.trunks.buttons.updating : dictionary.trunks.buttons.update}
                 </Button>
               </DialogFooter>
@@ -413,8 +428,10 @@ export default function TrunksPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>{dictionary.common.buttons.cancel}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={deleting}>
+            <AlertDialogCancel disabled={isReadOnly || deleting}>
+              {dictionary.common.buttons.cancel}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={isReadOnly || deleting}>
               {deleting ? dictionary.trunks.delete.processing : dictionary.trunks.delete.confirm}
             </AlertDialogAction>
           </AlertDialogFooter>
