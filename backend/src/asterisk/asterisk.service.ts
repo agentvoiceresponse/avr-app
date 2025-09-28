@@ -16,7 +16,7 @@ export class AsteriskService {
   private readonly extensionsPath = path.join(this.basePath, 'extensions.conf');
   private readonly pjsipPath = path.join(this.basePath, 'pjsip.conf');
   private readonly managerPath = path.join(this.basePath, 'manager.conf');
-  private readonly trunksPath = path.join(this.basePath, 'pjsip_trunks.conf');
+  private readonly trunksPath = path.join(this.basePath, 'pjsip.conf');
 
   private async getAri(): Promise<Client> {
     if (this.ari) {

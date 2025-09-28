@@ -44,7 +44,8 @@ export class PhonesController {
 
   @Delete(':id')
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.phonesService.remove(id);
+  async remove(@Param('id') id: string): Promise<{ success: true }> {
+    await this.phonesService.remove(id);
+    return { success: true };
   }
 }

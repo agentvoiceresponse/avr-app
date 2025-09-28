@@ -1,6 +1,6 @@
 {
   "name": "avr-app-frontend",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "author": "Agent Voice Response <info@agentvoiceresponse.com>",
   "description": "Frontend for Agent Voice Response App",
   "scripts": {

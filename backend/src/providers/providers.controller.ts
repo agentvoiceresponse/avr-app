@@ -47,7 +47,8 @@ export class ProvidersController {
 
   @Delete(':id')
   @Roles(UserRole.ADMIN)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.providersService.remove(id);
+  async remove(@Param('id') id: string): Promise<{ success: true }> {
+    await this.providersService.remove(id);
+    return { success: true };
   }
 }

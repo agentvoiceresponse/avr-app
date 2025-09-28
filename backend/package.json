@@ -1,6 +1,6 @@
 {
   "name": "avr-app-backend",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "author": "Agent Voice Response <info@agentvoiceresponse.com>",
   "description": "Backend for Agent Voice Response App",
   "scripts": {

@@ -5,9 +5,10 @@ import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Play, Square, PlusCircle, Waves, Pencil, Trash2 } from 'lucide-react';
+import { Play, Square, PlusCircle, Waves, Pencil, Trash2, Shield } from 'lucide-react';
 import { apiFetch, type PaginatedResponse } from '@/lib/api';
 import { useI18n, type Dictionary } from '@/lib/i18n';
+import { useAuth } from '@/lib/auth';
 import {
   Dialog,
   DialogContent,
@@ -198,6 +199,8 @@ export default function AgentsPage() {
   const [deleting, setDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { dictionary } = useI18n();
+  const { user } = useAuth();
+  const isReadOnly = user?.role === 'viewer';
 
   const agentSchema = useMemo(() => createAgentSchema(dictionary), [dictionary]);
 
@@ -309,6 +312,9 @@ export default function AgentsPage() {
   });
 
   const onSubmit = async (values: AgentFormValues) => {
+    if (isReadOnly) {
+      return;
+    }
     setSubmitting(true);
     try {
       await apiFetch<AgentDto>('/agents', {
@@ -337,6 +343,9 @@ export default function AgentsPage() {
   };
 
   const openEditDialog = (agent: AgentDto) => {
+    if (isReadOnly) {
+      return;
+    }
     setError(null);
     setEditingAgent(agent);
     editForm.reset({
@@ -352,6 +361,9 @@ export default function AgentsPage() {
 
   const handleUpdate = async (values: AgentFormValues) => {
     if (!editingAgent) {
+      return;
+    }
+    if (isReadOnly) {
       return;
     }
     setUpdating(true);
@@ -379,6 +391,9 @@ export default function AgentsPage() {
     if (!deleteTarget) {
       return;
     }
+    if (isReadOnly) {
+      return;
+    }
     setDeleting(true);
     try {
       await apiFetch(`/agents/${deleteTarget.id}`, {
@@ -399,6 +414,9 @@ export default function AgentsPage() {
   };
 
   const triggerAction = async (id: string, action: 'run' | 'stop') => {
+    if (isReadOnly) {
+      return;
+    }
     setActionMap((prev) => ({ ...prev, [id]: true }));
     try {
       await apiFetch(`/agents/${id}/${action}`, {
@@ -431,19 +449,25 @@ export default function AgentsPage() {
           <h1 className="text-2xl font-semibold tracking-tight">{dictionary.agents.title}</h1>
           <p className="text-sm text-muted-foreground">{dictionary.agents.subtitle}</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" /> {dictionary.agents.new}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[520px]">
-            <DialogHeader>
-              <DialogTitle>{dictionary.agents.createTitle}</DialogTitle>
-              <DialogDescription>{dictionary.agents.createDescription}</DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-              <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+        {isReadOnly ? (
+          <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted px-3 py-2 text-xs text-muted-foreground">
+            <Shield className="h-4 w-4" />
+            {dictionary.agents.notices.readOnly}
+          </div>
+        ) : (
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" /> {dictionary.agents.new}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[520px]">
+              <DialogHeader>
+                <DialogTitle>{dictionary.agents.createTitle}</DialogTitle>
+                <DialogDescription>{dictionary.agents.createDescription}</DialogDescription>
+              </DialogHeader>
+              <Form {...form}>
+                <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
                 <FormField
                   control={form.control}
                   name="mode"
@@ -513,7 +537,7 @@ export default function AgentsPage() {
                   />
                 ) : null}
                 <DialogFooter>
-                  <Button type="submit" disabled={submitting}>
+                  <Button type="submit" disabled={submitting || isReadOnly}>
                     {dictionary.agents.buttons.create}
                   </Button>
                 </DialogFooter>
@@ -521,6 +545,7 @@ export default function AgentsPage() {
             </Form>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <Card className="border-border/60">
@@ -565,7 +590,7 @@ export default function AgentsPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            disabled={actionMap[agent.id]}
+                            disabled={isReadOnly || actionMap[agent.id]}
                             onClick={() => triggerAction(agent.id, 'run')}
                           >
                             <Play className="mr-2 h-3 w-3" /> {dictionary.common.buttons.run}
@@ -573,12 +598,17 @@ export default function AgentsPage() {
                           <Button
                             size="sm"
                             variant="secondary"
-                            disabled={actionMap[agent.id]}
+                            disabled={isReadOnly || actionMap[agent.id]}
                             onClick={() => triggerAction(agent.id, 'stop')}
                           >
                             <Square className="mr-2 h-3 w-3" /> {dictionary.common.buttons.stop}
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => openEditDialog(agent)}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openEditDialog(agent)}
+                            disabled={isReadOnly}
+                          >
                             <Pencil className="mr-2 h-3 w-3" /> {dictionary.common.buttons.edit}
                           </Button>
                           <Button
@@ -589,7 +619,7 @@ export default function AgentsPage() {
                               setDeleteTarget(agent);
                               setDeleteDialogOpen(true);
                             }}
-                            disabled={deleting && deleteTarget?.id === agent.id}
+                            disabled={isReadOnly || (deleting && deleteTarget?.id === agent.id)}
                           >
                             <Trash2 className="mr-2 h-3 w-3" /> {dictionary.common.buttons.delete}
                           </Button>
@@ -704,7 +734,7 @@ export default function AgentsPage() {
                 />
               ) : null}
               <DialogFooter>
-                <Button type="submit" disabled={updating}>
+                <Button type="submit" disabled={updating || isReadOnly}>
                   {dictionary.agents.buttons.update}
                 </Button>
               </DialogFooter>
@@ -733,13 +763,13 @@ export default function AgentsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>
+            <AlertDialogCancel disabled={isReadOnly || deleting}>
               {dictionary.common.buttons.cancel}
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleDelete}
-              disabled={deleting}
+              disabled={isReadOnly || deleting}
             >
               {deleting
                 ? dictionary.agents.delete.processing

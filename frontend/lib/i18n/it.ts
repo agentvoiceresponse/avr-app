@@ -123,6 +123,9 @@ export const itDictionary = {
       create: 'Crea agente',
       update: 'Aggiorna agente',
     },
+    notices: {
+      readOnly: 'Solo admin o manager possono gestire gli agenti',
+    },
     delete: {
       title: 'Eliminare questo agente?',
       description: "L'operazione non può essere annullata. Verranno fermati eventuali container associati a {name}.",
@@ -184,6 +187,7 @@ export const itDictionary = {
       processing: 'Eliminazione…',
     },
     notices: {
+      readOnly: 'Solo admin o manager possono gestire i provider',
       noTemplate:
         'Non è ancora disponibile un template guidato per questa tipologia. Verranno salvati solo nome e tipologia.',
       noTemplateEdit: 'Nessun template disponibile per questa tipologia. Puoi comunque aggiornare nome e tipo.',
@@ -389,6 +393,10 @@ export const itDictionary = {
       start: 'Avvia',
       stop: 'Ferma',
       logs: 'Log',
+      pull: 'Aggiorna immagine e riavvia',
+    },
+    notices: {
+      readOnly: 'Solo admin o manager possono gestire i container',
     },
     empty: 'Nessun container trovato.',
     errors: {
@@ -396,6 +404,7 @@ export const itDictionary = {
       start: 'Impossibile avviare il container',
       stop: 'Impossibile fermare il container',
       logs: 'Impossibile recuperare i log',
+      pull: 'Impossibile aggiornare il container',
     },
     logsTitle: 'Log del container',
     status: {

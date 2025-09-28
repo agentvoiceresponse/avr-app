@@ -49,7 +49,8 @@ export class NumbersController {
 
   @Delete(':id')
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.numbersService.remove(id);
+  async remove(@Param('id') id: string): Promise<{ success: true }> {
+    await this.numbersService.remove(id);
+    return { success: true };
   }
 }

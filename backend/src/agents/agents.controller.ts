@@ -60,7 +60,8 @@ export class AgentsController {
 
   @Delete(':id')
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.agentsService.remove(id);
+  async remove(@Param('id') id: string): Promise<{ success: true }> {
+    await this.agentsService.remove(id);
+    return { success: true };
   }
 }

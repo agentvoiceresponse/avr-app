@@ -123,6 +123,9 @@ export const enDictionary = {
       create: 'Create agent',
       update: 'Update agent',
     },
+    notices: {
+      readOnly: 'Only admins or managers can manage agents',
+    },
     delete: {
       title: 'Delete this agent?',
       description: 'This action cannot be undone. Containers linked to {name} will be stopped.',
@@ -184,6 +187,7 @@ export const enDictionary = {
       processing: 'Deleting…',
     },
     notices: {
+      readOnly: 'Only admins or managers can manage providers',
       noTemplate:
         'A guided template is not yet available for this type. Only name and type will be saved.',
       noTemplateEdit: 'No template available for this type. You can still update name and type.',
@@ -387,6 +391,10 @@ export const enDictionary = {
       start: 'Start',
       stop: 'Stop',
       logs: 'Logs',
+      pull: 'Update image & restart',
+    },
+    notices: {
+      readOnly: 'Only admins or managers can control containers',
     },
     empty: 'No containers found.',
     errors: {
@@ -394,6 +402,7 @@ export const enDictionary = {
       start: 'Unable to start container',
       stop: 'Unable to stop container',
       logs: 'Unable to fetch logs',
+      pull: 'Unable to refresh container image',
     },
     logsTitle: 'Container logs',
     status: {

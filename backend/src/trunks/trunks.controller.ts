@@ -44,7 +44,8 @@ export class TrunksController {
 
   @Delete(':id')
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.trunksService.remove(id);
+  async remove(@Param('id') id: string): Promise<{ success: true }> {
+    await this.trunksService.remove(id);
+    return { success: true };
   }
 }
