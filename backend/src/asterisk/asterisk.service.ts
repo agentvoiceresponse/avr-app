@@ -164,6 +164,7 @@ export class AsteriskService {
   private buildNumberBlock(number: PhoneNumber): string {
     const agent = number.agent;
     return [
+      `[${process.env.TENANT || 'demo'}]`,
       `exten => ${number.value},1,NoOp(Number ${number.value} -> Agent ${agent.name ?? agent.id})`,
       ' same => n,Answer()',
       ' same => n,Ringing()',
@@ -188,6 +189,7 @@ export class AsteriskService {
       `[${phone.id}](webrtc-template)`,
       `auth=${phone.id}`,
       `aors=${phone.id}`,
+      `context=${process.env.TENANT || 'demo'}`,
       callerId,
     ].filter(Boolean) as string[];
 
@@ -220,9 +222,10 @@ export class AsteriskService {
     const endpointSection = [
       `[${trunk.id}]`,
       'type=endpoint',
-      'context=from-trunk',
+      `transport=transport-${trunk.transport || 'udp'}`,
+      `context=${process.env.TENANT || 'demo'}`,
       'disallow=all',
-      'allow=ulaw',
+      'allow=gsm,ulaw,alow',
       `auth=${trunk.id}`,
       `aors=${trunk.id}`,
       `outbound_auth=${trunk.id}`,

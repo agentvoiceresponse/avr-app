@@ -33,6 +33,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -43,14 +50,26 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+const TRANSPORT_OPTIONS = ['udp', 'tcp'] as const;
+type TransportValue = (typeof TRANSPORT_OPTIONS)[number];
+const DEFAULT_TRANSPORT: TransportValue = 'udp';
+
+const isTransportValue = (value: string | undefined): value is TransportValue =>
+  !!value && (TRANSPORT_OPTIONS as readonly string[]).includes(value);
+
+const normalizeTransport = (value?: string): TransportValue =>
+  isTransportValue(value) ? value : DEFAULT_TRANSPORT;
+
 interface TrunkDto {
   id: string;
   name: string;
   password: string;
+  transport: 'udp' | 'tcp' | 'tls' | 'wss';
 }
 
 const trunkSchema = z.object({
   name: z.string().min(2, 'Minimo 2 caratteri').max(50, 'Massimo 50 caratteri'),
+  transport: z.enum(TRANSPORT_OPTIONS),
 });
 
 type TrunkFormValues = z.infer<typeof trunkSchema>;
@@ -80,15 +99,23 @@ export default function TrunksPage() {
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
 
   const isReadOnly = user?.role === 'viewer';
+  const transportOptions = TRANSPORT_OPTIONS.map((value) => ({
+    value,
+    label: dictionary.trunks.transportOptions[value],
+  }));
+  const formatTransport = (value: TrunkDto['transport']) => {
+    const labels = dictionary.trunks.transportOptions as Record<string, string>;
+    return labels[value] ?? value.toUpperCase();
+  };
 
   const form = useForm<TrunkFormValues>({
     resolver: zodResolver(trunkSchema),
-    defaultValues: { name: '' },
+    defaultValues: { name: '', transport: DEFAULT_TRANSPORT },
   });
 
   const editForm = useForm<TrunkFormValues>({
     resolver: zodResolver(trunkSchema),
-    defaultValues: { name: '' },
+    defaultValues: { name: '', transport: DEFAULT_TRANSPORT },
   });
 
   const loadTrunks = useCallback(async () => {
@@ -123,8 +150,8 @@ export default function TrunksPage() {
   }, [loadTrunks]);
 
   const resetForms = () => {
-    form.reset({ name: '' });
-    editForm.reset({ name: '' });
+    form.reset({ name: '', transport: DEFAULT_TRANSPORT });
+    editForm.reset({ name: '', transport: DEFAULT_TRANSPORT });
   };
 
   const onSubmit = async (values: TrunkFormValues) => {
@@ -135,14 +162,16 @@ export default function TrunksPage() {
     try {
       await apiFetch<TrunkDto>('/trunks', {
         method: 'POST',
-        body: JSON.stringify({ name: values.name.trim() }),
+        body: JSON.stringify({ name: values.name.trim(), transport: values.transport }),
       });
       setDialogOpen(false);
       resetForms();
       await loadTrunks();
     } catch (err) {
       if (err instanceof ApiError) {
-        form.setError('name', { message: err.message });
+        const messageLower = err.message.toLowerCase();
+        const field: keyof TrunkFormValues = messageLower.includes('transport') ? 'transport' : 'name';
+        form.setError(field, { message: err.message });
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -159,7 +188,7 @@ export default function TrunksPage() {
     }
     setError(null);
     setEditingTrunk(trunk);
-    editForm.reset({ name: trunk.name });
+    editForm.reset({ name: trunk.name, transport: normalizeTransport(trunk.transport) });
     setEditDialogOpen(true);
   };
 
@@ -174,7 +203,7 @@ export default function TrunksPage() {
     try {
       await apiFetch<TrunkDto>(`/trunks/${editingTrunk.id}`, {
         method: 'PATCH',
-        body: JSON.stringify({ name: values.name.trim() }),
+        body: JSON.stringify({ name: values.name.trim(), transport: values.transport }),
       });
       setEditDialogOpen(false);
       setEditingTrunk(null);
@@ -182,7 +211,9 @@ export default function TrunksPage() {
       await loadTrunks();
     } catch (err) {
       if (err instanceof ApiError) {
-        editForm.setError('name', { message: err.message });
+        const messageLower = err.message.toLowerCase();
+        const field: keyof TrunkFormValues = messageLower.includes('transport') ? 'transport' : 'name';
+        editForm.setError(field, { message: err.message });
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -264,6 +295,30 @@ export default function TrunksPage() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="transport"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{dictionary.trunks.fields.transport}</FormLabel>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <SelectTrigger>
+                              <SelectValue placeholder={dictionary.trunks.placeholders.transport} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {transportOptions.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <DialogFooter>
                     <Button type="submit" disabled={submitting || isReadOnly}>
                       {submitting ? dictionary.trunks.buttons.creating : dictionary.trunks.buttons.create}
@@ -293,6 +348,7 @@ export default function TrunksPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>{dictionary.trunks.table.name}</TableHead>
+                    <TableHead>{dictionary.trunks.table.transport}</TableHead>
                     <TableHead>{dictionary.trunks.table.username}</TableHead>
                     <TableHead>{dictionary.trunks.table.password}</TableHead>
                     <TableHead className="text-right">{dictionary.trunks.table.actions}</TableHead>
@@ -302,6 +358,11 @@ export default function TrunksPage() {
                   {trunks.map((trunk) => (
                     <TableRow key={trunk.id}>
                       <TableCell className="font-medium">{trunk.name}</TableCell>
+                      <TableCell>
+                        <code className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
+                          {formatTransport(trunk.transport)}
+                        </code>
+                      </TableCell>
                       <TableCell>
                         <code className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
                           {trunk.id}
@@ -397,6 +458,30 @@ export default function TrunksPage() {
                     <FormLabel>{dictionary.trunks.fields.name}</FormLabel>
                     <FormControl>
                       <Input placeholder="es. company-trunk" autoComplete="off" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="transport"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{dictionary.trunks.fields.transport}</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={dictionary.trunks.placeholders.transport} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {transportOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

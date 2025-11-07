@@ -195,11 +195,14 @@ export const itDictionary = {
         "Configurazione per l'agente STS. Il container userà l'immagine indicata e valorizzerà le variabili d'ambiente.",
     },
     fieldsExtra: {
-      openaiApiKey: 'OPENAI_API_KEY',
-      openaiModel: 'OPENAI_MODEL',
-      openaiInstructions: 'OPENAI_INSTRUCTIONS',
-      elevenlabsAgentId: 'ELEVENLABS_AGENT_ID',
-      elevenlabsApiKey: 'ELEVENLABS_API_KEY',
+      openaiApiKey: 'API key OpenAI',
+      openaiModel: 'Modello OpenAI',
+      openaiInstructions: 'Istruzioni OpenAI',
+      elevenlabsAgentId: 'ID agente ElevenLabs',
+      elevenlabsApiKey: 'API key ElevenLabs',
+      geminiApiKey: 'API key Gemini',
+      geminiModel: 'Modello Gemini',
+      geminiInstructions: 'Istruzioni Gemini',
     },
     templates: {
       stsOpenai: {
@@ -210,10 +213,15 @@ export const itDictionary = {
         label: 'ElevenLabs Speech-to-Speech',
         description: "Integra il runtime ElevenLabs. È necessario indicare l'Agent ID e la chiave API.",
       },
+      stsGemini: {
+        label: 'Gemini Speech-to-Speech',
+        description: 'Container AVR basato su Google Gemini. Richiede API key e modello supportato.',
+      },
     },
     placeholders: {
       openaiInstructions: 'Istruzioni opzionali per guidare il comportamento',
-      name: 'es. sts-elevenlabs',
+      geminiInstructions: 'Istruzioni opzionali per guidare il comportamento',
+      name: 'es. avr-sts-nome-provider',
     },
     validation: {
       nameRequired: 'Inserisci il nome',
@@ -424,9 +432,18 @@ export const itDictionary = {
     editDescription: 'Rinomina il trunk; le credenziali restano invariate.',
     fields: {
       name: 'Nome',
+      transport: 'Trasporto',
+    },
+    placeholders: {
+      transport: 'Seleziona trasporto',
+    },
+    transportOptions: {
+      udp: 'UDP',
+      tcp: 'TCP',
     },
     table: {
       name: 'Nome',
+      transport: 'Trasporto',
       username: 'Username',
       password: 'Password',
       actions: 'Azioni',

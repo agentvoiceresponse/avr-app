@@ -1,6 +1,6 @@
 {
     "name": "avr-app",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "author": "Agent Voice Response <info@agentvoiceresponse.com>",
     "description": "Agent Voice Response App",
     "keywords": ["avr", "agentvoiceresponse", "voicebot", "app"],
