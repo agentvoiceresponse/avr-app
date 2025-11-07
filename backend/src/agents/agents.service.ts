@@ -283,6 +283,10 @@ export class AgentsService {
     env.add(`PROVIDER_${type}_NAME=${provider.name}`);
     env.add(`PROVIDER_${type}_TYPE=${provider.type}`);
     env.add(`PORT=${port}`);
+
+    if (type === ProviderType.STS || type === ProviderType.LLM) {
+      env.add(`AMI_URL=${process.env.AMI_URL}`);
+    }
     return Array.from(env);
   }
 
