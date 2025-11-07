@@ -23,6 +23,7 @@ services:
       - ARI_PASSWORD=
       - TENANT=demo
       - TOOLS_DIR=/home/[user]/avr-infra/tools
+      - AMI_URL=http://avr-ami:6006
     volumes:
       - ./data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock

@@ -225,7 +225,7 @@ export class AsteriskService {
       `transport=transport-${trunk.transport || 'udp'}`,
       `context=${process.env.TENANT || 'demo'}`,
       'disallow=all',
-      'allow=gsm,ulaw,alow',
+      'allow=gsm,ulaw,alaw',
       `auth=${trunk.id}`,
       `aors=${trunk.id}`,
       `outbound_auth=${trunk.id}`,
