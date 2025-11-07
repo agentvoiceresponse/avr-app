@@ -166,6 +166,9 @@ export class AgentsService {
         containerName,
         image,
         providerEnv,
+        [
+          `${process.env.TOOLS_DIR}:/usr/src/app/tools`
+        ]
       );
     }
 

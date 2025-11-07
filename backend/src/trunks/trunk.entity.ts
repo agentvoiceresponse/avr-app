@@ -10,4 +10,7 @@ export class Trunk {
 
   @Column()
   password: string;
+
+  @Column({ default: 'udp' })
+  transport: 'udp' | 'tcp' | 'tls' | 'wss';
 }

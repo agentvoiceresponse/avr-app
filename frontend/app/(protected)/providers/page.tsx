@@ -119,25 +119,25 @@ export default function ProvidersPage() {
       description: dictionary.providers.templates.stsOpenai.description,
       defaultImage: 'agentvoiceresponse/avr-sts-openai',
       defaults: {
-        OPENAI_MODEL: 'gpt-4o-mini',
+        OPENAI_MODEL: 'gpt-4o-realtime-preview',
       },
       fields: [
         {
           key: 'OPENAI_API_KEY',
-          label: 'OPENAI_API_KEY',
+          label: dictionary.providers.fieldsExtra.openaiApiKey,
           placeholder: 'sk-...',
           required: true,
           inputType: 'password',
         },
         {
           key: 'OPENAI_MODEL',
-          label: 'OPENAI_MODEL',
+          label: dictionary.providers.fieldsExtra.openaiModel,
           placeholder: 'gpt-4o-realtime-preview',
           required: true,
         },
         {
           key: 'OPENAI_INSTRUCTIONS',
-          label: 'OPENAI_INSTRUCTIONS',
+          label: dictionary.providers.fieldsExtra.openaiInstructions,
           placeholder: dictionary.providers.placeholders.openaiInstructions,
           widget: 'textarea',
         },
@@ -152,13 +152,13 @@ export default function ProvidersPage() {
       fields: [
         {
           key: 'ELEVENLABS_AGENT_ID',
-          label: 'ELEVENLABS_AGENT_ID',
+          label: dictionary.providers.fieldsExtra.elevenlabsAgentId,
           placeholder: 'agent_...',
           required: true,
         },
         {
           key: 'ELEVENLABS_API_KEY',
-          label: 'ELEVENLABS_API_KEY',
+          label: dictionary.providers.fieldsExtra.elevenlabsApiKey,
           placeholder: 'elevenlabs-api-key',
           required: true,
           inputType: 'password',
@@ -605,68 +605,43 @@ export default function ProvidersPage() {
                 <ServerCog className="mr-2 h-4 w-4" /> {dictionary.providers.buttons.new}
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[520px]">
-              <DialogHeader>
-                <DialogTitle>{dictionary.providers.createTitle}</DialogTitle>
-                <DialogDescription>{dictionary.providers.createDescription}</DialogDescription>
-              </DialogHeader>
-              <Form {...form}>
-                <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{dictionary.providers.fields.name}</FormLabel>
-                      <FormControl>
-                        <Input placeholder={dictionary.providers.placeholders.name} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{dictionary.providers.fields.type}</FormLabel>
-                      <FormControl>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <SelectTrigger>
-                            <SelectValue placeholder={dictionary.common.none} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ASR">ASR</SelectItem>
-                            <SelectItem value="LLM">LLM</SelectItem>
-                            <SelectItem value="TTS">TTS</SelectItem>
-                            <SelectItem value="STS">STS</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {createTemplates.length > 0 ? (
+          <DialogContent className="w-[1400px] max-w-[95vw] max-h-[90vh] overflow-hidden p-0 flex">
+            <Form {...form}>
+              <form className="flex max-h-[90vh] flex-1 flex-col" onSubmit={form.handleSubmit(onSubmit)}>
+                <DialogHeader className="sticky top-0 z-10 border-b border-border/60 bg-background px-6 py-4">
+                  <DialogTitle>{dictionary.providers.createTitle}</DialogTitle>
+                  <DialogDescription>{dictionary.providers.createDescription}</DialogDescription>
+                </DialogHeader>
+                <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
                   <FormField
                     control={form.control}
-                    name="templateId"
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Template</FormLabel>
+                        <FormLabel>{dictionary.providers.fields.name}</FormLabel>
+                        <FormControl>
+                          <Input placeholder={dictionary.providers.placeholders.name} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{dictionary.providers.fields.type}</FormLabel>
                         <FormControl>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <SelectTrigger>
                               <SelectValue placeholder={dictionary.common.none} />
                             </SelectTrigger>
                             <SelectContent>
-                              {createTemplates.map((template) => (
-                                <SelectItem key={template.id} value={template.id}>
-                                  {template.label}
-                                </SelectItem>
-                              ))}
+                              <SelectItem value="ASR">ASR</SelectItem>
+                              <SelectItem value="LLM">LLM</SelectItem>
+                              <SelectItem value="TTS">TTS</SelectItem>
+                              <SelectItem value="STS">STS</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -674,64 +649,96 @@ export default function ProvidersPage() {
                       </FormItem>
                     )}
                   />
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    {dictionary.providers.notices.noTemplate}
-                  </p>
-                )}
 
-                {createSelectedTemplate ? (
-                  <div className="space-y-4 rounded-md border border-dashed border-border/60 p-4">
-                    <p className="text-sm text-muted-foreground">{createSelectedTemplate.description}</p>
+                  {createTemplates.length > 0 ? (
                     <FormField
                       control={form.control}
-                      name="image"
+                      name="templateId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{dictionary.providers.fields.image}</FormLabel>
+                          <FormLabel>Template</FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder={createSelectedTemplate.defaultImage ?? 'repository:tag'}
-                              {...field}
-                            />
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder={dictionary.common.none} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {createTemplates.map((template) => (
+                                  <SelectItem key={template.id} value={template.id}>
+                                    {template.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    {createSelectedTemplate.fields.map((fieldConfig) => (
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {dictionary.providers.notices.noTemplate}
+                    </p>
+                  )}
+
+                  {createSelectedTemplate ? (
+                    <div className="space-y-4 rounded-md border border-dashed border-border/60 p-4">
+                      <p className="text-sm text-muted-foreground">
+                        {createSelectedTemplate.description}
+                      </p>
                       <FormField
-                        key={fieldConfig.key}
                         control={form.control}
-                        name={`env.${fieldConfig.key}` as const}
+                        name="image"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>
-                              {fieldConfig.label}
-                              {fieldConfig.required ? <span className="text-destructive"> *</span> : null}
-                            </FormLabel>
+                            <FormLabel>{dictionary.providers.fields.image}</FormLabel>
                             <FormControl>
-                              {fieldConfig.widget === 'textarea' ? (
-                                <Textarea placeholder={fieldConfig.placeholder} {...field} />
-                              ) : (
-                                <Input
-                                  type={fieldConfig.inputType === 'password' ? 'password' : 'text'}
-                                  placeholder={fieldConfig.placeholder}
-                                  {...field}
-                                />
-                              )}
+                              <Input
+                                placeholder={createSelectedTemplate.defaultImage ?? 'repository:tag'}
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                    ))}
-                  </div>
-                ) : null}
-
-                <DialogFooter>
+                      {createSelectedTemplate.fields.map((fieldConfig) => (
+                        <FormField
+                          key={fieldConfig.key}
+                          control={form.control}
+                          name={`env.${fieldConfig.key}` as const}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                {fieldConfig.label}
+                                {fieldConfig.required ? (
+                                  <span className="text-destructive"> *</span>
+                                ) : null}
+                              </FormLabel>
+                              <FormControl>
+                                {fieldConfig.widget === 'textarea' ? (
+                                  <Textarea placeholder={fieldConfig.placeholder} {...field} />
+                                ) : (
+                                  <Input
+                                    type={fieldConfig.inputType === 'password' ? 'password' : 'text'}
+                                    placeholder={fieldConfig.placeholder}
+                                    {...field}
+                                  />
+                                )}
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+                <DialogFooter className="sticky bottom-0 z-10 border-t border-border/60 bg-background px-6 py-4">
                   <Button type="submit" disabled={submitting || isReadOnly}>
-                    {submitting ? dictionary.providers.buttons.saving : dictionary.providers.buttons.create}
+                    {submitting
+                      ? dictionary.providers.buttons.saving
+                      : dictionary.providers.buttons.create}
                   </Button>
                 </DialogFooter>
               </form>
@@ -824,68 +831,43 @@ export default function ProvidersPage() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-[520px]">
-          <DialogHeader>
-            <DialogTitle>{dictionary.providers.editTitle}</DialogTitle>
-            <DialogDescription>{dictionary.providers.editDescription}</DialogDescription>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-[520px] max-h-[90vh] overflow-hidden p-0 flex">
           <Form {...editForm}>
-            <form className="space-y-4" onSubmit={editForm.handleSubmit(handleUpdate)}>
-              <FormField
-                control={editForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{dictionary.providers.fields.name}</FormLabel>
-                    <FormControl>
-                        <Input placeholder={dictionary.providers.placeholders.name} {...field} disabled />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={editForm.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{dictionary.providers.fields.type}</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value} disabled>
-                        <SelectTrigger>
-                          <SelectValue placeholder={dictionary.common.none} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="ASR">ASR</SelectItem>
-                          <SelectItem value="LLM">LLM</SelectItem>
-                          <SelectItem value="TTS">TTS</SelectItem>
-                          <SelectItem value="STS">STS</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {editTemplates.length > 0 ? (
+            <form className="flex max-h-[90vh] flex-1 flex-col" onSubmit={editForm.handleSubmit(handleUpdate)}>
+              <DialogHeader className="sticky top-0 z-10 border-b border-border/60 bg-background px-6 py-4">
+                <DialogTitle>{dictionary.providers.editTitle}</DialogTitle>
+                <DialogDescription>{dictionary.providers.editDescription}</DialogDescription>
+              </DialogHeader>
+              <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
                 <FormField
                   control={editForm.control}
-                  name="templateId"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{dictionary.providers.fields.template}</FormLabel>
+                      <FormLabel>{dictionary.providers.fields.name}</FormLabel>
+                      <FormControl>
+                          <Input placeholder={dictionary.providers.placeholders.name} {...field} disabled />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{dictionary.providers.fields.type}</FormLabel>
                       <FormControl>
                         <Select onValueChange={field.onChange} value={field.value} disabled>
                           <SelectTrigger>
                             <SelectValue placeholder={dictionary.common.none} />
                           </SelectTrigger>
                           <SelectContent>
-                            {editTemplates.map((template) => (
-                              <SelectItem key={template.id} value={template.id}>
-                                {template.label}
-                              </SelectItem>
-                            ))}
+                            <SelectItem value="ASR">ASR</SelectItem>
+                            <SelectItem value="LLM">LLM</SelectItem>
+                            <SelectItem value="TTS">TTS</SelectItem>
+                            <SelectItem value="STS">STS</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -893,63 +875,89 @@ export default function ProvidersPage() {
                     </FormItem>
                   )}
                 />
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  {dictionary.providers.notices.noTemplateEdit}
-                </p>
-              )}
 
-              {editSelectedTemplate ? (
-                <div className="space-y-4 rounded-md border border-dashed border-border/60 p-4">
-                  <p className="text-sm text-muted-foreground">{editSelectedTemplate.description}</p>
+                {editTemplates.length > 0 ? (
                   <FormField
                     control={editForm.control}
-                    name="image"
+                    name="templateId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{dictionary.providers.fields.image}</FormLabel>
+                        <FormLabel>{dictionary.providers.fields.template}</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder={editSelectedTemplate.defaultImage ?? 'repository:tag'}
-                            {...field}
-                            disabled
-                          />
+                          <Select onValueChange={field.onChange} value={field.value} disabled>
+                            <SelectTrigger>
+                              <SelectValue placeholder={dictionary.common.none} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {editTemplates.map((template) => (
+                                <SelectItem key={template.id} value={template.id}>
+                                  {template.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  {editSelectedTemplate.fields.map((fieldConfig) => (
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    {dictionary.providers.notices.noTemplateEdit}
+                  </p>
+                )}
+
+                {editSelectedTemplate ? (
+                  <div className="space-y-4 rounded-md border border-dashed border-border/60 p-4">
+                    <p className="text-sm text-muted-foreground">{editSelectedTemplate.description}</p>
                     <FormField
-                      key={fieldConfig.key}
                       control={editForm.control}
-                      name={`env.${fieldConfig.key}` as const}
+                      name="image"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>
-                            {fieldConfig.label}
-                            {fieldConfig.required ? <span className="text-destructive"> *</span> : null}
-                          </FormLabel>
+                          <FormLabel>{dictionary.providers.fields.image}</FormLabel>
                           <FormControl>
-                            {fieldConfig.widget === 'textarea' ? (
-                              <Textarea placeholder={fieldConfig.placeholder} {...field} />
-                            ) : (
-                              <Input
-                                type={fieldConfig.inputType === 'password' ? 'password' : 'text'}
-                                placeholder={fieldConfig.placeholder}
-                                {...field}
-                              />
-                            )}
+                            <Input
+                              placeholder={editSelectedTemplate.defaultImage ?? 'repository:tag'}
+                              {...field}
+                              disabled
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                  ))}
-                </div>
-              ) : null}
-
-              <DialogFooter>
+                    {editSelectedTemplate.fields.map((fieldConfig) => (
+                      <FormField
+                        key={fieldConfig.key}
+                        control={editForm.control}
+                        name={`env.${fieldConfig.key}` as const}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              {fieldConfig.label}
+                              {fieldConfig.required ? <span className="text-destructive"> *</span> : null}
+                            </FormLabel>
+                            <FormControl>
+                              {fieldConfig.widget === 'textarea' ? (
+                                <Textarea placeholder={fieldConfig.placeholder} {...field} />
+                              ) : (
+                                <Input
+                                  type={fieldConfig.inputType === 'password' ? 'password' : 'text'}
+                                  placeholder={fieldConfig.placeholder}
+                                  {...field}
+                                />
+                              )}
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+              <DialogFooter className="sticky bottom-0 z-10 border-t border-border/60 bg-background px-6 py-4">
                 <Button type="submit" disabled={updating || isReadOnly}>
                   {updating ? dictionary.providers.buttons.saving : dictionary.providers.buttons.update}
                 </Button>

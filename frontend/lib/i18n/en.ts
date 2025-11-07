@@ -195,11 +195,11 @@ export const enDictionary = {
         'Configuration for STS agent. The container will use the indicated image and environment variables.',
     },
     fieldsExtra: {
-      openaiApiKey: 'OPENAI_API_KEY',
-      openaiModel: 'OPENAI_MODEL',
-      openaiInstructions: 'OPENAI_INSTRUCTIONS',
-      elevenlabsAgentId: 'ELEVENLABS_AGENT_ID',
-      elevenlabsApiKey: 'ELEVENLABS_API_KEY',
+      openaiApiKey: 'OpenAI API key',
+      openaiModel: 'OpenAI model',
+      openaiInstructions: 'OpenAI instructions',
+      elevenlabsAgentId: 'ElevenLabs agent ID',
+      elevenlabsApiKey: 'ElevenLabs API key',
     },
     templates: {
       stsOpenai: {
@@ -213,7 +213,7 @@ export const enDictionary = {
     },
     placeholders: {
       openaiInstructions: 'Optional instructions to guide behavior',
-      name: 'e.g. sts-elevenlabs',
+      name: 'e.g. avr-sts-provider-name',
     },
     validation: {
       nameRequired: 'Enter the name',
@@ -422,9 +422,18 @@ export const enDictionary = {
     editDescription: 'Rename the trunk; credentials remain unchanged.',
     fields: {
       name: 'Name',
+      transport: 'Transport',
+    },
+    placeholders: {
+      transport: 'Select transport',
+    },
+    transportOptions: {
+      udp: 'UDP',
+      tcp: 'TCP',
     },
     table: {
       name: 'Name',
+      transport: 'Transport',
       username: 'Username',
       password: 'Password',
       actions: 'Actions',

@@ -188,6 +188,7 @@ export class AsteriskService {
       `[${phone.id}](webrtc-template)`,
       `auth=${phone.id}`,
       `aors=${phone.id}`,
+      `context=${process.env.TENANT || 'demo'}`,
       callerId,
     ].filter(Boolean) as string[];
 
@@ -220,9 +221,10 @@ export class AsteriskService {
     const endpointSection = [
       `[${trunk.id}]`,
       'type=endpoint',
-      'context=from-trunk',
+      `transport=transport-${trunk.transport || 'udp'}`,
+      `context=${process.env.TENANT || 'demo'}`,
       'disallow=all',
-      'allow=ulaw',
+      'allow=gsm,ulaw,alow',
       `auth=${trunk.id}`,
       `aors=${trunk.id}`,
       `outbound_auth=${trunk.id}`,

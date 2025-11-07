@@ -21,6 +21,7 @@ export class DockerService {
     name: string,
     image: string,
     env: string[] = [],
+    binds: string[] = [],
   ): Promise<string> {
     await this.pullImage(image);
     const existing = await this.findContainerByName(name);
@@ -43,6 +44,9 @@ export class DockerService {
         EndpointsConfig: {
           avr: {},
         },
+      },
+      HostConfig: {
+        Binds: binds,
       },
     });
     await container.start();

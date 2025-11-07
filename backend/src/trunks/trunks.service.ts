@@ -35,7 +35,9 @@ export class TrunksService {
 
     const password = randomBytes(12).toString('base64url');
 
-    const trunk = this.trunksRepository.create({ name, password });
+    const transport = dto.transport ?? 'udp';
+
+    const trunk = this.trunksRepository.create({ name, password, transport });
     const saved = await this.trunksRepository.save(trunk);
 
     try {
@@ -74,6 +76,10 @@ export class TrunksService {
         throw new ConflictException('Trunk name already exists');
       }
       trunk.name = newName;
+    }
+
+    if (dto.transport && dto.transport !== trunk.transport) {
+      trunk.transport = dto.transport;
     }
 
     const saved = await this.trunksRepository.save(trunk);
