@@ -200,6 +200,9 @@ export const enDictionary = {
       openaiInstructions: 'OpenAI instructions',
       elevenlabsAgentId: 'ElevenLabs agent ID',
       elevenlabsApiKey: 'ElevenLabs API key',
+      geminiApiKey: 'Gemini API key',
+      geminiModel: 'Gemini model',
+      geminiInstructions: 'Gemini instructions',
     },
     templates: {
       stsOpenai: {
@@ -210,9 +213,14 @@ export const enDictionary = {
         label: 'ElevenLabs Speech-to-Speech',
         description: 'Integrates the ElevenLabs runtime. Provide Agent ID and API key.',
       },
+      stsGemini: {
+        label: 'Gemini Speech-to-Speech',
+        description: 'AVR container powered by Google Gemini. Requires API key and supported model.',
+      },
     },
     placeholders: {
       openaiInstructions: 'Optional instructions to guide behavior',
+      geminiInstructions: 'Optional instructions to guide behavior',
       name: 'e.g. avr-sts-provider-name',
     },
     validation: {

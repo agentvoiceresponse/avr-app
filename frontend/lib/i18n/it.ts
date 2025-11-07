@@ -200,6 +200,9 @@ export const itDictionary = {
       openaiInstructions: 'Istruzioni OpenAI',
       elevenlabsAgentId: 'ID agente ElevenLabs',
       elevenlabsApiKey: 'API key ElevenLabs',
+      geminiApiKey: 'API key Gemini',
+      geminiModel: 'Modello Gemini',
+      geminiInstructions: 'Istruzioni Gemini',
     },
     templates: {
       stsOpenai: {
@@ -210,9 +213,14 @@ export const itDictionary = {
         label: 'ElevenLabs Speech-to-Speech',
         description: "Integra il runtime ElevenLabs. È necessario indicare l'Agent ID e la chiave API.",
       },
+      stsGemini: {
+        label: 'Gemini Speech-to-Speech',
+        description: 'Container AVR basato su Google Gemini. Richiede API key e modello supportato.',
+      },
     },
     placeholders: {
       openaiInstructions: 'Istruzioni opzionali per guidare il comportamento',
+      geminiInstructions: 'Istruzioni opzionali per guidare il comportamento',
       name: 'es. avr-sts-nome-provider',
     },
     validation: {

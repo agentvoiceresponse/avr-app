@@ -164,6 +164,7 @@ export class AsteriskService {
   private buildNumberBlock(number: PhoneNumber): string {
     const agent = number.agent;
     return [
+      `[${process.env.TENANT || 'demo'}]`,
       `exten => ${number.value},1,NoOp(Number ${number.value} -> Agent ${agent.name ?? agent.id})`,
       ' same => n,Answer()',
       ' same => n,Ringing()',

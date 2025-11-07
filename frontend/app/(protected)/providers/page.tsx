@@ -165,6 +165,37 @@ export default function ProvidersPage() {
         },
       ],
     },
+    {
+      id: 'sts-gemini',
+      type: 'STS',
+      label: dictionary.providers.templates.stsGemini.label,
+      description: dictionary.providers.templates.stsGemini.description,
+      defaultImage: 'agentvoiceresponse/avr-sts-gemini',
+      defaults: {
+        GEMINI_MODEL: 'gemini-2.5-flash-preview-native-audio-dialog',
+      },
+      fields: [
+        {
+          key: 'GEMINI_API_KEY',
+          label: dictionary.providers.fieldsExtra.geminiApiKey,
+          placeholder: 'gk-...',
+          required: true,
+          inputType: 'password',
+        },
+        {
+          key: 'GEMINI_MODEL',
+          label: dictionary.providers.fieldsExtra.geminiModel,
+          placeholder: 'gemini-2.5-flash-preview-native-audio-dialog',
+          required: true,
+        },
+        {
+          key: 'GEMINI_INSTRUCTIONS',
+          label: dictionary.providers.fieldsExtra.geminiInstructions,
+          placeholder: dictionary.providers.placeholders.geminiInstructions,
+          widget: 'textarea',
+        },
+      ],
+    },
   ];
 
   const createProviderSchema = (dict: Dictionary, templates: ProviderTemplate[]) => z
