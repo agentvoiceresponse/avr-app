@@ -117,11 +117,20 @@ export class AgentsService {
   }
 
   async remove(id: string): Promise<void> {
+    const agent = await this.agentRepository.findOne({ where: { id } });
+    if (!agent) {
+      throw new NotFoundException('Agent not found');
+    }
+    const names = this.getContainerNames(agent.id, agent.mode);
+    for (const name of names) {
+      await this.dockerService.stopContainer(name);
+    }
+    // TODO: remove phone related to agent from asterisk
+
     const result = await this.agentRepository.delete({ id });
     if (!result.affected) {
       throw new NotFoundException('Agent not found');
     }
-    // TODO: remove phone related to agent from asterisk
   }
 
   async runAgent(id: string, runAgentDto: RunAgentDto) {
@@ -244,15 +253,31 @@ export class AgentsService {
     return Array.from(envSet);
   }
 
+  private isValidUrl(str) {
+    try {
+      new URL(str);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   private extendEnv(
     baseEnv: string[],
     provider: Provider,
     type: ProviderType,
     port?: number,
   ): string[] {
-    const providerEnv = Object.entries(provider.config?.env ?? {}).map(
-      ([key, value]) => `${key}=${value}`,
-    );
+    const providerEnv = Object.entries(provider.config?.env ?? {}).map(([key, value]) => {
+      switch (key) {
+        case 'OPENAI_INSTRUCTIONS':
+          return `${this.isValidUrl(value) ? 'OPENAI_URL_INSTRUCTIONS' : 'OPENAI_INSTRUCTIONS'}=${value}`;
+        case 'GEMINI_INSTRUCTIONS':
+          return `${this.isValidUrl(value) ? 'GEMINI_URL_INSTRUCTIONS' : 'GEMINI_INSTRUCTIONS'}=${value}`;
+        default:
+          return `${key}=${value}`;
+      }
+    });
     const env = new Set([...baseEnv, ...providerEnv]);
     env.add(`PROVIDER_${type}_ID=${provider.id}`);
     env.add(`PROVIDER_${type}_NAME=${provider.name}`);
