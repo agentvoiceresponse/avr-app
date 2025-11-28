@@ -165,10 +165,11 @@ export class AsteriskService {
     const agent = number.agent;
     return [
       `[${process.env.TENANT || 'demo'}]`,
-      `exten => ${number.value},1,NoOp(Number ${number.value} -> Agent ${agent.name ?? agent.id})`,
+      `exten => ${number.value},1,NoOp(Exten ${number.value} -> Agent ${agent.name ?? agent.id})`,
       ' same => n,Answer()',
       ' same => n,Ringing()',
       ' same => n,Wait(1)',
+      ' same => n,Set(AVR_NUMBER=${CALLERID(num)})',
       " same => n,Set(UUID=${SHELL(uuidgen | tr -d '\\n')})",
       ' same => n,Dial(AudioSocket/avr-core-' +
         agent.id +
@@ -214,11 +215,6 @@ export class AsteriskService {
   }
 
   private buildTrunkBlock(trunk: Trunk): string {
-    const callerName = trunk.name?.replace(/"/g, '') ?? '';
-    const callerId = callerName
-      ? `callerid="${callerName}" <${trunk.id}>`
-      : undefined;
-
     const endpointSection = [
       `[${trunk.id}]`,
       'type=endpoint',
@@ -229,7 +225,10 @@ export class AsteriskService {
       `auth=${trunk.id}`,
       `aors=${trunk.id}`,
       `outbound_auth=${trunk.id}`,
-      callerId,
+      `trust_id_inbound=yes`,
+      `trust_id_outbound=yes`,
+      `send_pai=yes`,
+      `send_rpid=yes`,
     ].filter(Boolean) as string[];
 
     const authSection = [
