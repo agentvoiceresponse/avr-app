@@ -197,6 +197,7 @@ export const enDictionary = {
     fieldsExtra: {
       openaiApiKey: 'OpenAI API key',
       openaiModel: 'OpenAI model',
+      openaiVoice: 'OpenAI voice',
       openaiInstructions: 'OpenAI instructions',
       elevenlabsAgentId: 'ElevenLabs agent ID',
       elevenlabsApiKey: 'ElevenLabs API key',
@@ -220,6 +221,7 @@ export const enDictionary = {
     },
     placeholders: {
       openaiInstructions: 'Optional instructions to guide behavior',
+      openaiVoice: 'e.g. alloy',
       geminiInstructions: 'Optional instructions to guide behavior',
       name: 'e.g. avr-sts-provider-name',
     },
@@ -431,9 +433,11 @@ export const enDictionary = {
     fields: {
       name: 'Name',
       transport: 'Transport',
+      codecs: 'Codecs',
     },
     placeholders: {
       transport: 'Select transport',
+      codecs: 'ulaw,alaw',
     },
     transportOptions: {
       udp: 'UDP',
@@ -442,6 +446,7 @@ export const enDictionary = {
     table: {
       name: 'Name',
       transport: 'Transport',
+      codecs: 'Codecs',
       username: 'Username',
       password: 'Password',
       actions: 'Actions',
@@ -456,6 +461,12 @@ export const enDictionary = {
     },
     notices: {
       readOnly: 'Only admins or managers can manage trunks',
+    },
+    validation: {
+      nameMin: 'Enter at least 2 characters',
+      nameMax: 'Enter at most 50 characters',
+      codecsRequired: 'Enter at least one codec, comma-separated in priority order',
+      codecsFormat: 'Use comma-separated codec names (letters, numbers, . _ -)',
     },
     errors: {
       load: 'Unable to load trunks',

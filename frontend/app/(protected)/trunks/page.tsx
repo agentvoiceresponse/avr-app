@@ -1,13 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useState, type MouseEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PlusCircle, Pencil, Trash2, Shield, Eye, EyeOff } from 'lucide-react';
 import { apiFetch, ApiError, type PaginatedResponse } from '@/lib/api';
-import { useI18n } from '@/lib/i18n';
+import { useI18n, type Dictionary } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,6 +53,41 @@ import {
 const TRANSPORT_OPTIONS = ['udp', 'tcp'] as const;
 type TransportValue = (typeof TRANSPORT_OPTIONS)[number];
 const DEFAULT_TRANSPORT: TransportValue = 'udp';
+const CODECS_DEFAULT = 'ulaw,alaw';
+const CODEC_TOKEN_REGEX = /^[a-zA-Z0-9_.-]+$/;
+
+const parseCodecs = (value: string): string[] =>
+  value
+    .split(',')
+    .map((codec) => codec.trim())
+    .filter(Boolean);
+
+const normalizeCodecsValue = (value?: string): string => {
+  const codecs = parseCodecs(value ?? '');
+  return codecs.length > 0 ? codecs.join(',') : CODECS_DEFAULT;
+};
+
+const makeTrunkSchema = (dict: Dictionary) =>
+  z.object({
+    name: z
+      .string()
+      .min(2, dict.trunks.validation.nameMin)
+      .max(50, dict.trunks.validation.nameMax),
+    transport: z.enum(TRANSPORT_OPTIONS),
+    codecs: z
+      .string()
+      .transform((val) => val.trim())
+      .refine((val) => parseCodecs(val).length > 0, {
+        message: dict.trunks.validation.codecsRequired,
+      })
+      .refine(
+        (val) => parseCodecs(val).every((codec) => CODEC_TOKEN_REGEX.test(codec)),
+        {
+          message: dict.trunks.validation.codecsFormat,
+        },
+      )
+      .transform((val) => normalizeCodecsValue(val)),
+  });
 
 const isTransportValue = (value: string | undefined): value is TransportValue =>
   !!value && (TRANSPORT_OPTIONS as readonly string[]).includes(value);
@@ -65,18 +100,15 @@ interface TrunkDto {
   name: string;
   password: string;
   transport: 'udp' | 'tcp' | 'tls' | 'wss';
+  codecs?: string;
 }
 
-const trunkSchema = z.object({
-  name: z.string().min(2, 'Minimo 2 caratteri').max(50, 'Massimo 50 caratteri'),
-  transport: z.enum(TRANSPORT_OPTIONS),
-});
-
-type TrunkFormValues = z.infer<typeof trunkSchema>;
+type TrunkFormValues = z.infer<ReturnType<typeof makeTrunkSchema>>;
 
 export default function TrunksPage() {
   const { dictionary } = useI18n();
   const { user } = useAuth();
+  const trunkSchema = useMemo(() => makeTrunkSchema(dictionary), [dictionary]);
   const [trunks, setTrunks] = useState<TrunkDto[]>([]);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -110,12 +142,12 @@ export default function TrunksPage() {
 
   const form = useForm<TrunkFormValues>({
     resolver: zodResolver(trunkSchema),
-    defaultValues: { name: '', transport: DEFAULT_TRANSPORT },
+    defaultValues: { name: '', transport: DEFAULT_TRANSPORT, codecs: CODECS_DEFAULT },
   });
 
   const editForm = useForm<TrunkFormValues>({
     resolver: zodResolver(trunkSchema),
-    defaultValues: { name: '', transport: DEFAULT_TRANSPORT },
+    defaultValues: { name: '', transport: DEFAULT_TRANSPORT, codecs: CODECS_DEFAULT },
   });
 
   const loadTrunks = useCallback(async () => {
@@ -150,8 +182,8 @@ export default function TrunksPage() {
   }, [loadTrunks]);
 
   const resetForms = () => {
-    form.reset({ name: '', transport: DEFAULT_TRANSPORT });
-    editForm.reset({ name: '', transport: DEFAULT_TRANSPORT });
+    form.reset({ name: '', transport: DEFAULT_TRANSPORT, codecs: CODECS_DEFAULT });
+    editForm.reset({ name: '', transport: DEFAULT_TRANSPORT, codecs: CODECS_DEFAULT });
   };
 
   const onSubmit = async (values: TrunkFormValues) => {
@@ -162,7 +194,11 @@ export default function TrunksPage() {
     try {
       await apiFetch<TrunkDto>('/trunks', {
         method: 'POST',
-        body: JSON.stringify({ name: values.name.trim(), transport: values.transport }),
+        body: JSON.stringify({
+          name: values.name.trim(),
+          transport: values.transport,
+          codecs: values.codecs,
+        }),
       });
       setDialogOpen(false);
       resetForms();
@@ -170,7 +206,11 @@ export default function TrunksPage() {
     } catch (err) {
       if (err instanceof ApiError) {
         const messageLower = err.message.toLowerCase();
-        const field: keyof TrunkFormValues = messageLower.includes('transport') ? 'transport' : 'name';
+        const field: keyof TrunkFormValues = messageLower.includes('transport')
+          ? 'transport'
+          : messageLower.includes('codec')
+            ? 'codecs'
+            : 'name';
         form.setError(field, { message: err.message });
       } else if (err instanceof Error) {
         setError(err.message);
@@ -188,7 +228,11 @@ export default function TrunksPage() {
     }
     setError(null);
     setEditingTrunk(trunk);
-    editForm.reset({ name: trunk.name, transport: normalizeTransport(trunk.transport) });
+    editForm.reset({
+      name: trunk.name,
+      transport: normalizeTransport(trunk.transport),
+      codecs: normalizeCodecsValue(trunk.codecs),
+    });
     setEditDialogOpen(true);
   };
 
@@ -203,7 +247,11 @@ export default function TrunksPage() {
     try {
       await apiFetch<TrunkDto>(`/trunks/${editingTrunk.id}`, {
         method: 'PATCH',
-        body: JSON.stringify({ name: values.name.trim(), transport: values.transport }),
+        body: JSON.stringify({
+          name: values.name.trim(),
+          transport: values.transport,
+          codecs: values.codecs,
+        }),
       });
       setEditDialogOpen(false);
       setEditingTrunk(null);
@@ -212,7 +260,11 @@ export default function TrunksPage() {
     } catch (err) {
       if (err instanceof ApiError) {
         const messageLower = err.message.toLowerCase();
-        const field: keyof TrunkFormValues = messageLower.includes('transport') ? 'transport' : 'name';
+        const field: keyof TrunkFormValues = messageLower.includes('transport')
+          ? 'transport'
+          : messageLower.includes('codec')
+            ? 'codecs'
+            : 'name';
         editForm.setError(field, { message: err.message });
       } else if (err instanceof Error) {
         setError(err.message);
@@ -319,6 +371,23 @@ export default function TrunksPage() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="codecs"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{dictionary.trunks.fields.codecs}</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={dictionary.trunks.placeholders.codecs}
+                            autoComplete="off"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <DialogFooter>
                     <Button type="submit" disabled={submitting || isReadOnly}>
                       {submitting ? dictionary.trunks.buttons.creating : dictionary.trunks.buttons.create}
@@ -349,6 +418,7 @@ export default function TrunksPage() {
                   <TableRow>
                     <TableHead>{dictionary.trunks.table.name}</TableHead>
                     <TableHead>{dictionary.trunks.table.transport}</TableHead>
+                    <TableHead>{dictionary.trunks.table.codecs}</TableHead>
                     <TableHead>{dictionary.trunks.table.username}</TableHead>
                     <TableHead>{dictionary.trunks.table.password}</TableHead>
                     <TableHead className="text-right">{dictionary.trunks.table.actions}</TableHead>
@@ -361,6 +431,11 @@ export default function TrunksPage() {
                       <TableCell>
                         <code className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
                           {formatTransport(trunk.transport)}
+                        </code>
+                      </TableCell>
+                      <TableCell>
+                        <code className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
+                          {normalizeCodecsValue(trunk.codecs)}
                         </code>
                       </TableCell>
                       <TableCell>
@@ -482,6 +557,23 @@ export default function TrunksPage() {
                           ))}
                         </SelectContent>
                       </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={editForm.control}
+                name="codecs"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{dictionary.trunks.fields.codecs}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={dictionary.trunks.placeholders.codecs}
+                        autoComplete="off"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

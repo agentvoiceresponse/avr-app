@@ -197,6 +197,7 @@ export const itDictionary = {
     fieldsExtra: {
       openaiApiKey: 'API key OpenAI',
       openaiModel: 'Modello OpenAI',
+      openaiVoice: 'Voce OpenAI',
       openaiInstructions: 'Istruzioni OpenAI',
       elevenlabsAgentId: 'ID agente ElevenLabs',
       elevenlabsApiKey: 'API key ElevenLabs',
@@ -220,6 +221,7 @@ export const itDictionary = {
     },
     placeholders: {
       openaiInstructions: 'Istruzioni opzionali per guidare il comportamento',
+      openaiVoice: 'es. alloy',
       geminiInstructions: 'Istruzioni opzionali per guidare il comportamento',
       name: 'es. avr-sts-nome-provider',
     },
@@ -433,9 +435,11 @@ export const itDictionary = {
     fields: {
       name: 'Nome',
       transport: 'Trasporto',
+      codecs: 'Codec',
     },
     placeholders: {
       transport: 'Seleziona trasporto',
+      codecs: 'ulaw,alaw',
     },
     transportOptions: {
       udp: 'UDP',
@@ -444,6 +448,7 @@ export const itDictionary = {
     table: {
       name: 'Nome',
       transport: 'Trasporto',
+      codecs: 'Codec',
       username: 'Username',
       password: 'Password',
       actions: 'Azioni',
@@ -458,6 +463,12 @@ export const itDictionary = {
     },
     notices: {
       readOnly: 'Solo admin o manager possono gestire i trunk',
+    },
+    validation: {
+      nameMin: 'Inserisci almeno 2 caratteri',
+      nameMax: 'Inserisci al massimo 50 caratteri',
+      codecsRequired: 'Inserisci almeno un codec, separati da virgola in ordine di priorità',
+      codecsFormat: 'Usa nomi di codec separati da virgola (lettere, numeri, . _ -)',
     },
     errors: {
       load: 'Impossibile caricare i trunk',

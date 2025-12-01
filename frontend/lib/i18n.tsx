@@ -33,10 +33,10 @@ const I18nContext = createContext<I18nContextValue | undefined>(undefined);
 
 function getStoredLanguage(): Language {
   if (typeof window === 'undefined') {
-    return 'it';
+    return 'en';
   }
   const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-  return stored === 'en' || stored === 'it' ? stored : 'it';
+  return stored === 'en' || stored === 'it' ? stored : 'en';
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {

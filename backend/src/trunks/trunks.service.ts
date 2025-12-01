@@ -36,8 +36,14 @@ export class TrunksService {
     const password = randomBytes(12).toString('base64url');
 
     const transport = dto.transport ?? 'udp';
+    const codecs = this.normalizeCodecs(dto.codecs);
 
-    const trunk = this.trunksRepository.create({ name, password, transport });
+    const trunk = this.trunksRepository.create({
+      name,
+      password,
+      transport,
+      codecs,
+    });
     const saved = await this.trunksRepository.save(trunk);
 
     try {
@@ -82,6 +88,12 @@ export class TrunksService {
       trunk.transport = dto.transport;
     }
 
+    if (dto.codecs !== undefined) {
+      trunk.codecs = this.normalizeCodecs(dto.codecs);
+    } else {
+      trunk.codecs = this.normalizeCodecs(trunk.codecs);
+    }
+
     const saved = await this.trunksRepository.save(trunk);
     await this.asteriskService.provisionTrunk(saved);
     return saved;
@@ -95,5 +107,22 @@ export class TrunksService {
 
     await this.trunksRepository.remove(trunk);
     await this.asteriskService.removeTrunk(id);
+  }
+
+  private normalizeCodecs(input?: string): string {
+    const fallback = 'ulaw,alaw';
+    if (!input) {
+      return fallback;
+    }
+    const codecs = input
+      .split(',')
+      .map((codec) => codec.trim())
+      .filter(Boolean);
+
+    if (codecs.length === 0) {
+      return fallback;
+    }
+
+    return codecs.join(',');
   }
 }

@@ -13,4 +13,7 @@ export class Trunk {
 
   @Column({ default: 'udp' })
   transport: 'udp' | 'tcp' | 'tls' | 'wss';
+
+  @Column({ default: 'ulaw,alaw' })
+  codecs: string;
 }

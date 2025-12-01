@@ -120,6 +120,7 @@ export default function ProvidersPage() {
       defaultImage: 'agentvoiceresponse/avr-sts-openai',
       defaults: {
         OPENAI_MODEL: 'gpt-4o-realtime-preview',
+        OPENAI_VOICE: 'alloy',
       },
       fields: [
         {
@@ -134,6 +135,11 @@ export default function ProvidersPage() {
           label: dictionary.providers.fieldsExtra.openaiModel,
           placeholder: 'gpt-4o-realtime-preview',
           required: true,
+        },
+        {
+          key: 'OPENAI_VOICE',
+          label: dictionary.providers.fieldsExtra.openaiVoice,
+          placeholder: dictionary.providers.placeholders.openaiVoice,
         },
         {
           key: 'OPENAI_INSTRUCTIONS',
@@ -268,7 +274,12 @@ export default function ProvidersPage() {
       if (tpl.type !== provider.type) {
         return false;
       }
-      return tpl.fields.every((field) => env[field.key] !== undefined);
+      return tpl.fields.every((field) => {
+        if (field.required) {
+          return env[field.key] !== undefined;
+        }
+        return true;
+      });
     });
   };
 
@@ -862,7 +873,7 @@ export default function ProvidersPage() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-[520px] max-h-[90vh] overflow-hidden p-0 flex">
+        <DialogContent className="w-[1400px] max-w-[95vw] max-h-[90vh] overflow-hidden p-0 flex">
           <Form {...editForm}>
             <form className="flex max-h-[90vh] flex-1 flex-col" onSubmit={editForm.handleSubmit(handleUpdate)}>
               <DialogHeader className="sticky top-0 z-10 border-b border-border/60 bg-background px-6 py-4">

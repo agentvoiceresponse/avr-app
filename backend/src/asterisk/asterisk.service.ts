@@ -215,13 +215,15 @@ export class AsteriskService {
   }
 
   private buildTrunkBlock(trunk: Trunk): string {
+    const codecs = this.normalizeCodecs(trunk.codecs);
+
     const endpointSection = [
       `[${trunk.id}]`,
       'type=endpoint',
       `transport=transport-${trunk.transport || 'udp'}`,
       `context=${process.env.TENANT || 'demo'}`,
       'disallow=all',
-      'allow=gsm,ulaw,alaw',
+      `allow=${codecs}`,
       `auth=${trunk.id}`,
       `aors=${trunk.id}`,
       `outbound_auth=${trunk.id}`,
@@ -249,5 +251,22 @@ export class AsteriskService {
     return [...endpointSection, '', ...authSection, '', ...aorSection].join(
       '\n',
     );
+  }
+
+  private normalizeCodecs(input?: string): string {
+    const fallback = 'ulaw,alaw';
+    if (!input) {
+      return fallback;
+    }
+    const codecs = input
+      .split(',')
+      .map((codec) => codec.trim())
+      .filter(Boolean);
+
+    if (codecs.length === 0) {
+      return fallback;
+    }
+
+    return codecs.join(',');
   }
 }

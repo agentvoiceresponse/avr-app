@@ -1,4 +1,11 @@
-import { IsIn, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsIn,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CreateTrunkDto {
   @IsString()
@@ -9,4 +16,11 @@ export class CreateTrunkDto {
   @IsOptional()
   @IsIn(['udp', 'tcp'])
   transport?: 'udp' | 'tcp';
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-zA-Z0-9_.-]+(,[a-zA-Z0-9_.-]+)*$/, {
+    message: 'Invalid codecs list',
+  })
+  codecs?: string;
 }
