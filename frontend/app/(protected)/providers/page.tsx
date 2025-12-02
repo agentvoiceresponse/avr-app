@@ -423,7 +423,6 @@ export default function ProvidersPage() {
       });
       form.setValue('env', nextEnv, { shouldDirty: false });
 
-      const currentImage = form.getValues('image');
       const imageState = form.getFieldState('image');
       const shouldUpdateImage = resetImageOnTemplateChange || !imageState.isDirty;
 

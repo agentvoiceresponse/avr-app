@@ -86,6 +86,13 @@ interface TrunkDto {
 const APPLICATIONS = ['agent', 'internal', 'transfer'] as const;
 type ApplicationValue = (typeof APPLICATIONS)[number];
 
+const optionalId = (message: string) =>
+  z
+    .string()
+    .uuid(message)
+    .or(z.literal(''))
+    .transform((val) => (val === '' ? undefined : val));
+
 const makeNumberSchema = (dict: Dictionary) =>
   z
     .object({
@@ -94,22 +101,10 @@ const makeNumberSchema = (dict: Dictionary) =>
         .min(3, 'Minimo 3 caratteri')
         .max(32, 'Massimo 32 caratteri')
         .regex(/^\+?[0-9]+$/, dict.numbers.validation.numberFormat),
-      application: z.enum(APPLICATIONS, { required_error: dict.numbers.validation.application }),
-      agentId: z
-        .preprocess((val) => (typeof val === 'string' && val.trim().length === 0 ? undefined : val), z
-          .string()
-          .uuid(dict.numbers.validation.agentRequired)
-          .optional()),
-      phoneId: z
-        .preprocess((val) => (typeof val === 'string' && val.trim().length === 0 ? undefined : val), z
-          .string()
-          .uuid(dict.numbers.validation.phoneRequired)
-          .optional()),
-      trunkId: z
-        .preprocess((val) => (typeof val === 'string' && val.trim().length === 0 ? undefined : val), z
-          .string()
-          .uuid(dict.numbers.validation.trunkRequired)
-          .optional()),
+      application: z.enum(APPLICATIONS),
+      agentId: optionalId(dict.numbers.validation.agentRequired).optional(),
+      phoneId: optionalId(dict.numbers.validation.phoneRequired).optional(),
+      trunkId: optionalId(dict.numbers.validation.trunkRequired).optional(),
     })
     .superRefine((val, ctx) => {
       if (val.application === 'agent' && !val.agentId) {
