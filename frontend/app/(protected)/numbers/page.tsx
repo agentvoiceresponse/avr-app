@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PlusCircle, Pencil, Trash2, Shield } from 'lucide-react';
 import { apiFetch, ApiError, type PaginatedResponse } from '@/lib/api';
-import { useI18n } from '@/lib/i18n';
+import { useI18n, type Dictionary } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import {
   Dialog,
@@ -53,10 +53,19 @@ import {
 interface NumberDto {
   id: string;
   value: string;
-  agent: {
+  application: 'agent' | 'internal' | 'transfer';
+  agent?: {
     id: string;
     name: string;
-  };
+  } | null;
+  phone?: {
+    id: string;
+    fullName: string;
+  } | null;
+  trunk?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface AgentDto {
@@ -64,20 +73,71 @@ interface AgentDto {
   name: string;
 }
 
-const numberSchema = z.object({
-  value: z
-    .string()
-    .min(5, 'Minimo 5 caratteri')
-    .max(32, 'Massimo 32 caratteri')
-    .regex(/^\+?[0-9]+$/, 'Sono ammessi solo cifre ed eventualmente il prefisso +'),
-  agentId: z.string().uuid('Seleziona un agente valido'),
-});
+interface PhoneDto {
+  id: string;
+  fullName: string;
+}
 
-const updateNumberSchema = numberSchema;
+interface TrunkDto {
+  id: string;
+  name: string;
+}
 
-type NumberFormValues = z.infer<typeof numberSchema>;
+const APPLICATIONS = ['agent', 'internal', 'transfer'] as const;
+type ApplicationValue = (typeof APPLICATIONS)[number];
 
-type UpdateNumberFormValues = z.infer<typeof updateNumberSchema>;
+const makeNumberSchema = (dict: Dictionary) =>
+  z
+    .object({
+      value: z
+        .string()
+        .min(3, 'Minimo 3 caratteri')
+        .max(32, 'Massimo 32 caratteri')
+        .regex(/^\+?[0-9]+$/, dict.numbers.validation.numberFormat),
+      application: z.enum(APPLICATIONS, { required_error: dict.numbers.validation.application }),
+      agentId: z
+        .preprocess((val) => (typeof val === 'string' && val.trim().length === 0 ? undefined : val), z
+          .string()
+          .uuid(dict.numbers.validation.agentRequired)
+          .optional()),
+      phoneId: z
+        .preprocess((val) => (typeof val === 'string' && val.trim().length === 0 ? undefined : val), z
+          .string()
+          .uuid(dict.numbers.validation.phoneRequired)
+          .optional()),
+      trunkId: z
+        .preprocess((val) => (typeof val === 'string' && val.trim().length === 0 ? undefined : val), z
+          .string()
+          .uuid(dict.numbers.validation.trunkRequired)
+          .optional()),
+    })
+    .superRefine((val, ctx) => {
+      if (val.application === 'agent' && !val.agentId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['agentId'],
+          message: dict.numbers.validation.agentRequired,
+        });
+      }
+      if (val.application === 'internal' && !val.phoneId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['phoneId'],
+          message: dict.numbers.validation.phoneRequired,
+        });
+      }
+      if (val.application === 'transfer' && !val.trunkId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['trunkId'],
+          message: dict.numbers.validation.trunkRequired,
+        });
+      }
+    });
+
+type NumberFormValues = z.infer<ReturnType<typeof makeNumberSchema>>;
+
+type UpdateNumberFormValues = NumberFormValues;
 
 function NumbersSkeleton() {
   return (
@@ -100,8 +160,12 @@ export default function NumbersPage() {
   });
   const pageSizeOptions = [10, 25, 50];
   const [agents, setAgents] = useState<AgentDto[]>([]);
+  const [phones, setPhones] = useState<PhoneDto[]>([]);
+  const [trunks, setTrunks] = useState<TrunkDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [agentsLoading, setAgentsLoading] = useState(true);
+  const [phonesLoading, setPhonesLoading] = useState(true);
+  const [trunksLoading, setTrunksLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -113,6 +177,7 @@ export default function NumbersPage() {
   const [updating, setUpdating] = useState(false);
   const { dictionary } = useI18n();
   const { user } = useAuth();
+  const numberSchema = useMemo(() => makeNumberSchema(dictionary), [dictionary]);
 
   const isReadOnly = user?.role === 'viewer';
 
@@ -120,15 +185,21 @@ export default function NumbersPage() {
     resolver: zodResolver(numberSchema),
     defaultValues: {
       value: '',
+      application: 'agent',
       agentId: '',
+      phoneId: '',
+      trunkId: '',
     },
   });
 
   const editForm = useForm<UpdateNumberFormValues>({
-    resolver: zodResolver(updateNumberSchema),
+    resolver: zodResolver(numberSchema),
     defaultValues: {
       value: '',
+      application: 'agent',
       agentId: '',
+      phoneId: '',
+      trunkId: '',
     },
   });
 
@@ -145,6 +216,36 @@ export default function NumbersPage() {
       setError(err instanceof Error ? err.message : 'Impossibile caricare gli agenti');
     } finally {
       setAgentsLoading(false);
+    }
+  }, []);
+
+  const loadPhones = useCallback(async () => {
+    setPhonesLoading(true);
+    try {
+      const response = await apiFetch<PaginatedResponse<PhoneDto>>('/phones', {
+        query: { page: 1, limit: 100 },
+        paginated: true,
+      });
+      setPhones(response.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Impossibile caricare i telefoni');
+    } finally {
+      setPhonesLoading(false);
+    }
+  }, []);
+
+  const loadTrunks = useCallback(async () => {
+    setTrunksLoading(true);
+    try {
+      const response = await apiFetch<PaginatedResponse<TrunkDto>>('/trunks', {
+        query: { page: 1, limit: 100 },
+        paginated: true,
+      });
+      setTrunks(response.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Impossibile caricare i trunk');
+    } finally {
+      setTrunksLoading(false);
     }
   }, []);
 
@@ -177,13 +278,21 @@ export default function NumbersPage() {
 
   useEffect(() => {
     loadAgents();
+    loadPhones();
+    loadTrunks();
     loadNumbers();
-  }, [loadAgents, loadNumbers]);
+  }, [loadAgents, loadNumbers, loadPhones, loadTrunks]);
 
   const openEditDialog = (number: NumberDto) => {
     setError(null);
     setEditingNumber(number);
-    editForm.reset({ value: number.value, agentId: number.agent.id });
+    editForm.reset({
+      value: number.value,
+      application: number.application,
+      agentId: number.agent?.id ?? '',
+      phoneId: number.phone?.id ?? '',
+      trunkId: number.trunk?.id ?? '',
+    });
     setEditDialogOpen(true);
   };
 
@@ -194,15 +303,29 @@ export default function NumbersPage() {
         method: 'POST',
         body: JSON.stringify({
           value: values.value.trim(),
-          agentId: values.agentId,
+          application: values.application,
+          agentId: values.agentId || undefined,
+          phoneId: values.phoneId || undefined,
+          trunkId: values.trunkId || undefined,
         }),
       });
       setDialogOpen(false);
-      form.reset({ value: '', agentId: '' });
+      form.reset({ value: '', application: 'agent', agentId: '', phoneId: '', trunkId: '' });
       await loadNumbers();
     } catch (err) {
       if (err instanceof ApiError) {
-        form.setError('value', { message: err.message });
+        const lower = err.message.toLowerCase();
+        const field: keyof NumberFormValues =
+          lower.includes('application')
+            ? 'application'
+            : lower.includes('agent')
+              ? 'agentId'
+          : lower.includes('phone')
+            ? 'phoneId'
+            : lower.includes('trunk')
+              ? 'trunkId'
+              : 'value';
+        form.setError(field, { message: err.message });
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -224,16 +347,30 @@ export default function NumbersPage() {
         method: 'PATCH',
         body: JSON.stringify({
           value: values.value.trim(),
-          agentId: values.agentId,
+          application: values.application,
+          agentId: values.agentId || undefined,
+          phoneId: values.phoneId || undefined,
+          trunkId: values.trunkId || undefined,
         }),
       });
       setEditDialogOpen(false);
       setEditingNumber(null);
-      editForm.reset({ value: '', agentId: '' });
+      editForm.reset({ value: '', application: 'agent', agentId: '', phoneId: '', trunkId: '' });
       await loadNumbers();
     } catch (err) {
       if (err instanceof ApiError) {
-        editForm.setError('value', { message: err.message });
+        const lower = err.message.toLowerCase();
+        const field: keyof UpdateNumberFormValues =
+          lower.includes('application')
+            ? 'application'
+            : lower.includes('agent')
+              ? 'agentId'
+          : lower.includes('phone')
+            ? 'phoneId'
+            : lower.includes('trunk')
+              ? 'trunkId'
+              : 'value';
+        editForm.setError(field, { message: err.message });
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -270,6 +407,65 @@ export default function NumbersPage() {
   };
 
   const agentOptions = useMemo(() => agents, [agents]);
+  const phoneOptions = useMemo(() => phones, [phones]);
+  const trunkOptions = useMemo(() => trunks, [trunks]);
+  const applicationOptions = useMemo(
+    () =>
+      APPLICATIONS.map((value) => ({
+        value,
+        label: dictionary.numbers.applicationOptions[value],
+      })),
+    [dictionary.numbers.applicationOptions],
+  );
+
+  const selectedCreateApplication = form.watch('application');
+  const selectedEditApplication = editForm.watch('application');
+
+  const formatApplication = (application: ApplicationValue) =>
+    dictionary.numbers.applicationOptions[application];
+
+  const formatDestination = (number: NumberDto) => {
+    if (number.application === 'agent') {
+      return number.agent?.name ?? dictionary.common.none;
+    }
+    if (number.application === 'internal') {
+      return number.phone?.fullName || number.phone?.id || dictionary.common.none;
+    }
+    if (number.application === 'transfer') {
+      return number.trunk?.name ?? dictionary.common.none;
+    }
+    return dictionary.common.none;
+  };
+
+  useEffect(() => {
+    if (selectedCreateApplication === 'agent') {
+      form.setValue('phoneId', '');
+      form.setValue('trunkId', '');
+    }
+    if (selectedCreateApplication === 'internal') {
+      form.setValue('agentId', '');
+      form.setValue('trunkId', '');
+    }
+    if (selectedCreateApplication === 'transfer') {
+      form.setValue('agentId', '');
+      form.setValue('phoneId', '');
+    }
+  }, [selectedCreateApplication, form]);
+
+  useEffect(() => {
+    if (selectedEditApplication === 'agent') {
+      editForm.setValue('phoneId', '');
+      editForm.setValue('trunkId', '');
+    }
+    if (selectedEditApplication === 'internal') {
+      editForm.setValue('agentId', '');
+      editForm.setValue('trunkId', '');
+    }
+    if (selectedEditApplication === 'transfer') {
+      editForm.setValue('agentId', '');
+      editForm.setValue('phoneId', '');
+    }
+  }, [selectedEditApplication, editForm]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -312,19 +508,19 @@ export default function NumbersPage() {
                   />
                   <FormField
                     control={form.control}
-                    name="agentId"
+                    name="application"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{dictionary.numbers.fields.agent}</FormLabel>
+                        <FormLabel>{dictionary.numbers.fields.application}</FormLabel>
                         <FormControl>
-                          <Select onValueChange={field.onChange} value={field.value} disabled={agentsLoading}>
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <SelectTrigger>
                               <SelectValue placeholder={dictionary.common.none} />
                             </SelectTrigger>
                             <SelectContent>
-                              {agentOptions.map((agent) => (
-                                <SelectItem key={agent.id} value={agent.id}>
-                                  {agent.name}
+                              {applicationOptions.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -334,6 +530,84 @@ export default function NumbersPage() {
                       </FormItem>
                     )}
                   />
+                  {selectedCreateApplication === 'agent' && (
+                    <FormField
+                      control={form.control}
+                      name="agentId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{dictionary.numbers.fields.agent}</FormLabel>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={agentsLoading}>
+                              <SelectTrigger>
+                                <SelectValue placeholder={dictionary.common.none} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {agentOptions.map((agent) => (
+                                  <SelectItem key={agent.id} value={agent.id}>
+                                    {agent.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  {selectedCreateApplication === 'internal' && (
+                    <FormField
+                      control={form.control}
+                      name="phoneId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{dictionary.numbers.fields.phone}</FormLabel>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={phonesLoading}>
+                              <SelectTrigger>
+                                <SelectValue placeholder={dictionary.common.none} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {phoneOptions.map((phone) => (
+                                  <SelectItem key={phone.id} value={phone.id}>
+                                    {phone.fullName || phone.id}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  {selectedCreateApplication === 'transfer' && (
+                    <FormField
+                      control={form.control}
+                      name="trunkId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{dictionary.numbers.fields.trunk}</FormLabel>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={trunksLoading}>
+                              <SelectTrigger>
+                                <SelectValue placeholder={dictionary.common.none} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {trunkOptions.map((trunk) => (
+                                  <SelectItem key={trunk.id} value={trunk.id}>
+                                    {trunk.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                   <DialogFooter>
                     <Button type="submit" disabled={submitting}>
                       {submitting ? dictionary.numbers.buttons.creating : dictionary.numbers.buttons.create}
@@ -363,7 +637,8 @@ export default function NumbersPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>{dictionary.numbers.table.number}</TableHead>
-                    <TableHead>{dictionary.numbers.table.agent}</TableHead>
+                    <TableHead>{dictionary.numbers.table.application}</TableHead>
+                    <TableHead>{dictionary.numbers.table.destination}</TableHead>
                     {isReadOnly ? null : (
                       <TableHead className="text-right">{dictionary.numbers.table.actions}</TableHead>
                     )}
@@ -373,7 +648,8 @@ export default function NumbersPage() {
                   {numbers.map((number) => (
                     <TableRow key={number.id}>
                       <TableCell className="font-medium">{number.value}</TableCell>
-                      <TableCell>{number.agent?.name ?? dictionary.common.none}</TableCell>
+                      <TableCell>{formatApplication(number.application)}</TableCell>
+                      <TableCell>{formatDestination(number)}</TableCell>
                       {isReadOnly ? null : (
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
@@ -455,19 +731,19 @@ export default function NumbersPage() {
               />
               <FormField
                 control={editForm.control}
-                name="agentId"
+                name="application"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{dictionary.numbers.fields.agent}</FormLabel>
+                    <FormLabel>{dictionary.numbers.fields.application}</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value} disabled={agentsLoading}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
                           <SelectValue placeholder={dictionary.common.none} />
                         </SelectTrigger>
                         <SelectContent>
-                          {agentOptions.map((agent) => (
-                            <SelectItem key={agent.id} value={agent.id}>
-                              {agent.name}
+                          {applicationOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -477,6 +753,84 @@ export default function NumbersPage() {
                   </FormItem>
                 )}
               />
+              {selectedEditApplication === 'agent' && (
+                <FormField
+                  control={editForm.control}
+                  name="agentId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{dictionary.numbers.fields.agent}</FormLabel>
+                      <FormControl>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={agentsLoading}>
+                          <SelectTrigger>
+                            <SelectValue placeholder={dictionary.common.none} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {agentOptions.map((agent) => (
+                              <SelectItem key={agent.id} value={agent.id}>
+                                {agent.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {selectedEditApplication === 'internal' && (
+                <FormField
+                  control={editForm.control}
+                  name="phoneId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{dictionary.numbers.fields.phone}</FormLabel>
+                      <FormControl>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={phonesLoading}>
+                          <SelectTrigger>
+                            <SelectValue placeholder={dictionary.common.none} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {phoneOptions.map((phone) => (
+                              <SelectItem key={phone.id} value={phone.id}>
+                                {phone.fullName || phone.id}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {selectedEditApplication === 'transfer' && (
+                <FormField
+                  control={editForm.control}
+                  name="trunkId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{dictionary.numbers.fields.trunk}</FormLabel>
+                      <FormControl>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={trunksLoading}>
+                          <SelectTrigger>
+                            <SelectValue placeholder={dictionary.common.none} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {trunkOptions.map((trunk) => (
+                              <SelectItem key={trunk.id} value={trunk.id}>
+                                {trunk.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <DialogFooter>
                 <Button type="submit" disabled={updating}>
                   {updating ? dictionary.numbers.buttons.updating : dictionary.numbers.buttons.update}

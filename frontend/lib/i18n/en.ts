@@ -345,19 +345,23 @@ export const enDictionary = {
   },
   numbers: {
     title: 'Numbers',
-    subtitle: 'Associate external numbers with agents.',
+    subtitle: 'Associate external numbers with the desired application.',
     new: 'New number',
     createTitle: 'Create number',
-    createDescription: 'Define the external number and the agent that should answer.',
+    createDescription: 'Define the external number and the application that should answer.',
     editTitle: 'Edit number',
-    editDescription: 'Update number or associated agent.',
+    editDescription: 'Update number or associated application.',
     fields: {
       value: 'Number',
+      application: 'Application',
       agent: 'Agent',
+      phone: 'Phone',
+      trunk: 'Trunk',
     },
     table: {
       number: 'Number',
-      agent: 'Agent',
+      application: 'Application',
+      destination: 'Destination',
       actions: 'Actions',
     },
     buttons: {
@@ -371,7 +375,7 @@ export const enDictionary = {
     },
     delete: {
       title: 'Delete this number?',
-      description: 'This action cannot be undone. Calls to {value} will no longer reach the agent.',
+      description: 'This action cannot be undone. Calls to {value} will no longer reach the destination.',
       confirm: 'Delete',
       processing: 'Deleting…',
     },
@@ -383,6 +387,15 @@ export const enDictionary = {
     },
     validation: {
       numberFormat: 'Enter a valid number (digits and optional +)',
+      application: 'Select an application',
+      agentRequired: 'Select an agent',
+      phoneRequired: 'Select a phone',
+      trunkRequired: 'Select a trunk',
+    },
+    applicationOptions: {
+      agent: 'AI Agent',
+      internal: 'Internal call',
+      transfer: 'Transfer call',
     },
   },
   dockers: {

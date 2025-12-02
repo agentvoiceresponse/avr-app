@@ -6,6 +6,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Agent } from '../agents/agent.entity';
+import { Phone } from '../phones/phone.entity';
+import { Trunk } from '../trunks/trunk.entity';
 
 @Entity()
 export class PhoneNumber {
@@ -15,10 +17,30 @@ export class PhoneNumber {
   @Column({ unique: true })
   value: string;
 
+  @Column({ type: 'text', default: 'agent' })
+  application: 'agent' | 'internal' | 'transfer';
+
   @ManyToOne(() => Agent, (agent) => agent.numbers, {
     eager: true,
-    onDelete: 'CASCADE',
+    nullable: true,
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'agent_id' })
-  agent: Agent;
+  agent?: Agent | null;
+
+  @ManyToOne(() => Phone, {
+    eager: true,
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'phone_id' })
+  phone?: Phone | null;
+
+  @ManyToOne(() => Trunk, {
+    eager: true,
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'trunk_id' })
+  trunk?: Trunk | null;
 }

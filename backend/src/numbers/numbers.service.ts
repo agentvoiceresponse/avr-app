@@ -7,6 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AsteriskService } from '../asterisk/asterisk.service';
 import { Agent } from '../agents/agent.entity';
+import { Phone } from '../phones/phone.entity';
+import { Trunk } from '../trunks/trunk.entity';
 import { CreateNumberDto } from './dto/create-number.dto';
 import { UpdateNumberDto } from './dto/update-number.dto';
 import { PhoneNumber } from './number.entity';
@@ -24,6 +26,10 @@ export class NumbersService {
     private readonly numbersRepository: Repository<PhoneNumber>,
     @InjectRepository(Agent)
     private readonly agentsRepository: Repository<Agent>,
+    @InjectRepository(Phone)
+    private readonly phonesRepository: Repository<Phone>,
+    @InjectRepository(Trunk)
+    private readonly trunksRepository: Repository<Trunk>,
     private readonly asteriskService: AsteriskService,
   ) {}
 
@@ -37,16 +43,12 @@ export class NumbersService {
       throw new ConflictException('Number already exists');
     }
 
-    const agent = await this.agentsRepository.findOne({
-      where: { id: dto.agentId },
-    });
-    if (!agent) {
-      throw new NotFoundException('Agent not found');
-    }
+    const payload = await this.buildAssociations(dto);
 
     const number = this.numbersRepository.create({
       value,
-      agent,
+      application: dto.application,
+      ...payload,
     });
 
     const saved = await this.numbersRepository.save(number);
@@ -64,6 +66,7 @@ export class NumbersService {
   async findAll(query: PaginationQuery): Promise<PaginatedResult<PhoneNumber>> {
     const { skip, take, page, limit } = getPagination(query);
     const [data, total] = await this.numbersRepository.findAndCount({
+      relations: ['agent', 'phone', 'trunk'],
       order: { value: 'ASC' },
       skip,
       take,
@@ -91,14 +94,20 @@ export class NumbersService {
       }
     }
 
-    if (dto.agentId) {
-      const agent = await this.agentsRepository.findOne({
-        where: { id: dto.agentId },
+    if (dto.application) {
+      number.application = dto.application;
+    }
+
+    if (dto.agentId || dto.phoneId || dto.trunkId || dto.application) {
+      const associations = await this.buildAssociations({
+        application: number.application,
+        agentId: dto.agentId ?? number.agent?.id,
+        phoneId: dto.phoneId ?? number.phone?.id,
+        trunkId: dto.trunkId ?? number.trunk?.id,
       });
-      if (!agent) {
-        throw new NotFoundException('Agent not found');
-      }
-      number.agent = agent;
+      number.agent = associations.agent ?? null;
+      number.phone = associations.phone ?? null;
+      number.trunk = associations.trunk ?? null;
     }
 
     const saved = await this.numbersRepository.save(number);
@@ -118,5 +127,57 @@ export class NumbersService {
     await this.numbersRepository.remove(number);
 
     await this.asteriskService.removeNumber(id);
+  }
+
+  private async buildAssociations(
+    dto:
+      | Pick<CreateNumberDto, 'application' | 'agentId' | 'phoneId' | 'trunkId'>
+      | {
+          application: 'agent' | 'internal' | 'transfer';
+          agentId?: string | null;
+          phoneId?: string | null;
+          trunkId?: string | null;
+        },
+  ): Promise<{ agent?: Agent | null; phone?: Phone | null; trunk?: Trunk | null }> {
+    switch (dto.application) {
+      case 'agent': {
+        if (!dto.agentId) {
+          throw new NotFoundException('Agent not found');
+        }
+        const agent = await this.agentsRepository.findOne({
+          where: { id: dto.agentId },
+        });
+        if (!agent) {
+          throw new NotFoundException('Agent not found');
+        }
+        return { agent, phone: null, trunk: null };
+      }
+      case 'internal': {
+        if (!dto.phoneId) {
+          throw new NotFoundException('Phone not found');
+        }
+        const phone = await this.phonesRepository.findOne({
+          where: { id: dto.phoneId },
+        });
+        if (!phone) {
+          throw new NotFoundException('Phone not found');
+        }
+        return { phone, agent: null, trunk: null };
+      }
+      case 'transfer': {
+        if (!dto.trunkId) {
+          throw new NotFoundException('Trunk not found');
+        }
+        const trunk = await this.trunksRepository.findOne({
+          where: { id: dto.trunkId },
+        });
+        if (!trunk) {
+          throw new NotFoundException('Trunk not found');
+        }
+        return { trunk, agent: null, phone: null };
+      }
+      default:
+        throw new NotFoundException('Invalid application');
+    }
   }
 }

@@ -346,19 +346,23 @@ export const itDictionary = {
   },
   numbers: {
     title: 'Numerazioni',
-    subtitle: 'Associa numeri esterni agli agenti.',
+    subtitle: 'Associa numeri esterni all\'applicazione desiderata.',
     new: 'Nuova numerazione',
     createTitle: 'Crea numerazione',
-    createDescription: "Definisci il numero esterno e seleziona l'agente che deve rispondere.",
+    createDescription: 'Definisci il numero esterno e seleziona l\'applicazione che deve rispondere.',
     editTitle: 'Modifica numerazione',
-    editDescription: "Aggiorna il numero o l'agente associato.",
+    editDescription: 'Aggiorna il numero o l\'applicazione associata.',
     fields: {
       value: 'Numero',
+      application: 'Applicazione',
       agent: 'Agente',
+      phone: 'Telefono',
+      trunk: 'Trunk',
     },
     table: {
       number: 'Numero',
-      agent: 'Agente',
+      application: 'Applicazione',
+      destination: 'Destinazione',
       actions: 'Azioni',
     },
     buttons: {
@@ -373,7 +377,7 @@ export const itDictionary = {
     delete: {
       title: 'Eliminare questa numerazione?',
       description:
-        "L'operazione non può essere annullata. Le chiamate verso {value} non raggiungeranno più l'agente.",
+        "L'operazione non può essere annullata. Le chiamate verso {value} non raggiungeranno più la destinazione.",
       confirm: 'Elimina',
       processing: 'Eliminazione…',
     },
@@ -385,6 +389,15 @@ export const itDictionary = {
     },
     validation: {
       numberFormat: 'Inserisci un numero valido (cifre e opzionale +)',
+      application: 'Seleziona un\'applicazione',
+      agentRequired: 'Seleziona un agente',
+      phoneRequired: 'Seleziona un telefono',
+      trunkRequired: 'Seleziona un trunk',
+    },
+    applicationOptions: {
+      agent: 'AI Agent',
+      internal: 'Chiamata interna',
+      transfer: 'Trasferimento',
     },
   },
   dockers: {

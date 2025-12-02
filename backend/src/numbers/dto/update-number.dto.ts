@@ -1,4 +1,5 @@
 import {
+  IsIn,
   IsOptional,
   IsString,
   Matches,
@@ -10,7 +11,7 @@ import {
 export class UpdateNumberDto {
   @IsOptional()
   @IsString()
-  @MinLength(5)
+  @MinLength(3)
   @MaxLength(32)
   @Matches(/^\+?[0-9]+$/, {
     message: 'Number can only contain digits and an optional leading +',
@@ -18,6 +19,18 @@ export class UpdateNumberDto {
   value?: string;
 
   @IsOptional()
+  @IsIn(['agent', 'internal', 'transfer'])
+  application?: 'agent' | 'internal' | 'transfer';
+
+  @IsOptional()
   @IsUUID()
   agentId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  phoneId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  trunkId?: string;
 }

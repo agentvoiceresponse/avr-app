@@ -162,22 +162,53 @@ export class AsteriskService {
   }
 
   private buildNumberBlock(number: PhoneNumber): string {
-    const agent = number.agent;
-    return [
-      `[${process.env.TENANT || 'demo'}]`,
-      `exten => ${number.value},1,NoOp(Exten ${number.value} -> Agent ${agent.name ?? agent.id})`,
-      ' same => n,Answer()',
-      ' same => n,Ringing()',
-      ' same => n,Wait(1)',
-      ' same => n,Set(AVR_NUMBER=${CALLERID(num)})',
-      " same => n,Set(UUID=${SHELL(uuidgen | tr -d '\\n')})",
-      ' same => n,Dial(AudioSocket/avr-core-' +
-        agent.id +
-        ':' +
-        agent.port +
-        '/${UUID})',
-      ' same => n,Hangup()',
-    ].join('\n');
+    const tenant = process.env.TENANT || 'demo';
+    switch (number.application) {
+      case 'internal': {
+        if (!number.phone) {
+          throw new Error('Phone not found for internal call');
+        }
+        return [
+          `[${tenant}]`,
+          `exten => ${number.value},1,NoOp(Internal call)`,
+          ` same => n,Dial(PJSIP/${number.phone.id})`,
+          ' same => n,Hangup()',
+        ].join('\n');
+      }
+      case 'transfer': {
+        if (!number.trunk) {
+          throw new Error('Trunk not found for transfer call');
+        }
+        return [
+          `[${tenant}]`,
+          `exten => ${number.value},1,NoOp(Transfer call)`,
+          ` same => n,Dial(PJSIP/${number.value}@${number.trunk.id})`,
+          ' same => n,Hangup()',
+        ].join('\n');
+      }
+      case 'agent':
+      default: {
+        const agent = number.agent;
+        if (!agent) {
+          throw new Error('Agent not found for number');
+        }
+        return [
+          `[${tenant}]`,
+          `exten => ${number.value},1,NoOp(Exten ${number.value} -> Agent ${agent.name ?? agent.id})`,
+          ' same => n,Answer()',
+          ' same => n,Ringing()',
+          ' same => n,Wait(1)',
+          ' same => n,Set(AVR_NUMBER=${CALLERID(num)})',
+          " same => n,Set(UUID=${SHELL(uuidgen | tr -d '\\n')})",
+          ' same => n,Dial(AudioSocket/avr-core-' +
+            agent.id +
+            ':' +
+            agent.port +
+            '/${UUID})',
+          ' same => n,Hangup()',
+        ].join('\n');
+      }
+    }
   }
 
   private buildPhoneBlock(phone: Phone): string {
