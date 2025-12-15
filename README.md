@@ -65,6 +65,68 @@ Enjoy the Agent Voice Response App experience! After installation, you can acces
   <em>The intuitive dashboard for managing your voice response agents</em>
 </div>
 
+## Environment Variables Setup
+
+Before running `docker compose up`, you need to configure the required environment variables.
+
+### Quick Setup (Recommended)
+
+Create your `.env` file with automatically generated secure secrets:
+```bash
+cat > .env << EOF
+JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
+WEBHOOK_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
+ADMIN_PASSWORD=$(node -e "console.log(require('crypto').randomBytes(16).toString('hex'))")
+ARI_PASSWORD=$(node -e "console.log(require('crypto').randomBytes(16).toString('hex'))")
+EOF
+```
+**Important:** Save your generated credentials to a secure location:
+
+```bash
+cat .env
+```
+
+Copy the output, especially the `ADMIN_PASSWORD` which you'll need for login.
+
+## docker-compose setup
+
+Before running `docker compose up`, you need to configure the required environment variables and update the `docker-compose.yml` file.
+
+### Step 1: Update docker-compose.yml
+
+The default `docker-compose.yml` has empty environment variables and an incorrect API URL. Update it with the following changes:
+
+#### Backend service - Replace empty environment variables:
+```yaml
+backend:
+environment:
+- PORT=3001
+- JWT_SECRET=${JWT_SECRET} # ← CHANGED: was empty
+- CORE_DEFAULT_IMAGE=agentvoiceresponse/avr-core
+- DB_TYPE=sqlite
+- DB_DATABASE=/app/data/data.db
+- FRONTEND_URL=http://localhost:3000
+- ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+- ADMIN_PASSWORD=${ADMIN_PASSWORD} # ← CHANGED: was empty
+- WEBHOOK_URL=http://avr-app-backend:3001/webhooks
+- WEBHOOK_SECRET=${WEBHOOK_SECRET} # ← CHANGED: was empty
+- ASTERISK_CONFIG_PATH=/app/asterisk
+- ARI_URL=http://avr-asterisk:8088/ari
+- ARI_USERNAME=avr
+- ARI_PASSWORD=${ARI_PASSWORD} # ← CHANGED: was empty
+- TENANT=demo
+- TOOLS_DIR=/home/[user]/avr-infra/tools
+- AMI_URL=http://avr-ami:6006
+```
+
+**Frontend service - Fix API URL for browser access:**
+```yaml
+frontend:
+environment:
+- NEXT_PUBLIC_API_URL=http://localhost:3001 # ← CHANGED: was http://avr-app-backend:3001
+- NEXT_PUBLIC_WEBRTC_CLIENT_URL=http://avr-phone:8080
+```
+
 ## Support & Community
 
 *   **GitHub:** [https://github.com/agentvoiceresponse](https://github.com/agentvoiceresponse) - Report issues, contribute code.
