@@ -22,14 +22,6 @@ Repository for the AVR administration panel composed of:
 - Docker Engine (required to run agent containers)
 - Asterisk PBX (required onfly for telephony sections)
 
-## Quick Start
-
-```bash
-docker compose up --build
-```
-
-The backend will be available at `http://localhost:3000`, the frontend at `http://localhost:3001`.
-
 ## Local Development
 
 Backend:
