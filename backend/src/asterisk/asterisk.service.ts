@@ -192,7 +192,9 @@ export class AsteriskService {
         if (!agent) {
           throw new Error('Agent not found for number');
         }
-        return [
+        const denoiseEnabled = number.denoiseEnabled ?? true;
+        const recordingEnabled = number.recordingEnabled ?? false;
+        const lines = [
           `[${tenant}]`,
           `exten => ${number.value},1,NoOp(Exten ${number.value} -> Agent ${agent.name ?? agent.id})`,
           ' same => n,Answer()',
@@ -200,19 +202,27 @@ export class AsteriskService {
           ' same => n,Wait(1)',
           ' same => n,Set(AVR_NUMBER=${CALLERID(num)})',
           " same => n,Set(UUID=${SHELL(uuidgen | tr -d '\\n')})",
-          " same => n,Set(JSON_BODY={\"uuid\":\"${UUID}\",\"payload\":{\"from\":\"${CALLERID(num)}\",\"to\":\"${EXTEN}\",\"uniqueid\":\"${UNIQUEID}\",\"channel\":\"${CHANNEL}\"}})",
+          " same => n,Set(JSON_BODY={\"uuid\":\"${UUID}\",\"payload\":{\"from\":\"${CALLERID(num)}\",\"to\":\"${EXTEN}\",\"uniqueid\":\"${UNIQUEID}\",\"channel\":\"${CHANNEL}\",\"recording\": " + recordingEnabled + "}})",
           " same => n,Set(CURLOPT(httpheader)=Content-Type: application/json)",
           " same => n,Set(JSON_RESPONSE=${CURL(http://avr-core-" + agent.id + ":" + agent.httpPort + "/call,${JSON_BODY})})",
           " same => n,NoOp(JSON_BODY: ${JSON_BODY})",
           " same => n,NoOp(JSON_RESPONSE: ${JSON_RESPONSE})",
-          " same => n,Set(DENOISE(rx)=on)",
+        ];
+        if (recordingEnabled) {
+          lines.push(' same => n,MixMonitor(${UUID}.wav)');
+        }
+        if (denoiseEnabled) {
+          lines.push(' same => n,Set(DENOISE(rx)=on)');
+        } 
+        lines.push(
           ' same => n,Dial(AudioSocket/avr-core-' +
             agent.id +
             ':' +
             agent.port +
             '/${UUID})',
           ' same => n,Hangup()',
-        ].join('\n');
+        );
+        return lines.join('\n');
       }
     }
   }

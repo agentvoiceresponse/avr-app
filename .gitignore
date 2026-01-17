@@ -9,3 +9,4 @@ data/*.db
 data/*.sqlite
 .env
 docker-compose-asterisk.yml
+recordings/*.wav

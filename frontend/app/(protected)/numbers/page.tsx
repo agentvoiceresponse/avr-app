@@ -54,6 +54,8 @@ interface NumberDto {
   id: string;
   value: string;
   application: 'agent' | 'internal' | 'transfer';
+  denoiseEnabled?: boolean | null;
+  recordingEnabled?: boolean | null;
   agent?: {
     id: string;
     name: string;
@@ -85,6 +87,7 @@ interface TrunkDto {
 
 const APPLICATIONS = ['agent', 'internal', 'transfer'] as const;
 type ApplicationValue = (typeof APPLICATIONS)[number];
+type ToggleValue = 'on' | 'off';
 
 const optionalId = (message: string) =>
   z
@@ -105,6 +108,8 @@ const makeNumberSchema = (dict: Dictionary) =>
       agentId: optionalId(dict.numbers.validation.agentRequired).optional(),
       phoneId: optionalId(dict.numbers.validation.phoneRequired).optional(),
       trunkId: optionalId(dict.numbers.validation.trunkRequired).optional(),
+      denoiseEnabled: z.enum(['on', 'off']).optional(),
+      recordingEnabled: z.enum(['on', 'off']).optional(),
     })
     .superRefine((val, ctx) => {
       if (val.application === 'agent' && !val.agentId) {
@@ -184,6 +189,8 @@ export default function NumbersPage() {
       agentId: '',
       phoneId: '',
       trunkId: '',
+      denoiseEnabled: 'on',
+      recordingEnabled: 'off',
     },
   });
 
@@ -195,6 +202,8 @@ export default function NumbersPage() {
       agentId: '',
       phoneId: '',
       trunkId: '',
+      denoiseEnabled: 'on',
+      recordingEnabled: 'off',
     },
   });
 
@@ -287,6 +296,8 @@ export default function NumbersPage() {
       agentId: number.agent?.id ?? '',
       phoneId: number.phone?.id ?? '',
       trunkId: number.trunk?.id ?? '',
+      denoiseEnabled: number.denoiseEnabled === false ? 'off' : 'on',
+      recordingEnabled: number.recordingEnabled ? 'on' : 'off',
     });
     setEditDialogOpen(true);
   };
@@ -294,6 +305,9 @@ export default function NumbersPage() {
   const onSubmit = async (values: NumberFormValues) => {
     setSubmitting(true);
     try {
+      const isAgent = values.application === 'agent';
+      const denoiseEnabled = isAgent ? values.denoiseEnabled === 'on' : undefined;
+      const recordingEnabled = isAgent ? values.recordingEnabled === 'on' : undefined;
       await apiFetch<NumberDto>('/numbers', {
         method: 'POST',
         body: JSON.stringify({
@@ -302,10 +316,20 @@ export default function NumbersPage() {
           agentId: values.agentId || undefined,
           phoneId: values.phoneId || undefined,
           trunkId: values.trunkId || undefined,
+          denoiseEnabled,
+          recordingEnabled,
         }),
       });
       setDialogOpen(false);
-      form.reset({ value: '', application: 'agent', agentId: '', phoneId: '', trunkId: '' });
+      form.reset({
+        value: '',
+        application: 'agent',
+        agentId: '',
+        phoneId: '',
+        trunkId: '',
+        denoiseEnabled: 'on',
+        recordingEnabled: 'off',
+      });
       await loadNumbers();
     } catch (err) {
       if (err instanceof ApiError) {
@@ -338,6 +362,9 @@ export default function NumbersPage() {
 
     setUpdating(true);
     try {
+      const isAgent = values.application === 'agent';
+      const denoiseEnabled = isAgent ? values.denoiseEnabled === 'on' : undefined;
+      const recordingEnabled = isAgent ? values.recordingEnabled === 'on' : undefined;
       await apiFetch<NumberDto>(`/numbers/${editingNumber.id}`, {
         method: 'PATCH',
         body: JSON.stringify({
@@ -346,11 +373,21 @@ export default function NumbersPage() {
           agentId: values.agentId || undefined,
           phoneId: values.phoneId || undefined,
           trunkId: values.trunkId || undefined,
+          denoiseEnabled,
+          recordingEnabled,
         }),
       });
       setEditDialogOpen(false);
       setEditingNumber(null);
-      editForm.reset({ value: '', application: 'agent', agentId: '', phoneId: '', trunkId: '' });
+      editForm.reset({
+        value: '',
+        application: 'agent',
+        agentId: '',
+        phoneId: '',
+        trunkId: '',
+        denoiseEnabled: 'on',
+        recordingEnabled: 'off',
+      });
       await loadNumbers();
     } catch (err) {
       if (err instanceof ApiError) {
@@ -411,6 +448,13 @@ export default function NumbersPage() {
         label: dictionary.numbers.applicationOptions[value],
       })),
     [dictionary.numbers.applicationOptions],
+  );
+  const toggleOptions = useMemo(
+    () => [
+      { value: 'on', label: dictionary.numbers.toggleOptions.on },
+      { value: 'off', label: dictionary.numbers.toggleOptions.off },
+    ],
+    [dictionary.numbers.toggleOptions],
   );
 
   const selectedCreateApplication = form.watch('application');
@@ -541,6 +585,58 @@ export default function NumbersPage() {
                                 {agentOptions.map((agent) => (
                                   <SelectItem key={agent.id} value={agent.id}>
                                     {agent.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  {selectedCreateApplication === 'agent' && (
+                    <FormField
+                      control={form.control}
+                      name="denoiseEnabled"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{dictionary.numbers.fields.denoise}</FormLabel>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value as ToggleValue}>
+                              <SelectTrigger>
+                                <SelectValue placeholder={dictionary.common.none} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {toggleOptions.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  {selectedCreateApplication === 'agent' && (
+                    <FormField
+                      control={form.control}
+                      name="recordingEnabled"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{dictionary.numbers.fields.recording}</FormLabel>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value as ToggleValue}>
+                              <SelectTrigger>
+                                <SelectValue placeholder={dictionary.common.none} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {toggleOptions.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -764,6 +860,58 @@ export default function NumbersPage() {
                             {agentOptions.map((agent) => (
                               <SelectItem key={agent.id} value={agent.id}>
                                 {agent.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {selectedEditApplication === 'agent' && (
+                <FormField
+                  control={editForm.control}
+                  name="denoiseEnabled"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{dictionary.numbers.fields.denoise}</FormLabel>
+                      <FormControl>
+                        <Select onValueChange={field.onChange} value={field.value as ToggleValue}>
+                          <SelectTrigger>
+                            <SelectValue placeholder={dictionary.common.none} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {toggleOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {selectedEditApplication === 'agent' && (
+                <FormField
+                  control={editForm.control}
+                  name="recordingEnabled"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{dictionary.numbers.fields.recording}</FormLabel>
+                      <FormControl>
+                        <Select onValueChange={field.onChange} value={field.value as ToggleValue}>
+                          <SelectTrigger>
+                            <SelectValue placeholder={dictionary.common.none} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {toggleOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
                               </SelectItem>
                             ))}
                           </SelectContent>

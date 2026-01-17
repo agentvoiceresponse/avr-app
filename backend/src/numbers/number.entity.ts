@@ -20,6 +20,12 @@ export class PhoneNumber {
   @Column({ type: 'text', default: 'agent' })
   application: 'agent' | 'internal' | 'transfer';
 
+  @Column({ type: 'boolean', default: true })
+  denoiseEnabled: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  recordingEnabled: boolean;
+
   @ManyToOne(() => Agent, (agent) => agent.numbers, {
     eager: true,
     nullable: true,

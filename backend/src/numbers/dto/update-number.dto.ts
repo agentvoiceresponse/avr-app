@@ -6,6 +6,7 @@ import {
   MaxLength,
   MinLength,
   IsUUID,
+  IsBoolean,
 } from 'class-validator';
 
 export class UpdateNumberDto {
@@ -33,4 +34,12 @@ export class UpdateNumberDto {
   @IsOptional()
   @IsUUID()
   trunkId?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  denoiseEnabled?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  recordingEnabled?: boolean;
 }

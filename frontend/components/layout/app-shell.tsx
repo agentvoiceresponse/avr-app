@@ -17,6 +17,7 @@ import {
   PhoneCall,
   Shield,
   X,
+  Download,
   MessageCircle,
   Github,
   BookOpen,
@@ -114,6 +115,7 @@ export function AppShell({ children }: PropsWithChildren) {
   const navObserveItems = useMemo<NavItem[]>(
     () => [
       { href: "/calls", label: dictionary.navigation.calls, icon: PhoneCall },
+      { href: "/recordings", label: dictionary.navigation.recordings, icon: Download },
       { href: "/dockers", label: dictionary.navigation.dockers, icon: Server },
     ],
     [dictionary]

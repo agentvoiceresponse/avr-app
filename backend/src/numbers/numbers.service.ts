@@ -48,6 +48,8 @@ export class NumbersService {
     const number = this.numbersRepository.create({
       value,
       application: dto.application,
+      denoiseEnabled: dto.denoiseEnabled,
+      recordingEnabled: dto.recordingEnabled,
       ...payload,
     });
 
@@ -96,6 +98,14 @@ export class NumbersService {
 
     if (dto.application) {
       number.application = dto.application;
+    }
+
+    if (dto.denoiseEnabled !== undefined) {
+      number.denoiseEnabled = dto.denoiseEnabled;
+    }
+
+    if (dto.recordingEnabled !== undefined) {
+      number.recordingEnabled = dto.recordingEnabled;
     }
 
     if (dto.agentId || dto.phoneId || dto.trunkId || dto.application) {

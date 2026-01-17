@@ -6,6 +6,7 @@ import {
   MaxLength,
   MinLength,
   IsUUID,
+  IsBoolean,
 } from 'class-validator';
 
 export class CreateNumberDto {
@@ -31,4 +32,12 @@ export class CreateNumberDto {
   @IsOptional()
   @IsUUID()
   trunkId?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  denoiseEnabled?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  recordingEnabled?: boolean;
 }

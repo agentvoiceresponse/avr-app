@@ -12,6 +12,7 @@ import { PhonesModule } from './phones/phones.module';
 import { NumbersModule } from './numbers/numbers.module';
 import { TrunksModule } from './trunks/trunks.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
+import { RecordingsModule } from './recordings/recordings.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     NumbersModule,
     TrunksModule,
     WebhooksModule,
+    RecordingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, RefreshCcw } from 'lucide-react';
-import { apiFetch, type PaginatedResponse } from '@/lib/api';
+import { Download, Eye, Play, RefreshCcw } from 'lucide-react';
+import { apiFetch, ApiError, getApiUrl, getStoredToken, type PaginatedResponse } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,6 +49,7 @@ interface CallInitiatedPayload {
   to?: string;
   uniqueid?: string;
   channel?: string;
+  recording?: boolean;
 }
 
 export default function CallsPage() {
@@ -70,6 +71,9 @@ export default function CallsPage() {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [selectedCall, setSelectedCall] = useState<CallDetailDto | null>(null);
+  const [audioMap, setAudioMap] = useState<Record<string, string>>({});
+  const [loadingAudioId, setLoadingAudioId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const extractInitiatedPayload = useCallback((events: CallEventDto[]) => {
     const initiated = events.find((event) => event.type === 'call_initiated');
@@ -89,6 +93,12 @@ export default function CallsPage() {
     }
     if (payload.channel) {
       normalized.channel = String(payload.channel);
+    }
+    if (payload.recording !== undefined) {
+      normalized.recording =
+        typeof payload.recording === 'boolean'
+          ? payload.recording
+          : String(payload.recording).toLowerCase() === 'true';
     }
     return Object.keys(normalized).length > 0 ? normalized : null;
   }, []);
@@ -228,6 +238,86 @@ export default function CallsPage() {
     () => (selectedCall ? extractInitiatedPayload(selectedCall.events ?? []) : null),
     [extractInitiatedPayload, selectedCall],
   );
+  const recordingAvailableById = useMemo(() => {
+    const map: Record<string, boolean> = {};
+    calls.forEach((call) => {
+      map[call.id] = Boolean(callInitiatedMap[call.id]?.recording);
+    });
+    return map;
+  }, [callInitiatedMap, calls]);
+
+  const handleDownload = useCallback(
+    async (call: CallSummaryDto) => {
+      setDownloadingId(call.id);
+      try {
+        const token = getStoredToken();
+        if (!token) {
+          throw new ApiError(dictionary.calls.errors.authRequired, 401);
+        }
+        const response = await fetch(`${getApiUrl()}/recordings/${call.uuid}/download`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new ApiError(await response.text(), response.status);
+        }
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${call.uuid}.wav`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError(dictionary.calls.errors.download);
+        }
+      } finally {
+        setDownloadingId(null);
+      }
+    },
+    [dictionary.calls.errors.authRequired, dictionary.calls.errors.download],
+  );
+
+  const handlePlay = useCallback(
+    async (call: CallSummaryDto) => {
+      if (audioMap[call.id]) {
+        return;
+      }
+      setLoadingAudioId(call.id);
+      try {
+        const token = getStoredToken();
+        if (!token) {
+          throw new ApiError(dictionary.calls.errors.authRequired, 401);
+        }
+        const response = await fetch(`${getApiUrl()}/recordings/${call.uuid}/download`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new ApiError(await response.text(), response.status);
+        }
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        setAudioMap((prev) => ({ ...prev, [call.id]: url }));
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError(dictionary.calls.errors.play);
+        }
+      } finally {
+        setLoadingAudioId(null);
+      }
+    },
+    [audioMap, dictionary.calls.errors.authRequired, dictionary.calls.errors.play],
+  );
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -260,8 +350,8 @@ export default function CallsPage() {
                     <TableHead>{dictionary.calls.table.uuid}</TableHead>
                     <TableHead>{dictionary.calls.table.from}</TableHead>
                     <TableHead>{dictionary.calls.table.to}</TableHead>
+                    <TableHead>{dictionary.calls.table.recording}</TableHead>
                     <TableHead>{dictionary.calls.table.startedAt}</TableHead>
-                    <TableHead>{dictionary.calls.table.agentId}</TableHead>
                     <TableHead>{dictionary.calls.table.endedAt}</TableHead>
                     <TableHead>{dictionary.calls.table.duration}</TableHead>
                     <TableHead>{dictionary.calls.table.status}</TableHead>
@@ -271,7 +361,7 @@ export default function CallsPage() {
                 <TableBody>
                   {calls.map((call) => (
                     <TableRow key={call.id}>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
+                      <TableCell className="max-w-[160px] truncate font-mono text-xs text-muted-foreground">
                         {call.uuid}
                       </TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">
@@ -280,16 +370,26 @@ export default function CallsPage() {
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         {callInitiatedMap[call.id]?.to ?? '—'}
                       </TableCell>
-                      <TableCell>{formatDateTime(call.startedAt)}</TableCell>
                       <TableCell>
-                        {call.agentId ? (
-                          <code className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
-                            {call.agentId}
-                          </code>
+                        {recordingAvailableById[call.id] ? (
+                          audioMap[call.id] ? (
+                            <audio controls src={audioMap[call.id]} className="h-8 w-full" />
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handlePlay(call)}
+                              disabled={loadingAudioId === call.id}
+                              aria-label={dictionary.calls.buttons.listen}
+                            >
+                              <Play className="h-4 w-4" />
+                            </Button>
+                          )
                         ) : (
-                          dictionary.common.none
+                          '—'
                         )}
                       </TableCell>
+                      <TableCell>{formatDateTime(call.startedAt)}</TableCell>
                       <TableCell>{formatDateTime(call.endedAt)}</TableCell>
                       <TableCell>{formatDuration(call.startedAt, call.endedAt)}</TableCell>
                       <TableCell>
@@ -298,14 +398,27 @@ export default function CallsPage() {
                           : dictionary.calls.events.call_started}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => openDetails(call.id)}
-                          aria-label={dictionary.calls.buttons.view}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => openDetails(call.id)}
+                            aria-label={dictionary.calls.buttons.view}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          {recordingAvailableById[call.id] ? (
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleDownload(call)}
+                              disabled={downloadingId === call.id}
+                              aria-label={dictionary.calls.buttons.download}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          ) : null}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -490,6 +603,55 @@ function EventRow({ event, dictionary }: EventRowProps) {
         <div className="space-y-1">
           <div className="text-xs uppercase text-muted-foreground">{roleLabel}</div>
           <p className="rounded bg-background/60 p-3 text-sm">{text}</p>
+        </div>
+      );
+    }
+    if (event.type === 'call_initiated') {
+      const payload = event.payload as Record<string, unknown>;
+      const recordingValue =
+        payload.recording === undefined
+          ? undefined
+          : typeof payload.recording === 'boolean'
+            ? payload.recording
+            : String(payload.recording).toLowerCase() === 'true';
+      return (
+        <div className="grid gap-2 text-xs text-muted-foreground md:grid-cols-2">
+          <div>
+            <span className="font-medium text-foreground">
+              {dictionary.calls.table.from}:
+            </span>{' '}
+            <span className="font-mono">{String(payload.from ?? '')}</span>
+          </div>
+          <div>
+            <span className="font-medium text-foreground">
+              {dictionary.calls.table.to}:
+            </span>{' '}
+            <span className="font-mono">{String(payload.to ?? '')}</span>
+          </div>
+          <div>
+            <span className="font-medium text-foreground">
+              {dictionary.calls.table.uniqueid}:
+            </span>{' '}
+            <span className="font-mono">{String(payload.uniqueid ?? '')}</span>
+          </div>
+          <div>
+            <span className="font-medium text-foreground">
+              {dictionary.calls.table.channel}:
+            </span>{' '}
+            <span className="font-mono">{String(payload.channel ?? '')}</span>
+          </div>
+          <div>
+            <span className="font-medium text-foreground">
+              {dictionary.calls.table.recording}:
+            </span>{' '}
+            <span className="font-mono">
+              {recordingValue === undefined
+                ? '—'
+                : recordingValue
+                  ? dictionary.common.enabled
+                  : dictionary.common.disabled}
+            </span>
+          </div>
         </div>
       );
     }

@@ -11,6 +11,8 @@ export const itDictionary = {
       it: 'Italiano',
     },
     none: 'Nessuno',
+    enabled: 'Attivo',
+    disabled: 'Disattivo',
     status: {
       running: 'In esecuzione',
       stopped: 'Fermo',
@@ -36,6 +38,7 @@ export const itDictionary = {
     phones: 'Telefoni',
     numbers: 'Numerazioni',
     trunks: 'Trunks',
+    recordings: 'Registrazioni',
     dockers: 'Dockers',
     calls: 'Chiamate',
   },
@@ -422,6 +425,8 @@ export const itDictionary = {
       agent: 'Agente',
       phone: 'Telefono',
       trunk: 'Trunk',
+      denoise: 'Denoise',
+      recording: 'Registrazione chiamata',
     },
     table: {
       number: 'Numero',
@@ -462,6 +467,34 @@ export const itDictionary = {
       agent: 'AI Agent',
       internal: 'Chiamata interna',
       transfer: 'Trasferimento',
+    },
+    toggleOptions: {
+      on: 'Attivo',
+      off: 'Disattivo',
+    },
+  },
+  recordings: {
+    title: 'Registrazioni',
+    subtitle: 'Consulta le registrazioni delle chiamate salvate da Asterisk.',
+    table: {
+      callUuid: 'UUID chiamata',
+      filename: 'Nome file',
+      recordedAt: 'Data registrazione',
+      size: 'Dimensione',
+      listen: 'Ascolta',
+      actions: 'Azioni',
+    },
+    buttons: {
+      refresh: 'Aggiorna',
+      download: 'Scarica',
+      listen: 'Ascolta',
+    },
+    empty: 'Nessuna registrazione trovata.',
+    errors: {
+      load: 'Impossibile caricare le registrazioni',
+      download: 'Impossibile scaricare la registrazione',
+      play: 'Impossibile riprodurre la registrazione',
+      authRequired: 'Autenticazione richiesta per accedere alle registrazioni',
     },
   },
   dockers: {
@@ -567,6 +600,7 @@ export const itDictionary = {
       uuid: 'UUID',
       from: 'Da',
       to: 'A',
+      recording: 'Registrazione',
       agentId: 'ID agente',
       startedAt: 'Inizio',
       endedAt: 'Fine',
@@ -580,6 +614,8 @@ export const itDictionary = {
       view: 'Dettagli',
       close: 'Chiudi',
       refresh: 'Aggiorna',
+      listen: 'Ascolta',
+      download: 'Scarica',
     },
     empty: 'Nessuna chiamata registrata.',
     loading: 'Caricamento eventi…',
@@ -599,6 +635,9 @@ export const itDictionary = {
     errors: {
       loadCalls: 'Impossibile caricare le chiamate',
       loadEvents: 'Impossibile caricare i dettagli della chiamata',
+      download: 'Impossibile scaricare la registrazione',
+      play: 'Impossibile riprodurre la registrazione',
+      authRequired: 'Autenticazione richiesta per accedere alle registrazioni',
     },
   },
   pagination: {

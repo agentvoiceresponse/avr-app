@@ -11,6 +11,8 @@ export const enDictionary = {
       it: 'Italiano',
     },
     none: 'None',
+    enabled: 'Enabled',
+    disabled: 'Disabled',
     status: {
       running: 'Running',
       stopped: 'Stopped',
@@ -36,6 +38,7 @@ export const enDictionary = {
     phones: 'Phones',
     numbers: 'Numbers',
     trunks: 'Trunks',
+    recordings: 'Recordings',
     dockers: 'Dockers',
     calls: 'Calls',
   },
@@ -421,6 +424,8 @@ export const enDictionary = {
       agent: 'Agent',
       phone: 'Phone',
       trunk: 'Trunk',
+      denoise: 'Denoise',
+      recording: 'Call recording',
     },
     table: {
       number: 'Number',
@@ -460,6 +465,34 @@ export const enDictionary = {
       agent: 'AI Agent',
       internal: 'Internal call',
       transfer: 'Transfer call',
+    },
+    toggleOptions: {
+      on: 'Enabled',
+      off: 'Disabled',
+    },
+  },
+  recordings: {
+    title: 'Recordings',
+    subtitle: 'Browse the call recordings stored by Asterisk.',
+    table: {
+      callUuid: 'Call UUID',
+      filename: 'Filename',
+      recordedAt: 'Recorded at',
+      size: 'Size',
+      listen: 'Listen',
+      actions: 'Actions',
+    },
+    buttons: {
+      refresh: 'Refresh',
+      download: 'Download',
+      listen: 'Listen',
+    },
+    empty: 'No recordings found.',
+    errors: {
+      load: 'Unable to load recordings',
+      download: 'Unable to download recording',
+      play: 'Unable to play recording',
+      authRequired: 'Authentication required to access recordings',
     },
   },
   dockers: {
@@ -565,6 +598,7 @@ export const enDictionary = {
       uuid: 'UUID',
       from: 'From',
       to: 'To',
+      recording: 'Recording',
       agentId: 'Agent ID',
       startedAt: 'Started',
       endedAt: 'Ended',
@@ -578,6 +612,8 @@ export const enDictionary = {
       view: 'View details',
       close: 'Close',
       refresh: 'Refresh',
+      listen: 'Listen',
+      download: 'Download',
     },
     empty: 'No calls received yet.',
     loading: 'Loading events…',
@@ -597,6 +633,9 @@ export const enDictionary = {
     errors: {
       loadCalls: 'Unable to load calls',
       loadEvents: 'Unable to load call details',
+      download: 'Unable to download recording',
+      play: 'Unable to play recording',
+      authRequired: 'Authentication required to access recordings',
     },
   },
   pagination: {
