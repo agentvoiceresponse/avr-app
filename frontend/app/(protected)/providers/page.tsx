@@ -79,7 +79,8 @@ type TemplateField = {
   placeholder?: string;
   required?: boolean;
   inputType?: 'text' | 'password';
-  widget?: 'textarea';
+  widget?: 'textarea' | 'select';
+  options?: { value: string; label: string }[];
 };
 
 interface ProviderTemplate {
@@ -121,6 +122,7 @@ export default function ProvidersPage() {
       defaults: {
         OPENAI_MODEL: 'gpt-4o-realtime-preview',
         OPENAI_VOICE: 'alloy',
+        OPENAI_LANGUAGE: 'auto',
       },
       fields: [
         {
@@ -140,6 +142,68 @@ export default function ProvidersPage() {
           key: 'OPENAI_VOICE',
           label: dictionary.providers.fieldsExtra.openaiVoice,
           placeholder: dictionary.providers.placeholders.openaiVoice,
+        },
+        {
+          key: 'OPENAI_LANGUAGE',
+          label: dictionary.providers.fieldsExtra.openaiLanguage,
+          widget: 'select',
+          options: [
+            { value: 'auto', label: dictionary.providers.languageOptions.autoDetect },
+            { value: 'af', label: dictionary.providers.languageOptions.afrikaans },
+            { value: 'ar', label: dictionary.providers.languageOptions.arabic },
+            { value: 'az', label: dictionary.providers.languageOptions.azerbaijani },
+            { value: 'be', label: dictionary.providers.languageOptions.belarusian },
+            { value: 'bg', label: dictionary.providers.languageOptions.bulgarian },
+            { value: 'bs', label: dictionary.providers.languageOptions.bosnian },
+            { value: 'ca', label: dictionary.providers.languageOptions.catalan },
+            { value: 'cs', label: dictionary.providers.languageOptions.czech },
+            { value: 'cy', label: dictionary.providers.languageOptions.welsh },
+            { value: 'da', label: dictionary.providers.languageOptions.danish },
+            { value: 'de', label: dictionary.providers.languageOptions.german },
+            { value: 'el', label: dictionary.providers.languageOptions.greek },
+            { value: 'en', label: dictionary.providers.languageOptions.english },
+            { value: 'es', label: dictionary.providers.languageOptions.spanish },
+            { value: 'et', label: dictionary.providers.languageOptions.estonian },
+            { value: 'fa', label: dictionary.providers.languageOptions.persian },
+            { value: 'fi', label: dictionary.providers.languageOptions.finnish },
+            { value: 'fr', label: dictionary.providers.languageOptions.french },
+            { value: 'gl', label: dictionary.providers.languageOptions.galician },
+            { value: 'he', label: dictionary.providers.languageOptions.hebrew },
+            { value: 'hi', label: dictionary.providers.languageOptions.hindi },
+            { value: 'hr', label: dictionary.providers.languageOptions.croatian },
+            { value: 'hu', label: dictionary.providers.languageOptions.hungarian },
+            { value: 'hy', label: dictionary.providers.languageOptions.armenian },
+            { value: 'id', label: dictionary.providers.languageOptions.indonesian },
+            { value: 'is', label: dictionary.providers.languageOptions.icelandic },
+            { value: 'it', label: dictionary.providers.languageOptions.italian },
+            { value: 'kk', label: dictionary.providers.languageOptions.kazakh },
+            { value: 'kn', label: dictionary.providers.languageOptions.kannada },
+            { value: 'ko', label: dictionary.providers.languageOptions.korean },
+            { value: 'lt', label: dictionary.providers.languageOptions.lithuanian },
+            { value: 'lv', label: dictionary.providers.languageOptions.latvian },
+            { value: 'mk', label: dictionary.providers.languageOptions.macedonian },
+            { value: 'ms', label: dictionary.providers.languageOptions.malay },
+            { value: 'ne', label: dictionary.providers.languageOptions.nepali },
+            { value: 'nl', label: dictionary.providers.languageOptions.dutch },
+            { value: 'no', label: dictionary.providers.languageOptions.norwegian },
+            { value: 'pl', label: dictionary.providers.languageOptions.polish },
+            { value: 'pt', label: dictionary.providers.languageOptions.portuguese },
+            { value: 'ro', label: dictionary.providers.languageOptions.romanian },
+            { value: 'ru', label: dictionary.providers.languageOptions.russian },
+            { value: 'sk', label: dictionary.providers.languageOptions.slovak },
+            { value: 'sl', label: dictionary.providers.languageOptions.slovenian },
+            { value: 'sr', label: dictionary.providers.languageOptions.serbian },
+            { value: 'sv', label: dictionary.providers.languageOptions.swedish },
+            { value: 'sw', label: dictionary.providers.languageOptions.swahili },
+            { value: 'ta', label: dictionary.providers.languageOptions.tamil },
+            { value: 'th', label: dictionary.providers.languageOptions.thai },
+            { value: 'tl', label: dictionary.providers.languageOptions.filipino },
+            { value: 'tr', label: dictionary.providers.languageOptions.turkish },
+            { value: 'uk', label: dictionary.providers.languageOptions.ukrainian },
+            { value: 'ur', label: dictionary.providers.languageOptions.urdu },
+            { value: 'vi', label: dictionary.providers.languageOptions.vietnamese },
+            { value: 'zh', label: dictionary.providers.languageOptions.chinese },
+          ],
         },
         {
           key: 'OPENAI_INSTRUCTIONS',
@@ -288,6 +352,11 @@ export default function ProvidersPage() {
     const envConfig = (provider.config?.env as Record<string, string>) ?? {};
     const envEntries = template
       ? template.fields.reduce((acc, field) => {
+          if (field.key === 'OPENAI_LANGUAGE') {
+            const raw = String(envConfig[field.key] ?? '');
+            acc[field.key] = !raw || raw === 'NULL' ? 'auto' : raw;
+            return acc;
+          }
           acc[field.key] = String(envConfig[field.key] ?? '');
           return acc;
         }, {} as Record<string, string>)
@@ -320,6 +389,9 @@ export default function ProvidersPage() {
         .map((field) => {
           const rawValue = values.env?.[field.key] ?? '';
           const trimmed = rawValue.trim();
+          if (field.key === 'OPENAI_LANGUAGE') {
+            return trimmed === 'auto' ? null : [field.key, trimmed] as [string, string];
+          }
           if (trimmed.length > 0) {
             return [field.key, trimmed] as [string, string];
           }
@@ -759,6 +831,19 @@ export default function ProvidersPage() {
                               <FormControl>
                                 {fieldConfig.widget === 'textarea' ? (
                                   <Textarea placeholder={fieldConfig.placeholder} {...field} />
+                                ) : fieldConfig.widget === 'select' ? (
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder={fieldConfig.placeholder} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {(fieldConfig.options ?? []).map((option) => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                          {option.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
                                 ) : (
                                   <Input
                                     type={fieldConfig.inputType === 'password' ? 'password' : 'text'}
@@ -986,6 +1071,19 @@ export default function ProvidersPage() {
                             <FormControl>
                               {fieldConfig.widget === 'textarea' ? (
                                 <Textarea placeholder={fieldConfig.placeholder} {...field} />
+                              ) : fieldConfig.widget === 'select' ? (
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder={fieldConfig.placeholder} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {(fieldConfig.options ?? []).map((option) => (
+                                      <SelectItem key={option.value} value={option.value}>
+                                        {option.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               ) : (
                                 <Input
                                   type={fieldConfig.inputType === 'password' ? 'password' : 'text'}

@@ -275,16 +275,25 @@ export class AgentsService {
     type: ProviderType,
     port?: number,
   ): string[] {
-    const providerEnv = Object.entries(provider.config?.env ?? {}).map(([key, value]) => {
-      switch (key) {
-        case 'OPENAI_INSTRUCTIONS':
-          return `${this.isValidUrl(value) ? 'OPENAI_URL_INSTRUCTIONS' : 'OPENAI_INSTRUCTIONS'}=${value}`;
-        case 'GEMINI_INSTRUCTIONS':
-          return `${this.isValidUrl(value) ? 'GEMINI_URL_INSTRUCTIONS' : 'GEMINI_INSTRUCTIONS'}=${value}`;
-        default:
-          return `${key}=${value}`;
-      }
-    });
+    const providerEnv = Object.entries(provider.config?.env ?? {})
+      .map(([key, value]) => {
+        switch (key) {
+          case 'OPENAI_INSTRUCTIONS':
+            return `${this.isValidUrl(value) ? 'OPENAI_URL_INSTRUCTIONS' : 'OPENAI_INSTRUCTIONS'}=${value}`;
+        case 'OPENAI_LANGUAGE': {
+          const language = value ? String(value) : '';
+          if (!language || language === 'NULL' || language === 'auto') {
+            return null;
+          }
+          return `OPENAI_LANGUAGE=${language}`;
+        }
+          case 'GEMINI_INSTRUCTIONS':
+            return `${this.isValidUrl(value) ? 'GEMINI_URL_INSTRUCTIONS' : 'GEMINI_INSTRUCTIONS'}=${value}`;
+          default:
+            return `${key}=${value}`;
+        }
+      })
+      .filter((entry): entry is string => Boolean(entry));
     const env = new Set([...baseEnv, ...providerEnv]);
     env.add(`PROVIDER_${type}_ID=${provider.id}`);
     env.add(`PROVIDER_${type}_NAME=${provider.name}`);

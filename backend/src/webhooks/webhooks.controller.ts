@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Headers,
+  Logger,
   NotFoundException,
   Param,
   Post,
@@ -14,6 +15,8 @@ import { PaginatedResult, PaginationQuery } from '../common/pagination';
 
 @Controller('webhooks')
 export class WebhooksController {
+  private readonly logger = new Logger(WebhooksController.name);
+
   constructor(private readonly webhooksService: WebhooksService) {}
 
   @Post()
@@ -23,6 +26,7 @@ export class WebhooksController {
     @Headers('x-avr-agent-id') agentId: string | undefined,
   ) {
     this.webhooksService.verifySecret(secret);
+    await this.forwardWebhook(event, agentId);
     await this.webhooksService.handleEvent(event, agentId);
     return { status: 'ok' };
   }
@@ -102,5 +106,38 @@ export class WebhooksController {
     const date = new Date();
     date.setMonth(date.getMonth() - months);
     return date;
+  }
+
+  private async forwardWebhook(
+    event: WebhookEventDto,
+    agentId?: string,
+  ): Promise<void> {
+    const forwardUrl = process.env.WEBHOOK_FORWARD_URL;
+    if (!forwardUrl) {
+      return;
+    }
+    const secret = process.env.WEBHOOK_SECRET;
+    if (!secret) {
+      this.logger.warn('WEBHOOK_SECRET not set; skipping webhook forwarding');
+      return;
+    }
+    try {
+      const response = await fetch(forwardUrl, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-avr-webhook-secret': secret,
+          ...(agentId ? { 'x-avr-agent-id': agentId } : {}),
+        },
+        body: JSON.stringify(event),
+      });
+      if (!response.ok) {
+        this.logger.warn(
+          `Webhook forward failed with status ${response.status}`,
+        );
+      }
+    } catch (error) {
+      this.logger.error('Failed to forward webhook', error as Error);
+    }
   }
 }
