@@ -359,6 +359,7 @@ export default function UsersPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>{dictionary.users.table.id}</TableHead>
                     <TableHead>{dictionary.users.table.username}</TableHead>
                     <TableHead>{dictionary.users.table.role}</TableHead>
                     {isAdmin ? (
@@ -369,6 +370,9 @@ export default function UsersPage() {
               <TableBody>
                 {users.map((item) => (
                   <TableRow key={item.id}>
+                    <TableCell className="max-w-[180px] truncate font-mono text-xs text-muted-foreground">
+                      {item.id}
+                    </TableCell>
                     <TableCell className="font-medium">{item.username}</TableCell>
                     <TableCell className="capitalize">
                       {dictionary.users.roles[item.role]}

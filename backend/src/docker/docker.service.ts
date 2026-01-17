@@ -39,7 +39,7 @@ export class DockerService {
       name,
       Image: image,
       Env: env,
-      Labels: { agentName: name },
+      Labels: this.getDefaultLabels(name),
       NetworkingConfig: {
         EndpointsConfig: {
           avr: {},
@@ -78,7 +78,10 @@ export class DockerService {
   }
 
   async listAllContainers(): Promise<Dockerode.ContainerInfo[]> {
-    return this.docker.listContainers({ all: true });
+    return this.docker.listContainers({
+      all: true,
+      filters: { label: this.getDefaultLabelFilters() },
+    });
   }
 
   async getContainerInspect(
@@ -223,6 +226,27 @@ export class DockerService {
       filters: { name: [name] },
     });
     return containers.length > 0 ? containers[0] : null;
+  }
+
+  private getDefaultLabels(name: string): Record<string, string> {
+    const labels: Record<string, string> = {
+      agentName: name,
+      app: 'AVR',
+    };
+    const tenant = process.env.TENANT;
+    if (tenant) {
+      labels.tenant = tenant;
+    }
+    return labels;
+  }
+
+  private getDefaultLabelFilters(): string[] {
+    const filters = ['app=AVR'];
+    const tenant = process.env.TENANT;
+    if (tenant) {
+      filters.push(`tenant=${tenant}`);
+    }
+    return filters;
   }
 
   private async pullImage(image: string): Promise<void> {

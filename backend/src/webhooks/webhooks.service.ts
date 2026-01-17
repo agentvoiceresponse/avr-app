@@ -64,6 +64,7 @@ export class WebhooksService {
     }
 
     const relevantTypes: WebhookEventType[] = [
+      'call_initiated',
       'call_started',
       'call_ended',
       'transcription',

@@ -29,7 +29,13 @@ interface CallSummaryDto {
 
 interface CallEventDto {
   id: string;
-  type: 'call_started' | 'call_ended' | 'interruption' | 'transcription' | 'dtmf_digit';
+  type:
+    | 'call_initiated'
+    | 'call_started'
+    | 'call_ended'
+    | 'interruption'
+    | 'transcription'
+    | 'dtmf_digit';
   timestamp: string;
   payload?: Record<string, unknown> | null;
 }
@@ -38,9 +44,19 @@ interface CallDetailDto extends CallSummaryDto {
   events: CallEventDto[];
 }
 
+interface CallInitiatedPayload {
+  from?: string;
+  to?: string;
+  uniqueid?: string;
+  channel?: string;
+}
+
 export default function CallsPage() {
   const { dictionary } = useI18n();
   const [calls, setCalls] = useState<CallSummaryDto[]>([]);
+  const [callInitiatedMap, setCallInitiatedMap] = useState<
+    Record<string, CallInitiatedPayload | null>
+  >({});
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -54,6 +70,28 @@ export default function CallsPage() {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [selectedCall, setSelectedCall] = useState<CallDetailDto | null>(null);
+
+  const extractInitiatedPayload = useCallback((events: CallEventDto[]) => {
+    const initiated = events.find((event) => event.type === 'call_initiated');
+    if (!initiated?.payload || typeof initiated.payload !== 'object') {
+      return null;
+    }
+    const payload = initiated.payload as Record<string, unknown>;
+    const normalized: CallInitiatedPayload = {};
+    if (payload.from) {
+      normalized.from = String(payload.from);
+    }
+    if (payload.to) {
+      normalized.to = String(payload.to);
+    }
+    if (payload.uniqueid) {
+      normalized.uniqueid = String(payload.uniqueid);
+    }
+    if (payload.channel) {
+      normalized.channel = String(payload.channel);
+    }
+    return Object.keys(normalized).length > 0 ? normalized : null;
+  }, []);
 
   const loadCalls = useCallback(async () => {
     setLoading(true);
@@ -86,17 +124,59 @@ export default function CallsPage() {
     loadCalls();
   }, [loadCalls]);
 
+  useEffect(() => {
+    if (calls.length === 0) {
+      return;
+    }
+    const pendingIds = calls
+      .map((call) => call.id)
+      .filter((id) => !(id in callInitiatedMap));
+    if (pendingIds.length === 0) {
+      return;
+    }
+    let active = true;
+    const loadInitiated = async () => {
+      const results = await Promise.allSettled(
+        pendingIds.map(async (id) => {
+          const detail = await apiFetch<CallDetailDto>(`/webhooks/calls/${id}`);
+          return { id, payload: extractInitiatedPayload(detail.events ?? []) };
+        }),
+      );
+      if (!active) {
+        return;
+      }
+      setCallInitiatedMap((prev) => {
+        const next = { ...prev };
+        results.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            next[result.value.id] = result.value.payload;
+          }
+        });
+        return next;
+      });
+    };
+    loadInitiated();
+    return () => {
+      active = false;
+    };
+  }, [calls, callInitiatedMap, extractInitiatedPayload]);
+
   const openDetails = async (callId: string) => {
     setDetailDialogOpen(true);
     setDetailLoading(true);
     try {
       const data = await apiFetch<CallDetailDto>(`/webhooks/calls/${callId}`);
-      setSelectedCall({
+      const next = {
         ...data,
         events: [...(data.events ?? [])].sort(
           (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
         ),
-      });
+      };
+      setSelectedCall(next);
+      setCallInitiatedMap((prev) => ({
+        ...prev,
+        [callId]: extractInitiatedPayload(next.events ?? []),
+      }));
     } catch (err) {
       setSelectedCall(null);
       if (err instanceof Error) {
@@ -144,6 +224,10 @@ export default function CallsPage() {
   );
 
   const isCompleted = (call: CallSummaryDto) => Boolean(call.startedAt) && Boolean(call.endedAt);
+  const selectedInitiatedPayload = useMemo(
+    () => (selectedCall ? extractInitiatedPayload(selectedCall.events ?? []) : null),
+    [extractInitiatedPayload, selectedCall],
+  );
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -174,6 +258,8 @@ export default function CallsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>{dictionary.calls.table.uuid}</TableHead>
+                    <TableHead>{dictionary.calls.table.from}</TableHead>
+                    <TableHead>{dictionary.calls.table.to}</TableHead>
                     <TableHead>{dictionary.calls.table.startedAt}</TableHead>
                     <TableHead>{dictionary.calls.table.agentId}</TableHead>
                     <TableHead>{dictionary.calls.table.endedAt}</TableHead>
@@ -187,6 +273,12 @@ export default function CallsPage() {
                     <TableRow key={call.id}>
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         {call.uuid}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {callInitiatedMap[call.id]?.from ?? '—'}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {callInitiatedMap[call.id]?.to ?? '—'}
                       </TableCell>
                       <TableCell>{formatDateTime(call.startedAt)}</TableCell>
                       <TableCell>
@@ -272,6 +364,30 @@ export default function CallsPage() {
                   </span>{' '}
                   {selectedCall.agentId ?? dictionary.common.none}
                 </div>
+                <div>
+                  <span className="font-medium text-foreground">
+                    {dictionary.calls.table.from}:
+                  </span>{' '}
+                  {selectedInitiatedPayload?.from ?? dictionary.common.none}
+                </div>
+                <div>
+                  <span className="font-medium text-foreground">
+                    {dictionary.calls.table.to}:
+                  </span>{' '}
+                  {selectedInitiatedPayload?.to ?? dictionary.common.none}
+                </div>
+                <div>
+                  <span className="font-medium text-foreground">
+                    {dictionary.calls.table.uniqueid}:
+                  </span>{' '}
+                  {selectedInitiatedPayload?.uniqueid ?? dictionary.common.none}
+                </div>
+                <div>
+                  <span className="font-medium text-foreground">
+                    {dictionary.calls.table.channel}:
+                  </span>{' '}
+                  {selectedInitiatedPayload?.channel ?? dictionary.common.none}
+                </div>
               </div>
               <div className="max-h-[60vh] space-y-3 overflow-auto rounded-md border border-border/60 bg-muted/40 p-4">
                 {selectedCall.events.map((event) => (
@@ -329,6 +445,37 @@ function EventRow({ event, dictionary }: EventRowProps) {
   const renderPayload = () => {
     if (!event.payload) {
       return null;
+    }
+    if (event.type === 'call_initiated') {
+      const payload = event.payload as Record<string, unknown>;
+      return (
+        <div className="grid gap-2 text-xs text-muted-foreground md:grid-cols-2">
+          <div>
+            <span className="font-medium text-foreground">
+              {dictionary.calls.table.from}:
+            </span>{' '}
+            <span className="font-mono">{String(payload.from ?? '')}</span>
+          </div>
+          <div>
+            <span className="font-medium text-foreground">
+              {dictionary.calls.table.to}:
+            </span>{' '}
+            <span className="font-mono">{String(payload.to ?? '')}</span>
+          </div>
+          <div>
+            <span className="font-medium text-foreground">
+              {dictionary.calls.table.uniqueid}:
+            </span>{' '}
+            <span className="font-mono">{String(payload.uniqueid ?? '')}</span>
+          </div>
+          <div>
+            <span className="font-medium text-foreground">
+              {dictionary.calls.table.channel}:
+            </span>{' '}
+            <span className="font-mono">{String(payload.channel ?? '')}</span>
+          </div>
+        </div>
+      );
     }
     if (event.type === 'transcription') {
       const roleRaw = String(event.payload.role ?? 'user');

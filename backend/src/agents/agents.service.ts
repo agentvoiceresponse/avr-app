@@ -38,6 +38,7 @@ export class AgentsService {
       name: createAgentDto.name,
       mode: createAgentDto.mode ?? AgentMode.PIPELINE,
       port: Math.floor(Math.random() * 1000) + 5000,
+      httpPort: Math.floor(Math.random() * 1000) + 7000,
     });
 
     agent.providerAsr = await this.resolveProvider(
@@ -87,6 +88,11 @@ export class AgentsService {
 
     if (updateAgentDto.mode) {
       agent.mode = updateAgentDto.mode;
+    }
+
+    // Retrocompatibily: if httpPort is not set, generate a random port
+    if (agent.httpPort === null) {
+      agent.httpPort = Math.floor(Math.random() * 1000) + 7000;
     }
 
     if (updateAgentDto.providerAsrId !== undefined) {
@@ -184,6 +190,7 @@ export class AgentsService {
     if (Object.keys(containerIds).length) {
       const containerName = this.buildContainerName(agent.id);
       coreEnv.push(`PORT=${agent.port}`);
+      coreEnv.push(`HTTP_PORT=${agent.httpPort}`);
       containerIds['core'] = await this.dockerService.runContainer(
         containerName,
         this.defaultImage,

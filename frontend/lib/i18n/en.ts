@@ -111,6 +111,7 @@ export const enDictionary = {
       providerSts: 'STS provider',
     },
     table: {
+      id: 'ID',
       name: 'Name',
       status: 'Status',
       providerAsr: 'ASR',
@@ -162,6 +163,7 @@ export const enDictionary = {
     editDescription: 'Modify provider environment variables. Name, type, template and Docker image cannot be changed.',
     tableTitle: 'Provider list',
     table: {
+      id: 'ID',
       name: 'Name',
       type: 'Type',
       image: 'Image',
@@ -250,6 +252,7 @@ export const enDictionary = {
     editDescription: 'Update role or credentials for the selected user.',
     tableTitle: 'User list',
     table: {
+      id: 'ID',
       username: 'Username',
       role: 'Role',
       actions: 'Actions',
@@ -499,10 +502,14 @@ export const enDictionary = {
     subtitle: 'Review call lifecycle and transcripts received via webhooks.',
     table: {
       uuid: 'UUID',
+      from: 'From',
+      to: 'To',
       agentId: 'Agent ID',
       startedAt: 'Started',
       endedAt: 'Ended',
       duration: 'Duration',
+      uniqueid: 'Unique ID',
+      channel: 'Channel',
       status: 'Status',
       actions: 'Actions',
     },
@@ -515,6 +522,7 @@ export const enDictionary = {
     loading: 'Loading events…',
     durationUnknown: '—',
     events: {
+      call_initiated: 'Call initiated',
       call_started: 'Call started',
       call_ended: 'Call ended',
       interruption: 'Interruption',

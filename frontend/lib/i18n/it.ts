@@ -111,6 +111,7 @@ export const itDictionary = {
       providerSts: 'Provider STS',
     },
     table: {
+      id: 'ID',
       name: 'Nome',
       status: 'Stato',
       providerAsr: 'ASR',
@@ -162,6 +163,7 @@ export const itDictionary = {
     editDescription: "Modifica le variabili d'ambiente del provider. Nome, tipo, template e immagine Docker non possono essere modificati.",
     tableTitle: 'Elenco provider',
     table: {
+      id: 'ID',
       name: 'Nome',
       type: 'Tipo',
       image: 'Immagine',
@@ -250,6 +252,7 @@ export const itDictionary = {
     editDescription: "Aggiorna ruolo o credenziali dell'utente selezionato.",
     tableTitle: 'Elenco utenti',
     table: {
+      id: 'ID',
       username: 'Username',
       role: 'Ruolo',
       actions: 'Azioni',
@@ -501,10 +504,14 @@ export const itDictionary = {
     subtitle: 'Consulta lo stato delle chiamate e le trascrizioni ricevute via webhook.',
     table: {
       uuid: 'UUID',
+      from: 'Da',
+      to: 'A',
       agentId: 'ID agente',
       startedAt: 'Inizio',
       endedAt: 'Fine',
       duration: 'Durata',
+      uniqueid: 'Unique ID',
+      channel: 'Canale',
       status: 'Stato',
       actions: 'Azioni',
     },
@@ -517,6 +524,7 @@ export const itDictionary = {
     loading: 'Caricamento eventi…',
     durationUnknown: '—',
     events: {
+      call_initiated: 'Chiamata avviata',
       call_started: 'Chiamata avviata',
       call_ended: 'Chiamata terminata',
       interruption: 'Interruzione',

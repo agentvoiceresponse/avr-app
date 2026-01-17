@@ -200,6 +200,12 @@ export class AsteriskService {
           ' same => n,Wait(1)',
           ' same => n,Set(AVR_NUMBER=${CALLERID(num)})',
           " same => n,Set(UUID=${SHELL(uuidgen | tr -d '\\n')})",
+          " same => n,Set(JSON_BODY={\"uuid\":\"${UUID}\",\"payload\":{\"from\":\"${CALLERID(num)}\",\"to\":\"${EXTEN}\",\"uniqueid\":\"${UNIQUEID}\",\"channel\":\"${CHANNEL}\"}})",
+          " same => n,Set(CURLOPT(httpheader)=Content-Type: application/json)",
+          " same => n,Set(JSON_RESPONSE=${CURL(http://avr-core-" + agent.id + ":" + agent.httpPort + "/call,${JSON_BODY})})",
+          " same => n,NoOp(JSON_BODY: ${JSON_BODY})",
+          " same => n,NoOp(JSON_RESPONSE: ${JSON_RESPONSE})",
+          " same => n,Set(DENOISE(rx)=on)",
           ' same => n,Dial(AudioSocket/avr-core-' +
             agent.id +
             ':' +

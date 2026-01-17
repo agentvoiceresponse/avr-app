@@ -33,6 +33,9 @@ export class Agent {
   @Column({ type: 'integer', nullable: true })
   port: number;
 
+  @Column({ type: 'integer', nullable: true })
+  httpPort: number;
+
   @Column({ type: 'text', default: AgentMode.PIPELINE })
   mode: AgentMode;
 

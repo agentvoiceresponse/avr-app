@@ -562,6 +562,7 @@ export default function AgentsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>{dictionary.agents.table.id}</TableHead>
                     <TableHead>{dictionary.agents.table.name}</TableHead>
                     <TableHead>{dictionary.agents.table.status}</TableHead>
                     <TableHead>{dictionary.agents.table.providerAsr}</TableHead>
@@ -574,6 +575,9 @@ export default function AgentsPage() {
                 <TableBody>
                   {agents.map((agent) => (
                     <TableRow key={agent.id}>
+                      <TableCell className="max-w-[180px] truncate font-mono text-xs text-muted-foreground">
+                        {agent.id}
+                      </TableCell>
                       <TableCell className="font-medium">{agent.name}</TableCell>
                       <TableCell>
                         <Badge variant={agent.status === 'running' ? 'default' : 'secondary'}>

@@ -803,6 +803,7 @@ export default function ProvidersPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                  <TableHead>{dictionary.providers.table.id}</TableHead>
                   <TableHead>{dictionary.providers.table.name}</TableHead>
                   <TableHead>{dictionary.providers.table.type}</TableHead>
                   <TableHead>{dictionary.providers.table.image}</TableHead>
@@ -812,6 +813,9 @@ export default function ProvidersPage() {
                 <TableBody>
                   {providers.map((provider) => (
                     <TableRow key={provider.id}>
+                      <TableCell className="max-w-[180px] truncate font-mono text-xs text-muted-foreground">
+                        {provider.id}
+                      </TableCell>
                       <TableCell className="font-medium">{provider.name}</TableCell>
                       <TableCell>{provider.type}</TableCell>
                       <TableCell>{provider.config?.image ?? '—'}</TableCell>

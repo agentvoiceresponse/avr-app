@@ -8,6 +8,7 @@ import {
 import { Call } from './call.entity';
 
 export type WebhookEventType =
+  | 'call_initiated'
   | 'call_started'
   | 'call_ended'
   | 'interruption'

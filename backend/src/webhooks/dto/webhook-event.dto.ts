@@ -13,6 +13,7 @@ export class WebhookEventDto {
 
   @IsString()
   @IsIn([
+    'call_initiated',
     'call_started',
     'call_ended',
     'interruption',
