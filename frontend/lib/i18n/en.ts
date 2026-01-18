@@ -615,6 +615,13 @@ export const enDictionary = {
       listen: 'Listen',
       download: 'Download',
     },
+    filters: {
+      uuid: 'Filter by UUID',
+      startedFrom: 'Started from',
+      startedTo: 'Started to',
+      apply: 'Apply filters',
+      clear: 'Clear filters',
+    },
     empty: 'No calls received yet.',
     loading: 'Loading events…',
     durationUnknown: '—',

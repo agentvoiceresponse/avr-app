@@ -617,6 +617,13 @@ export const itDictionary = {
       listen: 'Ascolta',
       download: 'Scarica',
     },
+    filters: {
+      uuid: 'Filtra per UUID',
+      startedFrom: 'Inizio da',
+      startedTo: 'Inizio a',
+      apply: 'Applica filtri',
+      clear: 'Pulisci filtri',
+    },
     empty: 'Nessuna chiamata registrata.',
     loading: 'Caricamento eventi…',
     durationUnknown: '—',

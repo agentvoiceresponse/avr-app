@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Play, RefreshCcw } from 'lucide-react';
+import { ArrowUpDown, Download, Play, RefreshCcw } from 'lucide-react';
 import { apiFetch, ApiError, getApiUrl, getStoredToken } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ export default function RecordingsPage() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [audioMap, setAudioMap] = useState<Record<string, string>>({});
   const [loadingAudioId, setLoadingAudioId] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const loadRecordings = useCallback(async () => {
     setLoading(true);
@@ -71,13 +72,12 @@ export default function RecordingsPage() {
     return `${size.toFixed(size >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
   }, []);
 
-  const sortedRecordings = useMemo(
-    () =>
-      [...recordings].sort(
-        (a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime(),
-      ),
-    [recordings],
-  );
+  const sortedRecordings = useMemo(() => {
+    const direction = sortDirection === 'asc' ? 1 : -1;
+    return [...recordings].sort(
+      (a, b) => direction * (new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime()),
+    );
+  }, [recordings, sortDirection]);
 
   const handleDownload = useCallback(
     async (recording: RecordingDto) => {
@@ -182,7 +182,20 @@ export default function RecordingsPage() {
                   <TableRow>
                     <TableHead>{dictionary.recordings.table.callUuid}</TableHead>
                     <TableHead>{dictionary.recordings.table.filename}</TableHead>
-                    <TableHead>{dictionary.recordings.table.recordedAt}</TableHead>
+                    <TableHead>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+                        }
+                        className="h-7 px-2"
+                      >
+                        {dictionary.recordings.table.recordedAt}
+                        <ArrowUpDown className="ml-2 h-3 w-3" />
+                      </Button>
+                    </TableHead>
                     <TableHead>{dictionary.recordings.table.size}</TableHead>
                     <TableHead>{dictionary.recordings.table.listen}</TableHead>
                     <TableHead className="text-right">{dictionary.recordings.table.actions}</TableHead>

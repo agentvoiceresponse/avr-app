@@ -84,21 +84,50 @@ export class WebhooksService {
   }
 
   async listCalls(
-    agentId?: string | null,
-    since?: Date,
+    filters: {
+      agentId?: string | null;
+      since?: Date;
+      uuid?: string;
+      startedFrom?: string;
+      startedTo?: string;
+      sortField?: 'startedAt' | 'endedAt';
+      sortDirection?: 'asc' | 'desc';
+    },
     paginationQuery: PaginationQuery = {},
   ): Promise<PaginatedResult<Call>> {
     const qb = this.callRepository.createQueryBuilder('call');
 
-    if (agentId) {
-      qb.andWhere('call.agentId = :agentId', { agentId });
+    if (filters.agentId) {
+      qb.andWhere('call.agentId = :agentId', { agentId: filters.agentId });
     }
 
-    if (since) {
-      qb.andWhere('call.startedAt >= :since', { since: since.toISOString() });
+    if (filters.uuid) {
+      qb.andWhere('call.uuid LIKE :uuid', { uuid: `%${filters.uuid}%` });
     }
 
-    qb.orderBy('call.startedAt', 'DESC').addOrderBy('call.id', 'DESC');
+    if (filters.since) {
+      qb.andWhere('call.startedAt >= :since', {
+        since: filters.since.toISOString(),
+      });
+    }
+
+    const startedFrom = this.parseDate(filters.startedFrom);
+    if (startedFrom) {
+      qb.andWhere('call.startedAt >= :startedFrom', {
+        startedFrom: startedFrom.toISOString(),
+      });
+    }
+
+    const startedTo = this.parseDate(filters.startedTo, true);
+    if (startedTo) {
+      qb.andWhere('call.startedAt <= :startedTo', {
+        startedTo: startedTo.toISOString(),
+      });
+    }
+
+    const sortField = filters.sortField === 'endedAt' ? 'call.endedAt' : 'call.startedAt';
+    const sortDirection = filters.sortDirection === 'asc' ? 'ASC' : 'DESC';
+    qb.orderBy(sortField, sortDirection).addOrderBy('call.id', 'DESC');
 
     const { skip, take, page, limit } = getPagination(paginationQuery);
     qb.skip(skip).take(take);
@@ -106,6 +135,22 @@ export class WebhooksService {
     const [data, total] = await qb.getManyAndCount();
 
     return buildPaginatedResult(data, total, page, limit);
+  }
+
+  private parseDate(value?: string, endOfDay = false): Date | null {
+    if (!value) {
+      return null;
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+    if (endOfDay) {
+      date.setHours(23, 59, 59, 999);
+    } else {
+      date.setHours(0, 0, 0, 0);
+    }
+    return date;
   }
 
   async getCallWithEvents(callId: string): Promise<Call | null> {

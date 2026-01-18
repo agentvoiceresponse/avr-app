@@ -37,6 +37,11 @@ export class WebhooksController {
     query: PaginationQuery & {
       agentId?: string;
       range?: string;
+      uuid?: string;
+      startedFrom?: string;
+      startedTo?: string;
+      sortField?: 'startedAt' | 'endedAt';
+      sortDirection?: 'asc' | 'desc';
     },
   ): Promise<
     PaginatedResult<{
@@ -47,9 +52,28 @@ export class WebhooksController {
       endedAt?: Date | null;
     }>
   > {
-    const { agentId, range } = query;
+    const {
+      agentId,
+      range,
+      uuid,
+      startedFrom,
+      startedTo,
+      sortField,
+      sortDirection,
+    } = query;
     const since = this.resolveRange(range);
-    const result = await this.webhooksService.listCalls(agentId, since, query);
+    const result = await this.webhooksService.listCalls(
+      {
+        agentId,
+        since,
+        uuid,
+        startedFrom,
+        startedTo,
+        sortField,
+        sortDirection,
+      },
+      query,
+    );
     return {
       ...result,
       data: result.data.map((call) => ({

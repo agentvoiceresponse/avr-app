@@ -209,7 +209,7 @@ export class AsteriskService {
           " same => n,NoOp(JSON_RESPONSE: ${JSON_RESPONSE})",
         ];
         if (recordingEnabled) {
-          lines.push(' same => n,MixMonitor(${UUID}.wav)');
+          lines.push(' same => n,MixMonitor(/var/spool/asterisk/monitor/' + tenant+ '/${UUID}.wav)');
         }
         if (denoiseEnabled) {
           lines.push(' same => n,Set(DENOISE(rx)=on)');

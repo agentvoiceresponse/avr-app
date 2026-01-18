@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Eye, Play, RefreshCcw } from 'lucide-react';
+import { ArrowUpDown, Download, Eye, Play, RefreshCcw } from 'lucide-react';
 import { apiFetch, ApiError, getApiUrl, getStoredToken, type PaginatedResponse } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TablePagination } from '@/components/ui/pagination';
+import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -74,6 +75,20 @@ export default function CallsPage() {
   const [audioMap, setAudioMap] = useState<Record<string, string>>({});
   const [loadingAudioId, setLoadingAudioId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [filters, setFilters] = useState({
+    uuid: '',
+    startedFrom: '',
+    startedTo: '',
+  });
+  const [sort, setSort] = useState<{ field: 'startedAt' | 'endedAt'; direction: 'asc' | 'desc' }>({
+    field: 'startedAt',
+    direction: 'desc',
+  });
+  const filtersRef = useRef(filters);
+
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
 
   const extractInitiatedPayload = useCallback((events: CallEventDto[]) => {
     const initiated = events.find((event) => event.type === 'call_initiated');
@@ -103,11 +118,20 @@ export default function CallsPage() {
     return Object.keys(normalized).length > 0 ? normalized : null;
   }, []);
 
-  const loadCalls = useCallback(async () => {
+  const loadCalls = useCallback(async (overrideFilters?: typeof filters) => {
     setLoading(true);
     try {
+      const activeFilters = overrideFilters ?? filtersRef.current;
       const data = await apiFetch<PaginatedResponse<CallSummaryDto>>('/webhooks/calls', {
-        query: { page: pagination.page, limit: pagination.limit },
+        query: {
+          page: pagination.page,
+          limit: pagination.limit,
+          uuid: activeFilters.uuid || undefined,
+          startedFrom: activeFilters.startedFrom || undefined,
+          startedTo: activeFilters.startedTo || undefined,
+          sortField: sort.field,
+          sortDirection: sort.direction,
+        },
         paginated: true,
       });
       setCalls(data.data);
@@ -128,7 +152,7 @@ export default function CallsPage() {
     } finally {
       setLoading(false);
     }
-  }, [dictionary.calls.errors.loadCalls, pagination.limit, pagination.page]);
+  }, [dictionary.calls.errors.loadCalls, pagination.limit, pagination.page, sort]);
 
   useEffect(() => {
     loadCalls();
@@ -238,6 +262,15 @@ export default function CallsPage() {
     () => (selectedCall ? extractInitiatedPayload(selectedCall.events ?? []) : null),
     [extractInitiatedPayload, selectedCall],
   );
+  const toggleSort = useCallback((field: 'startedAt' | 'endedAt') => {
+    setSort((prev) => {
+      if (prev.field === field) {
+        return { field, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { field, direction: 'desc' };
+    });
+    setPagination((prev) => ({ ...prev, page: 1 }));
+  }, []);
   const recordingAvailableById = useMemo(() => {
     const map: Record<string, boolean> = {};
     calls.forEach((call) => {
@@ -326,7 +359,11 @@ export default function CallsPage() {
           <h1 className="text-2xl font-semibold tracking-tight">{dictionary.calls.title}</h1>
           <p className="text-sm text-muted-foreground">{dictionary.calls.subtitle}</p>
         </div>
-        <Button variant="outline" onClick={loadCalls} disabled={loading}>
+        <Button
+          variant="outline"
+          onClick={() => loadCalls()}
+          disabled={loading}
+        >
           <RefreshCcw className="mr-2 h-4 w-4" /> {dictionary.calls.buttons.refresh}
         </Button>
       </div>
@@ -336,6 +373,57 @@ export default function CallsPage() {
           <CardTitle>{dictionary.calls.title}</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <Input
+              placeholder={dictionary.calls.filters.uuid}
+              value={filters.uuid}
+              onChange={(event) =>
+                setFilters((prev) => ({ ...prev, uuid: event.target.value }))
+              }
+            />
+            <Input
+              type="date"
+              value={filters.startedFrom}
+              onChange={(event) =>
+                setFilters((prev) => ({ ...prev, startedFrom: event.target.value }))
+              }
+            />
+            <Input
+              type="date"
+              value={filters.startedTo}
+              onChange={(event) =>
+                setFilters((prev) => ({ ...prev, startedTo: event.target.value }))
+              }
+            />
+          </div>
+          <div className="mb-6 flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setPagination((prev) => ({ ...prev, page: 1 }));
+                loadCalls();
+              }}
+              disabled={loading}
+            >
+              {dictionary.calls.filters.apply}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                const cleared = {
+                  uuid: '',
+                  startedFrom: '',
+                  startedTo: '',
+                };
+                setFilters(cleared);
+                setPagination((prev) => ({ ...prev, page: 1 }));
+                loadCalls(cleared);
+              }}
+              disabled={loading}
+            >
+              {dictionary.calls.filters.clear}
+            </Button>
+          </div>
           {loading ? (
             <CardSkeleton />
           ) : error ? (
@@ -351,8 +439,30 @@ export default function CallsPage() {
                     <TableHead>{dictionary.calls.table.from}</TableHead>
                     <TableHead>{dictionary.calls.table.to}</TableHead>
                     <TableHead>{dictionary.calls.table.recording}</TableHead>
-                    <TableHead>{dictionary.calls.table.startedAt}</TableHead>
-                    <TableHead>{dictionary.calls.table.endedAt}</TableHead>
+                    <TableHead>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleSort('startedAt')}
+                        className="h-7 px-2"
+                      >
+                        {dictionary.calls.table.startedAt}
+                        <ArrowUpDown className="ml-2 h-3 w-3" />
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleSort('endedAt')}
+                        className="h-7 px-2"
+                      >
+                        {dictionary.calls.table.endedAt}
+                        <ArrowUpDown className="ml-2 h-3 w-3" />
+                      </Button>
+                    </TableHead>
                     <TableHead>{dictionary.calls.table.duration}</TableHead>
                     <TableHead>{dictionary.calls.table.status}</TableHead>
                     <TableHead className="text-right">{dictionary.calls.table.actions}</TableHead>
@@ -361,14 +471,27 @@ export default function CallsPage() {
                 <TableBody>
                   {calls.map((call) => (
                     <TableRow key={call.id}>
-                      <TableCell className="max-w-[160px] truncate font-mono text-xs text-muted-foreground">
+                      <TableCell
+                        className="max-w-[140px] truncate font-mono text-xs text-muted-foreground"
+                        title={call.uuid}
+                      >
                         {call.uuid}
                       </TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">
-                        {callInitiatedMap[call.id]?.from ?? '—'}
+                        <span
+                          className="block max-w-[120px] truncate"
+                          title={callInitiatedMap[call.id]?.from ?? '—'}
+                        >
+                          {callInitiatedMap[call.id]?.from ?? '—'}
+                        </span>
                       </TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">
-                        {callInitiatedMap[call.id]?.to ?? '—'}
+                        <span
+                          className="block max-w-[120px] truncate"
+                          title={callInitiatedMap[call.id]?.to ?? '—'}
+                        >
+                          {callInitiatedMap[call.id]?.to ?? '—'}
+                        </span>
                       </TableCell>
                       <TableCell>
                         {recordingAvailableById[call.id] ? (
