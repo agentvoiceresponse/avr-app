@@ -559,37 +559,6 @@ function EventRow({ event, dictionary }: EventRowProps) {
     if (!event.payload) {
       return null;
     }
-    if (event.type === 'call_initiated') {
-      const payload = event.payload as Record<string, unknown>;
-      return (
-        <div className="grid gap-2 text-xs text-muted-foreground md:grid-cols-2">
-          <div>
-            <span className="font-medium text-foreground">
-              {dictionary.calls.table.from}:
-            </span>{' '}
-            <span className="font-mono">{String(payload.from ?? '')}</span>
-          </div>
-          <div>
-            <span className="font-medium text-foreground">
-              {dictionary.calls.table.to}:
-            </span>{' '}
-            <span className="font-mono">{String(payload.to ?? '')}</span>
-          </div>
-          <div>
-            <span className="font-medium text-foreground">
-              {dictionary.calls.table.uniqueid}:
-            </span>{' '}
-            <span className="font-mono">{String(payload.uniqueid ?? '')}</span>
-          </div>
-          <div>
-            <span className="font-medium text-foreground">
-              {dictionary.calls.table.channel}:
-            </span>{' '}
-            <span className="font-mono">{String(payload.channel ?? '')}</span>
-          </div>
-        </div>
-      );
-    }
     if (event.type === 'transcription') {
       const roleRaw = String(event.payload.role ?? 'user');
       const text = String(event.payload.text ?? '');
