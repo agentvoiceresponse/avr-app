@@ -66,7 +66,9 @@ Enjoy the Agent Voice Response App experience! After installation, you can acces
 
 ## Support AVR
 
-AVR is free and open-source. If you find it valuable, consider supporting its development:
+AVR is free and open-source.
+Any support is entirely voluntary and intended as a personal gesture of appreciation.
+Donations do not provide access to features, services, or special benefits, and the project remains fully available regardless of donations.
 
 <a href="https://ko-fi.com/agentvoiceresponse" target="_blank"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support us on Ko-fi"></a>
 
