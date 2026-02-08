@@ -177,13 +177,20 @@ export class AgentsService {
           `${type.toLowerCase()}_URL=http://${containerName}:${port}`,
         );
       }
+
+      let binds: string[] = [];
+      if (process.env.TOOLS_DIR) {
+        binds.push(`${process.env.TOOLS_DIR}:/usr/src/app/tools`);
+      }
+      if (process.env.AVR_TOOLS_DIR) {
+        binds.push(`${process.env.AVR_TOOLS_DIR}:/usr/src/app/avr_tools`);
+      }
+
       containerIds[type] = await this.dockerService.runContainer(
         containerName,
         image,
         providerEnv,
-        [
-          `${process.env.TOOLS_DIR}:/usr/src/app/tools`
-        ]
+        binds
       );
     }
 
