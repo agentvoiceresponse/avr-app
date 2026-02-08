@@ -210,6 +210,11 @@ export const itDictionary = {
       geminiApiKey: 'API key Gemini',
       geminiModel: 'Modello Gemini',
       geminiInstructions: 'Istruzioni Gemini',
+      deepgramApiKey: 'API key Deepgram',
+      deepgramAsrModel: 'Modello ASR Deepgram',
+      deepgramTtsModel: 'Modello TTS Deepgram',
+      deepgramGreeting: 'Saluto Deepgram',
+      agentPrompt: "Prompt dell'agente",
     },
     languageOptions: {
       autoDetect: 'Rilevamento automatico',
@@ -284,11 +289,17 @@ export const itDictionary = {
         label: 'Gemini Speech-to-Speech',
         description: 'Container AVR basato su Google Gemini. Richiede API key e modello supportato.',
       },
+      stsDeepgram: {
+        label: 'Deepgram Speech-to-Speech',
+        description: 'Container AVR basato su Deepgram. Richiede API key e impostazioni modello.',
+      },
     },
     placeholders: {
       openaiInstructions: 'Istruzioni opzionali per guidare il comportamento',
       openaiVoice: 'es. alloy',
       geminiInstructions: 'Istruzioni opzionali per guidare il comportamento',
+      agentPrompt: 'Istruzioni opzionali per guidare il comportamento',
+      deepgramGreeting: 'Messaggio di saluto facoltativo',
       name: 'es. avr-sts-nome-provider',
     },
     validation: {

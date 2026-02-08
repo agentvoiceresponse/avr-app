@@ -210,6 +210,11 @@ export const enDictionary = {
       geminiApiKey: 'Gemini API key',
       geminiModel: 'Gemini model',
       geminiInstructions: 'Gemini instructions',
+      deepgramApiKey: 'Deepgram API key',
+      deepgramAsrModel: 'Deepgram ASR model',
+      deepgramTtsModel: 'Deepgram TTS model',
+      deepgramGreeting: 'Deepgram greeting',
+      agentPrompt: 'Agent prompt',
     },
     languageOptions: {
       autoDetect: 'Auto-detect',
@@ -284,11 +289,17 @@ export const enDictionary = {
         label: 'Gemini Speech-to-Speech',
         description: 'AVR container powered by Google Gemini. Requires API key and supported model.',
       },
+      stsDeepgram: {
+        label: 'Deepgram Speech-to-Speech',
+        description: 'AVR container powered by Deepgram. Requires API key and model settings.',
+      },
     },
     placeholders: {
       openaiInstructions: 'Optional instructions to guide behavior',
       openaiVoice: 'e.g. alloy',
       geminiInstructions: 'Optional instructions to guide behavior',
+      agentPrompt: 'Optional instructions to guide behavior',
+      deepgramGreeting: 'Optional greeting message',
       name: 'e.g. avr-sts-provider-name',
     },
     validation: {

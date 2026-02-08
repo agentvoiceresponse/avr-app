@@ -266,6 +266,56 @@ export default function ProvidersPage() {
         },
       ],
     },
+    {
+      id: 'sts-deepgram',
+      type: 'STS',
+      label: dictionary.providers.templates.stsDeepgram.label,
+      description: dictionary.providers.templates.stsDeepgram.description,
+      defaultImage: 'agentvoiceresponse/avr-sts-deepgram',
+      defaults: {
+        DEEPGRAM_API_KEY: '',
+        AGENT_PROMPT: 'You are an helpfull Assistant',
+        DEEPGRAM_ASR_MODEL: 'nova-3',
+        OPENAI_MODEL: 'gpt-4o-mini',
+        DEEPGRAM_TTS_MODEL: 'aura-2-thalia-en',
+        DEEPGRAM_GREETING: "Hi there, I'm your virtual assistant—how can I help today?",
+      },
+      fields: [
+        {
+          key: 'DEEPGRAM_API_KEY',
+          label: dictionary.providers.fieldsExtra.deepgramApiKey,
+          required: true,
+          inputType: 'password',
+        },
+        {
+          key: 'AGENT_PROMPT',
+          label: dictionary.providers.fieldsExtra.agentPrompt,
+          placeholder: dictionary.providers.placeholders.agentPrompt,
+          widget: 'textarea',
+        },
+        {
+          key: 'DEEPGRAM_ASR_MODEL',
+          label: dictionary.providers.fieldsExtra.deepgramAsrModel,
+          placeholder: 'nova-3',
+        },
+        {
+          key: 'OPENAI_MODEL',
+          label: dictionary.providers.fieldsExtra.openaiModel,
+          placeholder: 'gpt-4o-mini',
+        },
+        {
+          key: 'DEEPGRAM_TTS_MODEL',
+          label: dictionary.providers.fieldsExtra.deepgramTtsModel,
+          placeholder: 'aura-2-thalia-en',
+        },
+        {
+          key: 'DEEPGRAM_GREETING',
+          label: dictionary.providers.fieldsExtra.deepgramGreeting,
+          placeholder: dictionary.providers.placeholders.deepgramGreeting,
+          widget: 'textarea',
+        },
+      ],
+    },
   ];
 
   const createProviderSchema = (dict: Dictionary, templates: ProviderTemplate[]) => z
@@ -489,7 +539,9 @@ export default function ProvidersPage() {
       const nextEnv = buildDefaultEnv(selectedTemplate);
       selectedTemplate.fields.forEach((field) => {
         const previousValue = previousEnv[field.key];
-        if (previousValue && previousValue.trim().length > 0) {
+        const fieldName = `env.${field.key}` as const;
+        const fieldState = form.getFieldState(fieldName, form.formState);
+        if (fieldState.isDirty && previousValue && previousValue.trim().length > 0) {
           nextEnv[field.key] = previousValue;
         }
       });
@@ -733,7 +785,11 @@ export default function ProvidersPage() {
                       <FormItem>
                         <FormLabel>{dictionary.providers.fields.name}</FormLabel>
                         <FormControl>
-                          <Input placeholder={dictionary.providers.placeholders.name} {...field} />
+                          <Input
+                            placeholder={dictionary.providers.placeholders.name}
+                            {...field}
+                            value={field.value ?? ''}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -809,6 +865,7 @@ export default function ProvidersPage() {
                               <Input
                                 placeholder={createSelectedTemplate.defaultImage ?? 'repository:tag'}
                                 {...field}
+                                value={field.value ?? ''}
                               />
                             </FormControl>
                             <FormMessage />
@@ -830,7 +887,11 @@ export default function ProvidersPage() {
                               </FormLabel>
                               <FormControl>
                                 {fieldConfig.widget === 'textarea' ? (
-                                  <Textarea placeholder={fieldConfig.placeholder} {...field} />
+                                  <Textarea
+                                    placeholder={fieldConfig.placeholder}
+                                    {...field}
+                                    value={field.value ?? ''}
+                                  />
                                 ) : fieldConfig.widget === 'select' ? (
                                   <Select onValueChange={field.onChange} value={field.value}>
                                     <SelectTrigger>
@@ -849,6 +910,7 @@ export default function ProvidersPage() {
                                     type={fieldConfig.inputType === 'password' ? 'password' : 'text'}
                                     placeholder={fieldConfig.placeholder}
                                     {...field}
+                                    value={field.value ?? ''}
                                   />
                                 )}
                               </FormControl>
@@ -976,7 +1038,12 @@ export default function ProvidersPage() {
                     <FormItem>
                       <FormLabel>{dictionary.providers.fields.name}</FormLabel>
                       <FormControl>
-                          <Input placeholder={dictionary.providers.placeholders.name} {...field} disabled />
+                          <Input
+                            placeholder={dictionary.providers.placeholders.name}
+                            {...field}
+                            value={field.value ?? ''}
+                            disabled
+                          />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1050,6 +1117,7 @@ export default function ProvidersPage() {
                             <Input
                               placeholder={editSelectedTemplate.defaultImage ?? 'repository:tag'}
                               {...field}
+                              value={field.value ?? ''}
                               disabled
                             />
                           </FormControl>
@@ -1070,7 +1138,11 @@ export default function ProvidersPage() {
                             </FormLabel>
                             <FormControl>
                               {fieldConfig.widget === 'textarea' ? (
-                                <Textarea placeholder={fieldConfig.placeholder} {...field} />
+                                <Textarea
+                                  placeholder={fieldConfig.placeholder}
+                                  {...field}
+                                  value={field.value ?? ''}
+                                />
                               ) : fieldConfig.widget === 'select' ? (
                                 <Select onValueChange={field.onChange} value={field.value}>
                                   <SelectTrigger>
@@ -1089,6 +1161,7 @@ export default function ProvidersPage() {
                                   type={fieldConfig.inputType === 'password' ? 'password' : 'text'}
                                   placeholder={fieldConfig.placeholder}
                                   {...field}
+                                  value={field.value ?? ''}
                                 />
                               )}
                             </FormControl>
