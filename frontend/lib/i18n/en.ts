@@ -210,11 +210,17 @@ export const enDictionary = {
       geminiApiKey: 'Gemini API key',
       geminiModel: 'Gemini model',
       geminiInstructions: 'Gemini instructions',
+      geminiThinkingLevel: 'Gemini thinking level',
+      geminiThinkingBudget: 'Gemini thinking budget',
       deepgramApiKey: 'Deepgram API key',
       deepgramAsrModel: 'Deepgram ASR model',
       deepgramTtsModel: 'Deepgram TTS model',
       deepgramGreeting: 'Deepgram greeting',
       agentPrompt: 'Agent prompt',
+    },
+    geminiThinkingBudgetOptions: {
+      turnOff: 'Turn off thinking',
+      enableDynamic: 'Enable dynamic thinking',
     },
     languageOptions: {
       autoDetect: 'Auto-detect',

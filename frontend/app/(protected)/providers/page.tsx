@@ -243,6 +243,8 @@ export default function ProvidersPage() {
       defaultImage: 'agentvoiceresponse/avr-sts-gemini',
       defaults: {
         GEMINI_MODEL: 'gemini-2.5-flash-preview-native-audio-dialog',
+        GEMINI_THINKING_LEVEL: 'MINIMAL',
+        GEMINI_THINKING_BUDGET: '0',
       },
       fields: [
         {
@@ -257,6 +259,27 @@ export default function ProvidersPage() {
           label: dictionary.providers.fieldsExtra.geminiModel,
           placeholder: 'gemini-2.5-flash-preview-native-audio-dialog',
           required: true,
+        },
+        {
+          key: 'GEMINI_THINKING_LEVEL',
+          label: dictionary.providers.fieldsExtra.geminiThinkingLevel,
+          widget: 'select',
+          options: [
+            { value: 'THINKING_LEVEL_UNSPECIFIED', label: 'THINKING_LEVEL_UNSPECIFIED' },
+            { value: 'LOW', label: 'LOW' },
+            { value: 'MEDIUM', label: 'MEDIUM' },
+            { value: 'HIGH', label: 'HIGH' },
+            { value: 'MINIMAL', label: 'MINIMAL' },
+          ],
+        },
+        {
+          key: 'GEMINI_THINKING_BUDGET',
+          label: dictionary.providers.fieldsExtra.geminiThinkingBudget,
+          widget: 'select',
+          options: [
+            { value: '0', label: dictionary.providers.geminiThinkingBudgetOptions.turnOff },
+            { value: '-1', label: dictionary.providers.geminiThinkingBudgetOptions.enableDynamic },
+          ],
         },
         {
           key: 'GEMINI_INSTRUCTIONS',
@@ -407,7 +430,20 @@ export default function ProvidersPage() {
             acc[field.key] = !raw || raw === 'NULL' ? 'auto' : raw;
             return acc;
           }
-          acc[field.key] = String(envConfig[field.key] ?? '');
+
+          const rawValue = envConfig[field.key];
+          if (
+            template.id === 'sts-gemini' &&
+            (rawValue === undefined || rawValue === null || String(rawValue).trim().length === 0)
+          ) {
+            const defaultValue = template.defaults?.[field.key];
+            if (defaultValue !== undefined) {
+              acc[field.key] = String(defaultValue);
+              return acc;
+            }
+          }
+
+          acc[field.key] = String(rawValue ?? '');
           return acc;
         }, {} as Record<string, string>)
       : Object.fromEntries(
@@ -546,6 +582,11 @@ export default function ProvidersPage() {
         }
       });
       form.setValue('env', nextEnv, { shouldDirty: false });
+      selectedTemplate.fields.forEach((field) => {
+        const fieldName = `env.${field.key}` as const;
+        const nextValue = nextEnv[field.key] ?? '';
+        form.setValue(fieldName, nextValue, { shouldDirty: false });
+      });
 
       const imageState = form.getFieldState('image');
       const shouldUpdateImage = resetImageOnTemplateChange || !imageState.isDirty;
@@ -893,7 +934,14 @@ export default function ProvidersPage() {
                                     value={field.value ?? ''}
                                   />
                                 ) : fieldConfig.widget === 'select' ? (
-                                  <Select onValueChange={field.onChange} value={field.value}>
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    value={
+                                      field.value && field.value.length > 0
+                                        ? field.value
+                                        : createSelectedTemplate?.defaults?.[fieldConfig.key] ?? ''
+                                    }
+                                  >
                                     <SelectTrigger>
                                       <SelectValue placeholder={fieldConfig.placeholder} />
                                     </SelectTrigger>
