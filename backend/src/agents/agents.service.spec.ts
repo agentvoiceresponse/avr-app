@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { AsteriskService } from '../asterisk/asterisk.service';
 import { DockerService } from '../docker/docker.service';
 import { Provider } from '../providers/provider.entity';
 import { Agent } from './agent.entity';
@@ -22,6 +23,9 @@ describe('AgentsService', () => {
     stopContainer: jest.fn(),
     listContainers: jest.fn(),
   };
+  const asteriskServiceMock = {
+    syncDialplan: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -33,6 +37,7 @@ describe('AgentsService', () => {
           useValue: providerRepositoryMock,
         },
         { provide: DockerService, useValue: dockerServiceMock },
+        { provide: AsteriskService, useValue: asteriskServiceMock },
       ],
     }).compile();
 
