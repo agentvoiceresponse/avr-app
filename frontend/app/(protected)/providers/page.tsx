@@ -290,6 +290,51 @@ export default function ProvidersPage() {
       ],
     },
     {
+      id: 'sts-ultravox',
+      type: 'STS',
+      label: dictionary.providers.templates.stsUltravox.label,
+      description: dictionary.providers.templates.stsUltravox.description,
+      defaultImage: 'agentvoiceresponse/avr-sts-ultravox',
+      defaults: {
+        ULTRAVOX_CALL_TYPE: 'agent',
+      },
+      fields: [
+        {
+          key: 'ULTRAVOX_API_KEY',
+          label: dictionary.providers.fieldsExtra.ultravoxApiKey,
+          placeholder: 'uv_...',
+          required: true,
+          inputType: 'password',
+        },
+        {
+          key: 'ULTRAVOX_CALL_TYPE',
+          label: dictionary.providers.fieldsExtra.ultravoxCallType,
+          widget: 'select',
+          options: [
+            {
+              value: 'agent',
+              label: dictionary.providers.ultravoxCallTypeOptions.agent,
+            },
+            {
+              value: 'generic',
+              label: dictionary.providers.ultravoxCallTypeOptions.generic,
+            },
+          ],
+        },
+        {
+          key: 'ULTRAVOX_AGENT_ID',
+          label: dictionary.providers.fieldsExtra.ultravoxAgentId,
+          placeholder: 'agent_...',
+        },
+        {
+          key: 'ULTRAVOX_SYSTEM_PROMPT',
+          label: dictionary.providers.fieldsExtra.ultravoxSystemPrompt,
+          placeholder: dictionary.providers.placeholders.ultravoxSystemPrompt,
+          widget: 'textarea',
+        },
+      ],
+    },
+    {
       id: 'sts-deepgram',
       type: 'STS',
       label: dictionary.providers.templates.stsDeepgram.label,
@@ -385,6 +430,18 @@ export default function ProvidersPage() {
             });
           }
         });
+
+        if (template.id === 'sts-ultravox') {
+          const callType = values.env?.ULTRAVOX_CALL_TYPE?.trim() || 'agent';
+          const agentId = values.env?.ULTRAVOX_AGENT_ID?.trim() || '';
+          if (callType === 'agent' && !agentId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: dict.providers.validation.ultravoxAgentIdRequiredForAgentMode,
+              path: ['env', 'ULTRAVOX_AGENT_ID'],
+            });
+          }
+        }
       }
     });
 
@@ -475,6 +532,13 @@ export default function ProvidersPage() {
         .map((field) => {
           const rawValue = values.env?.[field.key] ?? '';
           const trimmed = rawValue.trim();
+          if (
+            template.id === 'sts-ultravox' &&
+            field.key === 'ULTRAVOX_AGENT_ID' &&
+            (values.env?.ULTRAVOX_CALL_TYPE?.trim() || 'agent') !== 'agent'
+          ) {
+            return null;
+          }
           if (field.key === 'OPENAI_LANGUAGE') {
             return trimmed === 'auto' ? null : [field.key, trimmed] as [string, string];
           }
