@@ -51,21 +51,21 @@ export class DockerController {
 
   @Post('containers/:id/start')
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  async startContainer(@Param('id') id: string):  Promise<{ success: true }> {
+  async startContainer(@Param('id') id: string): Promise<{ success: true }> {
     await this.dockerService.startContainer(id);
     return { success: true };
   }
 
   @Post('containers/:id/stop')
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  async stopContainer(@Param('id') id: string):  Promise<{ success: true }> {
+  async stopContainer(@Param('id') id: string): Promise<{ success: true }> {
     await this.dockerService.stopContainerById(id);
     return { success: true };
   }
 
   @Post('containers/:id/pull')
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  async pullAndRestart(@Param('id') id: string):  Promise<{ success: true }> {
+  async pullAndRestart(@Param('id') id: string): Promise<{ success: true }> {
     await this.dockerService.pullAndRestartContainer(id);
     return { success: true };
   }

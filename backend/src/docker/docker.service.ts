@@ -90,7 +90,7 @@ export class DockerService {
     try {
       const container = this.docker.getContainer(containerId);
       return await container.inspect();
-    } catch (error) {
+    } catch {
       this.logger.warn(`Container ${containerId} not found`);
       throw new NotFoundException('Container not found');
     }
