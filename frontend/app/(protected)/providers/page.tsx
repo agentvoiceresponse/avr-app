@@ -500,6 +500,15 @@ export default function ProvidersPage() {
             }
           }
 
+          if (
+            template.id === 'sts-ultravox' &&
+            field.key === 'ULTRAVOX_CALL_TYPE' &&
+            (rawValue === undefined || rawValue === null || String(rawValue).trim().length === 0)
+          ) {
+            acc[field.key] = 'agent';
+            return acc;
+          }
+
           acc[field.key] = String(rawValue ?? '');
           return acc;
         }, {} as Record<string, string>)
