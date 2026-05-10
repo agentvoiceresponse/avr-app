@@ -202,18 +202,28 @@ export class AsteriskService {
           ' same => n,Wait(1)',
           ' same => n,Set(AVR_NUMBER=${CALLERID(num)})',
           " same => n,Set(UUID=${SHELL(uuidgen | tr -d '\\n')})",
-          " same => n,Set(JSON_BODY={\"uuid\":\"${UUID}\",\"payload\":{\"from\":\"${CALLERID(num)}\",\"to\":\"${EXTEN}\",\"uniqueid\":\"${UNIQUEID}\",\"channel\":\"${CHANNEL}\",\"recording\": " + recordingEnabled + "}})",
-          " same => n,Set(CURLOPT(httpheader)=Content-Type: application/json)",
-          " same => n,Set(JSON_RESPONSE=${CURL(http://avr-core-" + agent.id + ":" + agent.httpPort + "/call,${JSON_BODY})})",
-          " same => n,NoOp(JSON_BODY: ${JSON_BODY})",
-          " same => n,NoOp(JSON_RESPONSE: ${JSON_RESPONSE})",
+          ' same => n,Set(JSON_BODY={"uuid":"${UUID}","payload":{"from":"${CALLERID(num)}","to":"${EXTEN}","uniqueid":"${UNIQUEID}","channel":"${CHANNEL}","recording": ' +
+            recordingEnabled +
+            '}})',
+          ' same => n,Set(CURLOPT(httpheader)=Content-Type: application/json)',
+          ' same => n,Set(JSON_RESPONSE=${CURL(http://avr-core-' +
+            agent.id +
+            ':' +
+            agent.httpPort +
+            '/call,${JSON_BODY})})',
+          ' same => n,NoOp(JSON_BODY: ${JSON_BODY})',
+          ' same => n,NoOp(JSON_RESPONSE: ${JSON_RESPONSE})',
         ];
         if (recordingEnabled) {
-          lines.push(' same => n,MixMonitor(/var/spool/asterisk/monitor/' + tenant+ '/${UUID}.wav)');
+          lines.push(
+            ' same => n,MixMonitor(/var/spool/asterisk/monitor/' +
+              tenant +
+              '/${UUID}.wav)',
+          );
         }
         if (denoiseEnabled) {
           lines.push(' same => n,Set(DENOISE(rx)=on)');
-        } 
+        }
         lines.push(
           ' same => n,Dial(AudioSocket/avr-core-' +
             agent.id +

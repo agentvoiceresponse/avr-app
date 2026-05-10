@@ -89,9 +89,13 @@ export class RecordingsService {
       throw error;
     }
 
-    const wavFiles = fileNames.filter((name) => name.toLowerCase().endsWith('.wav'));
+    const wavFiles = fileNames.filter((name) =>
+      name.toLowerCase().endsWith('.wav'),
+    );
     const existing = await this.recordingsRepository.find();
-    const existingByUuid = new Map(existing.map((item) => [item.callUuid, item]));
+    const existingByUuid = new Map(
+      existing.map((item) => [item.callUuid, item]),
+    );
     const seen = new Set<string>();
 
     for (const fileName of wavFiles) {

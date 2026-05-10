@@ -148,7 +148,11 @@ export class NumbersService {
           phoneId?: string | null;
           trunkId?: string | null;
         },
-  ): Promise<{ agent?: Agent | null; phone?: Phone | null; trunk?: Trunk | null }> {
+  ): Promise<{
+    agent?: Agent | null;
+    phone?: Phone | null;
+    trunk?: Trunk | null;
+  }> {
     switch (dto.application) {
       case 'agent': {
         if (!dto.agentId) {

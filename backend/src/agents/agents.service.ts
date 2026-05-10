@@ -190,7 +190,7 @@ export class AgentsService {
         containerName,
         image,
         providerEnv,
-        binds
+        binds,
       );
     }
 
@@ -271,7 +271,7 @@ export class AgentsService {
     try {
       new URL(str);
       return true;
-    } catch (_) {
+    } catch {
       return false;
     }
   }
@@ -287,13 +287,13 @@ export class AgentsService {
         switch (key) {
           case 'OPENAI_INSTRUCTIONS':
             return `${this.isValidUrl(value) ? 'OPENAI_URL_INSTRUCTIONS' : 'OPENAI_INSTRUCTIONS'}=${value}`;
-        case 'OPENAI_LANGUAGE': {
-          const language = value ? String(value) : '';
-          if (!language || language === 'NULL' || language === 'auto') {
-            return null;
+          case 'OPENAI_LANGUAGE': {
+            const language = value ? String(value) : '';
+            if (!language || language === 'NULL' || language === 'auto') {
+              return null;
+            }
+            return `OPENAI_LANGUAGE=${language}`;
           }
-          return `OPENAI_LANGUAGE=${language}`;
-        }
           case 'GEMINI_INSTRUCTIONS':
             return `${this.isValidUrl(value) ? 'GEMINI_URL_INSTRUCTIONS' : 'GEMINI_INSTRUCTIONS'}=${value}`;
           default:

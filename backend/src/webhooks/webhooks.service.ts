@@ -125,7 +125,8 @@ export class WebhooksService {
       });
     }
 
-    const sortField = filters.sortField === 'endedAt' ? 'call.endedAt' : 'call.startedAt';
+    const sortField =
+      filters.sortField === 'endedAt' ? 'call.endedAt' : 'call.startedAt';
     const sortDirection = filters.sortDirection === 'asc' ? 'ASC' : 'DESC';
     qb.orderBy(sortField, sortDirection).addOrderBy('call.id', 'DESC');
 
