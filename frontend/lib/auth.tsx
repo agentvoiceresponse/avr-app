@@ -58,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (stored) {
       const decoded = decodeToken(stored);
       if (decoded) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setToken(stored);
         setUser(decoded);
       } else {
