@@ -216,7 +216,15 @@ export const enDictionary = {
       deepgramAsrModel: 'Deepgram ASR model',
       deepgramTtsModel: 'Deepgram TTS model',
       deepgramGreeting: 'Deepgram greeting',
+      ultravoxApiKey: 'Ultravox API key',
+      ultravoxCallType: 'Ultravox call type',
+      ultravoxAgentId: 'Ultravox agent ID',
+      ultravoxSystemPrompt: 'Ultravox system prompt',
       agentPrompt: 'Agent prompt',
+    },
+    ultravoxCallTypeOptions: {
+      agent: 'Agent',
+      generic: 'Generic',
     },
     geminiThinkingBudgetOptions: {
       turnOff: 'Turn off thinking',
@@ -295,6 +303,10 @@ export const enDictionary = {
         label: 'Gemini Speech-to-Speech',
         description: 'AVR container powered by Google Gemini. Requires API key and supported model.',
       },
+      stsUltravox: {
+        label: 'Ultravox Speech-to-Speech',
+        description: 'AVR container powered by Ultravox. Configure API key, call mode, and agent ID.',
+      },
       stsDeepgram: {
         label: 'Deepgram Speech-to-Speech',
         description: 'AVR container powered by Deepgram. Requires API key and model settings.',
@@ -306,6 +318,7 @@ export const enDictionary = {
       geminiInstructions: 'Optional instructions to guide behavior',
       agentPrompt: 'Optional instructions to guide behavior',
       deepgramGreeting: 'Optional greeting message',
+      ultravoxSystemPrompt: 'Optional instructions to guide behavior',
       name: 'e.g. avr-sts-provider-name',
     },
     validation: {
@@ -314,6 +327,7 @@ export const enDictionary = {
       incompatibleTemplate: 'Template incompatible with selected type',
       dockerImageRequired: 'Specify the Docker image',
       requiredField: 'Required field',
+      ultravoxAgentIdRequiredForAgentMode: 'Ultravox agent ID is required when call type is Agent',
     },
     errors: {
       load: 'Unable to load providers',
