@@ -15,6 +15,7 @@ NestJS backend that powers the AVR admin panel with user management, provider co
 - Node.js 18+
 - npm 9+
 - Local Docker Engine (for agent Docker operations)
+- Docker socket access (`/var/run/docker.sock` by default)
 
 ## Configuration
 
@@ -29,8 +30,12 @@ Key variables:
 - `PORT` (default `3001`)
 - `DB_TYPE` (default `sqlite`)
 - `DB_DATABASE` (default `../data/data.db`)
+- `FRONTEND_URL` (required for CORS in local dev, usually `http://localhost:3000`)
 - `JWT_SECRET`
 - `CORE_DEFAULT_IMAGE` (fallback image when provider config does not define one)
+- `DOCKER_SOCKET_PATH` (default `/var/run/docker.sock`)
+- `TOOLS_DIR` / `AVR_TOOLS_DIR` (optional absolute host paths mounted into agent containers)
+- `ARI_URL`, `ASTERISK_CONFIG_PATH`, `TENANT` (Asterisk integration settings)
 
 ## Local Development
 
@@ -40,6 +45,12 @@ npm run start:dev
 ```
 
 The API listens on `http://localhost:3001`. All endpoints require a valid JWT except `GET /health` and `POST /auth/login`.
+
+Important runtime notes:
+
+- TypeORM uses `synchronize: true`. Entity schema changes can mutate/drop columns automatically; there are no migrations.
+- Admin user is seeded at boot from `ADMIN_USERNAME` / `ADMIN_PASSWORD` (fallback password: `agentvoiceresponse`).
+- Global validation uses `forbidNonWhitelisted: true`; DTOs must explicitly define accepted fields.
 
 ## Docker Compose
 

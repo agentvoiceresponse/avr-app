@@ -10,10 +10,10 @@ Repository for the AVR administration panel composed of:
 - `backend/`: NestJS API (TypeORM + SQLite, JWT, Docker management)
 [![Docker Pulls](https://img.shields.io/docker/pulls/agentvoiceresponse/avr-app-backend?label=Docker%20Pulls&logo=docker)](https://hub.docker.com/r/agentvoiceresponse/avr-app-backend)
 
-- `frontend/`: Next.js 14 interface with Tailwind CSS, shadcn/ui and light/dark mode
+- `frontend/`: Next.js 16 + React 19 interface with Tailwind CSS and shadcn/ui
 [![Docker Pulls](https://img.shields.io/docker/pulls/agentvoiceresponse/avr-app-frontend?label=Docker%20Pulls&logo=docker)](https://hub.docker.com/r/agentvoiceresponse/avr-app-frontend)
 
-- `docker-compose.yml`: orchestrates backend and frontend services
+- `docker-compose-asterisk.yml`: optional local Asterisk stack (PBX + AMI + softphone)
 
 ## Requirements
 
@@ -23,6 +23,8 @@ Repository for the AVR administration panel composed of:
 - Asterisk PBX (required onfly for telephony sections)
 
 ## Local Development
+
+This repository contains two independent npm projects. There is no npm workspace at root.
 
 Backend:
 
@@ -37,15 +39,28 @@ Frontend:
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run start:dev
 ```
+
+Backend runs on `http://localhost:3001` and frontend runs on `http://localhost:3000` in standalone dev mode.
 
 ## Data structure
 
 - SQLite database mounted in `./data` (volume shared by the containers)
-- JWT signed with `JWT_SECRET`, configurable in `docker-compose.yml`
+- JWT signed with `JWT_SECRET`, configurable via backend environment variables
 
-See `backend/README.md` and `frontend/README.md` for more details on each project.
+## Local Verification
+
+Run checks from each project directory:
+
+```bash
+cd backend && npm run lint && npm test
+cd frontend && npm run lint && npm run build
+```
+
+CI for this repository currently builds and pushes Docker images on `main`, but does not run lint/tests for both projects. Validate locally before pushing.
+
+See `backend/README.md` and `frontend/README.md` for full details.
 
 ## Usage
 
