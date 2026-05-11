@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserPlus, Shield, Pencil, Trash2 } from 'lucide-react';
 import { apiFetch, ApiError, type PaginatedResponse } from '@/lib/api';
+import { resolveApiErrorMessage } from '@/lib/resolve-api-error';
 import { useAuth } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n';
 import {
@@ -109,6 +110,13 @@ export default function UsersPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const isAdmin = user?.role === 'admin';
+  const apiErrorOptions = useMemo(
+    () => ({
+      authRequired: dictionary.common.errors.authRequired,
+      forbidden: dictionary.common.errors.forbidden,
+    }),
+    [dictionary.common.errors.authRequired, dictionary.common.errors.forbidden],
+  );
 
   const createSchema = useMemo(() => createUserSchema(dictionary), [dictionary]);
   const updateSchema = useMemo(() => updateUserSchema(dictionary), [dictionary]);
@@ -148,15 +156,11 @@ export default function UsersPage() {
       });
       setError(null);
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(dictionary.users.errors.load);
-      }
+      setError(resolveApiErrorMessage(err, { ...apiErrorOptions, fallback: dictionary.users.errors.load }));
     } finally {
       setLoading(false);
     }
-  }, [dictionary.users.errors.load, pagination.limit, pagination.page]);
+  }, [apiErrorOptions, dictionary.users.errors.load, pagination.limit, pagination.page]);
 
   useEffect(() => {
     loadUsers();
@@ -173,12 +177,10 @@ export default function UsersPage() {
       form.reset();
       await loadUsers();
     } catch (err) {
-      if (err instanceof ApiError) {
+      if (err instanceof ApiError && err.status !== 401 && err.status !== 403) {
         form.setError('username', { message: err.message });
-      } else if (err instanceof Error) {
-        setError(err.message);
       } else {
-        setError(dictionary.users.errors.create);
+        setError(resolveApiErrorMessage(err, { ...apiErrorOptions, fallback: dictionary.users.errors.create }));
       }
     } finally {
       setSubmitting(false);
@@ -222,12 +224,10 @@ export default function UsersPage() {
       editForm.reset({ username: '', password: '', role: 'viewer' });
       await loadUsers();
     } catch (err) {
-      if (err instanceof ApiError) {
+      if (err instanceof ApiError && err.status !== 401 && err.status !== 403) {
         editForm.setError('username', { message: err.message });
-      } else if (err instanceof Error) {
-        setError(err.message);
       } else {
-        setError(dictionary.users.errors.update);
+        setError(resolveApiErrorMessage(err, { ...apiErrorOptions, fallback: dictionary.users.errors.update }));
       }
     } finally {
       setUpdating(false);
@@ -248,11 +248,7 @@ export default function UsersPage() {
       setDeleteDialogOpen(false);
       await loadUsers();
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-      setError(dictionary.users.errors.delete);
-      }
+      setError(resolveApiErrorMessage(err, { ...apiErrorOptions, fallback: dictionary.users.errors.delete }));
     } finally {
       setDeleting(false);
     }

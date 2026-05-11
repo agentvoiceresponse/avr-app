@@ -11,3 +11,4 @@ data/*.sqlite
 docker-compose-asterisk.yml
 recordings/**/*.wav
 docs/*
+scripts/docs/*

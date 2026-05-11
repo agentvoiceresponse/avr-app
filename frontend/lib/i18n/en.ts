@@ -29,6 +29,10 @@ export const enDictionary = {
       openWebrtc: 'Open WebRTC client',
       hidePhone: 'Hide phone',
     },
+    errors: {
+      authRequired: 'Your session has expired. Please sign in again.',
+      forbidden: 'You do not have permission to perform this action.',
+    },
   },
   navigation: {
     dashboard: 'Overview',
@@ -71,6 +75,37 @@ export const enDictionary = {
     charts: {
       callsPerMonth: 'Calls per month',
       empty: 'No call activity in the selected period.',
+    },
+    cockpit: {
+      alertTitle: 'VoiceOps attention required',
+      healthyTitle: 'VoiceOps operating normally',
+      noFailures: 'No active failures detected in agents, containers, or recent calls.',
+      healthyGuidance: 'Keep monitoring this cockpit and refresh during incident response.',
+      readOnly: 'Viewer role cannot run recovery actions',
+      actions: {
+        restart: 'Restart top failure',
+        retry: 'Retry top failure',
+        refresh: 'Refresh diagnostics',
+      },
+      metrics: {
+        failingComponents: 'Failing components',
+      },
+      guidance: {
+        restartAgent: 'Restart the stopped agent first, then verify call flow and provider reachability.',
+        retryContainer: 'Retry the container image pull/restart path and inspect logs if it fails again.',
+        inspectCallErrors: 'Inspect recent call failures and verify provider/container health before reattempts.',
+        configureTrunk: 'Create and assign at least one trunk so outbound transfer routes are available.',
+      },
+      topFailures: {
+        agents: (count: number) => `${count} stopped agent${count === 1 ? '' : 's'} detected.`,
+        containers: (count: number) => `${count} container${count === 1 ? '' : 's'} not running.`,
+        calls: (count: number) => `${count} recent call${count === 1 ? '' : 's'} with failure signals.`,
+        noTrunks: 'No trunks configured in telephony setup.',
+      },
+      actionState: {
+        success: 'Recovery action completed successfully.',
+        error: 'Recovery action failed. Check logs and retry.',
+      },
     },
     errors: {
       load: 'Unable to load overview data',

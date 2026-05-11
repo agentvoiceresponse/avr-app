@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,10 +9,17 @@ import { Repository } from 'typeorm';
 import { DockerService } from '../docker/docker.service';
 import { AsteriskService } from '../asterisk/asterisk.service';
 import { Provider, ProviderType } from '../providers/provider.entity';
+import { assertProviderContract } from '../providers/provider-contracts';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { RunAgentDto } from './dto/run-agent.dto';
 import { UpdateAgentDto } from './dto/update-agent.dto';
-import { Agent, AgentMode, AgentStatus } from './agent.entity';
+import {
+  Agent,
+  AgentFailureReason,
+  AgentFailureStatus,
+  AgentMode,
+  AgentStatus,
+} from './agent.entity';
 import {
   buildPaginatedResult,
   getPagination,
@@ -23,6 +31,32 @@ import {
 export class AgentsService {
   private readonly defaultImage =
     process.env.CORE_DEFAULT_IMAGE || 'agentvoiceresponse/avr-core:latest';
+  private readonly reservedEnvKeys = new Set([
+    'AGENT_ID',
+    'AGENT_NAME',
+    'PORT',
+    'HTTP_PORT',
+    'WEBHOOK_URL',
+    'WEBHOOK_SECRET',
+    'ASR_URL',
+    'LLM_URL',
+    'TTS_URL',
+    'STS_URL',
+    'AMI_URL',
+  ]);
+  private readonly readinessTimeoutMs = Number(
+    process.env.CONNECTOR_READINESS_TIMEOUT_MS ?? 15000,
+  );
+  private readonly readinessPollMs = Number(
+    process.env.CONNECTOR_READINESS_POLL_MS ?? 1000,
+  );
+  private readonly lifecycleTransitions: Record<AgentStatus, AgentStatus[]> = {
+    [AgentStatus.STOPPED]: [AgentStatus.STARTING],
+    [AgentStatus.STARTING]: [AgentStatus.RUNNING, AgentStatus.ERROR],
+    [AgentStatus.RUNNING]: [AgentStatus.STOPPING],
+    [AgentStatus.STOPPING]: [AgentStatus.STOPPED, AgentStatus.ERROR],
+    [AgentStatus.ERROR]: [AgentStatus.STARTING, AgentStatus.STOPPING],
+  };
 
   constructor(
     @InjectRepository(Agent)
@@ -141,6 +175,11 @@ export class AgentsService {
 
   async runAgent(id: string, runAgentDto: RunAgentDto) {
     const agent = await this.findOne(id);
+    this.assertTransition(agent.status, AgentStatus.STARTING);
+    agent.status = AgentStatus.STARTING;
+    this.clearFailureState(agent);
+    await this.agentRepository.save(agent);
+
     const env = this.buildEnv(agent, runAgentDto.env ?? []);
     const coreEnv = this.buildEnv(agent, [
       `WEBHOOK_URL=${process.env.WEBHOOK_URL}`,
@@ -158,66 +197,211 @@ export class AgentsService {
             [ProviderType.TTS, agent.providerTts ?? null],
           ];
 
-    for (const [type, provider] of mappedProviders) {
-      if (!provider) {
-        continue;
+    try {
+      for (const [type, provider] of mappedProviders) {
+        if (!provider) {
+          continue;
+        }
+        this.assertProviderRuntimeContract(provider, type);
+        const containerName = this.buildContainerName(
+          agent.id,
+          type.toLowerCase(),
+        );
+        // Generate a random port between 6000 and 6999 for each provider container
+        const port = Math.floor(Math.random() * 1000) + 6000;
+        const image = this.extractImage(provider);
+        const providerEnv = this.extendEnv(env, provider, type, port);
+        if (type == ProviderType.STS) {
+          coreEnv.push(`STS_URL=ws://${containerName}:${port}`);
+        } else {
+          coreEnv.push(
+            `${type.toLowerCase()}_URL=http://${containerName}:${port}`,
+          );
+        }
+
+        let binds: string[] = [];
+        if (process.env.TOOLS_DIR) {
+          binds.push(`${process.env.TOOLS_DIR}:/usr/src/app/tools`);
+        }
+        if (process.env.AVR_TOOLS_DIR) {
+          binds.push(`${process.env.AVR_TOOLS_DIR}:/usr/src/app/avr_tools`);
+        }
+
+        containerIds[type] = await this.dockerService.runContainer(
+          containerName,
+          image,
+          providerEnv,
+          binds,
+        );
+        await this.waitForReadiness(containerIds[type], provider.name, type);
       }
-      const containerName = this.buildContainerName(
-        agent.id,
-        type.toLowerCase(),
-      );
-      // Generate a random port between 6000 and 6999 for each provider container
-      const port = Math.floor(Math.random() * 1000) + 6000;
-      const image = this.extractImage(provider);
-      const providerEnv = this.extendEnv(env, provider, type, port);
-      if (type == ProviderType.STS) {
-        coreEnv.push(`STS_URL=ws://${containerName}:${port}`);
-      } else {
-        coreEnv.push(
-          `${type.toLowerCase()}_URL=http://${containerName}:${port}`,
+
+      if (Object.keys(containerIds).length) {
+        const containerName = this.buildContainerName(agent.id);
+        coreEnv.push(`PORT=${agent.port}`);
+        coreEnv.push(`HTTP_PORT=${agent.httpPort}`);
+        containerIds['core'] = await this.dockerService.runContainer(
+          containerName,
+          this.defaultImage,
+          coreEnv,
         );
       }
 
-      let binds: string[] = [];
-      if (process.env.TOOLS_DIR) {
-        binds.push(`${process.env.TOOLS_DIR}:/usr/src/app/tools`);
-      }
-      if (process.env.AVR_TOOLS_DIR) {
-        binds.push(`${process.env.AVR_TOOLS_DIR}:/usr/src/app/avr_tools`);
-      }
+      await this.asteriskService.syncDialplan();
 
-      containerIds[type] = await this.dockerService.runContainer(
-        containerName,
-        image,
-        providerEnv,
-        binds,
+      this.assertTransition(agent.status, AgentStatus.RUNNING);
+      agent.status = AgentStatus.RUNNING;
+      this.clearFailureState(agent);
+      return this.agentRepository.save(agent);
+    } catch (error) {
+      const startedContainers = Object.keys(containerIds).map((type) =>
+        type === 'core'
+          ? this.buildContainerName(agent.id)
+          : this.buildContainerName(agent.id, type.toLowerCase()),
       );
+      for (const name of startedContainers.reverse()) {
+        try {
+          await this.dockerService.stopContainer(name);
+        } catch {
+          // Best effort cleanup of partially started runtimes.
+        }
+      }
+      this.assertTransition(agent.status, AgentStatus.ERROR);
+      this.markFailedLifecycle(agent, error, 'run');
+      await this.agentRepository.save(agent);
+      throw error;
     }
-
-    if (Object.keys(containerIds).length) {
-      const containerName = this.buildContainerName(agent.id);
-      coreEnv.push(`PORT=${agent.port}`);
-      coreEnv.push(`HTTP_PORT=${agent.httpPort}`);
-      containerIds['core'] = await this.dockerService.runContainer(
-        containerName,
-        this.defaultImage,
-        coreEnv,
-      );
-    }
-
-    agent.status = AgentStatus.RUNNING;
-    return this.agentRepository.save(agent);
   }
 
   async stopAgent(id: string): Promise<Agent> {
     const agent = await this.findOne(id);
+    this.assertTransition(agent.status, AgentStatus.STOPPING);
+    agent.status = AgentStatus.STOPPING;
+    await this.agentRepository.save(agent);
+
     const names = this.getContainerNames(agent.id, agent.mode);
-    for (const name of names) {
-      await this.dockerService.stopContainer(name);
+    try {
+      const stopErrors = await this.stopContainersIdempotently(names);
+      if (stopErrors.length) {
+        throw new Error(
+          `Compensation stop failed for ${stopErrors.length} container(s)`,
+        );
+      }
+      await this.asteriskService.syncDialplan();
+
+      this.assertTransition(agent.status, AgentStatus.STOPPED);
+      agent.status = AgentStatus.STOPPED;
+      this.clearFailureState(agent);
+      return this.agentRepository.save(agent);
+    } catch (error) {
+      this.assertTransition(agent.status, AgentStatus.ERROR);
+      this.markFailedLifecycle(agent, error, 'stop');
+      await this.agentRepository.save(agent);
+      throw error;
+    }
+  }
+
+  private assertTransition(from: AgentStatus, to: AgentStatus): void {
+    const allowed = this.lifecycleTransitions[from] ?? [];
+    if (allowed.includes(to)) {
+      return;
     }
 
-    agent.status = AgentStatus.STOPPED;
-    return this.agentRepository.save(agent);
+    throw new ConflictException({
+      code: 'AGENT_INVALID_TRANSITION',
+      reason: 'Agent lifecycle transition is not allowed',
+      currentStatus: from,
+      targetStatus: to,
+      allowedTransitions: allowed,
+      retryable: false,
+    });
+  }
+
+  private clearFailureState(agent: Agent): void {
+    agent.lastError = null;
+    agent.failureReason = null;
+    agent.failureStatus = AgentFailureStatus.NONE;
+    agent.retryable = null;
+  }
+
+  private async stopContainersIdempotently(names: string[]): Promise<Error[]> {
+    const errors: Error[] = [];
+    for (const name of names) {
+      try {
+        await this.dockerService.stopContainer(name);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Unknown stop error';
+        errors.push(new Error(`${name}: ${message}`));
+      }
+    }
+    return errors;
+  }
+
+  private markFailedLifecycle(
+    agent: Agent,
+    error: unknown,
+    operation: 'run' | 'stop',
+  ): void {
+    const message =
+      error instanceof Error ? error.message : 'Unknown lifecycle error';
+    const retryable = this.isRetryableLifecycleFailure(error);
+
+    agent.status = AgentStatus.ERROR;
+    agent.lastError = message;
+    agent.failureReason = this.normalizeFailureReason(error, operation);
+    agent.failureStatus = retryable
+      ? AgentFailureStatus.RETRYABLE
+      : AgentFailureStatus.TERMINAL;
+    agent.retryable = retryable;
+  }
+
+  private isRetryableLifecycleFailure(error: unknown): boolean {
+    if (error instanceof BadRequestException) {
+      return false;
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+    const normalized = message.toLowerCase();
+
+    return (
+      normalized.includes('timeout') ||
+      normalized.includes('econnrefused') ||
+      normalized.includes('enoent') ||
+      normalized.includes('socket') ||
+      normalized.includes('temporar') ||
+      normalized.includes('unavailable')
+    );
+  }
+
+  private normalizeFailureReason(
+    error: unknown,
+    operation: 'run' | 'stop',
+  ): AgentFailureReason {
+    if (error instanceof BadRequestException) {
+      return AgentFailureReason.CONFIGURATION_INVALID;
+    }
+
+    const message = (
+      error instanceof Error ? error.message : String(error)
+    ).toLowerCase();
+
+    if (operation === 'stop' && message.includes('compensation stop failed')) {
+      return AgentFailureReason.COMPENSATION_FAILED;
+    }
+
+    if (
+      message.includes('timeout') ||
+      message.includes('econnrefused') ||
+      message.includes('enoent') ||
+      message.includes('socket') ||
+      message.includes('temporar') ||
+      message.includes('unavailable')
+    ) {
+      return AgentFailureReason.DEPENDENCY_UNAVAILABLE;
+    }
+
+    return AgentFailureReason.UNKNOWN;
   }
 
   private async resolveProvider(id?: string | null): Promise<Provider | null> {
@@ -330,5 +514,74 @@ export class AgentsService {
       );
     }
     agent.providerSts = null;
+  }
+
+  private assertProviderRuntimeContract(
+    provider: Provider,
+    type: ProviderType,
+  ): void {
+    assertProviderContract(provider);
+
+    const image = this.extractImage(provider);
+    if (!image) {
+      throw new BadRequestException(
+        `Provider ${provider.name} (${type}) is missing runtime image`,
+      );
+    }
+
+    const envConfig = provider.config?.env;
+    if (!envConfig || typeof envConfig !== 'object') {
+      return;
+    }
+
+    for (const key of Object.keys(envConfig)) {
+      if (
+        this.reservedEnvKeys.has(key) ||
+        key.startsWith('PROVIDER_') ||
+        key.endsWith('_URL')
+      ) {
+        throw new BadRequestException(
+          `Provider ${provider.name} (${type}) uses reserved env key ${key}`,
+        );
+      }
+    }
+  }
+
+  private async waitForReadiness(
+    containerId: string,
+    providerName: string,
+    type: ProviderType,
+  ): Promise<void> {
+    const deadline = Date.now() + this.readinessTimeoutMs;
+
+    while (Date.now() < deadline) {
+      const inspect = await this.dockerService.getContainerInspect(containerId);
+      const running = Boolean(inspect.State?.Running);
+      const health = inspect.State?.Health?.Status;
+
+      if (health === 'healthy') {
+        return;
+      }
+      if (!health && running) {
+        return;
+      }
+      if (health === 'unhealthy') {
+        throw new BadRequestException(
+          `Provider ${providerName} (${type}) failed healthcheck`,
+        );
+      }
+
+      await this.sleep(this.readinessPollMs);
+    }
+
+    throw new BadRequestException(
+      `Provider ${providerName} (${type}) readiness timeout after ${this.readinessTimeoutMs}ms`,
+    );
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 }

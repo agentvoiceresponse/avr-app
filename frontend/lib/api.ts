@@ -3,6 +3,7 @@ import { env } from 'next-runtime-env';
 
 const API_URL = env('NEXT_PUBLIC_API_URL') ?? 'http://localhost:3001';
 const TOKEN_KEY = 'avr-admin-token';
+export const AUTH_SESSION_EXPIRED_EVENT = 'avr:auth-session-expired';
 
 export class ApiError extends Error {
   status: number;
@@ -74,6 +75,12 @@ export async function apiFetch<T>(endpoint: string, init: ApiFetchOptions = {}):
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      setStoredToken(null);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent(AUTH_SESSION_EXPIRED_EVENT));
+      }
+    }
     const message = await extractErrorMessage(response);
     throw new ApiError(message, response.status);
   }

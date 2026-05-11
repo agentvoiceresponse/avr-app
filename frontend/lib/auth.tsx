@@ -3,7 +3,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
-import { getApiUrl, getStoredToken, setStoredToken } from './api';
+import {
+  AUTH_SESSION_EXPIRED_EVENT,
+  TOKEN_KEY,
+  getApiUrl,
+  getStoredToken,
+  setStoredToken,
+} from './api';
 
 export type UserRole = 'admin' | 'manager' | 'viewer';
 
@@ -53,6 +59,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const clearAuthState = useCallback(
+    (redirectToLogin = false) => {
+      setToken(null);
+      setUser(null);
+      setStoredToken(null);
+      if (redirectToLogin) {
+        router.replace('/login');
+      }
+    },
+    [router],
+  );
+
   useEffect(() => {
     const stored = getStoredToken();
     if (stored) {
@@ -62,18 +80,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setToken(stored);
         setUser(decoded);
       } else {
-        setStoredToken(null);
+        clearAuthState();
       }
     }
     setLoading(false);
-  }, []);
+  }, [clearAuthState]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const handleExpiredSession = () => {
+      clearAuthState(true);
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== TOKEN_KEY) {
+        return;
+      }
+
+      const nextToken = event.newValue;
+      if (!nextToken) {
+        clearAuthState(true);
+        return;
+      }
+
+      const decoded = decodeToken(nextToken);
+      if (!decoded) {
+        clearAuthState(true);
+        return;
+      }
+
+      setToken(nextToken);
+      setUser(decoded);
+    };
+
+    window.addEventListener(AUTH_SESSION_EXPIRED_EVENT, handleExpiredSession as EventListener);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_EXPIRED_EVENT, handleExpiredSession as EventListener);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [clearAuthState]);
 
   const logout = useCallback(() => {
-    setToken(null);
-    setUser(null);
-    setStoredToken(null);
-    router.replace('/login');
-  }, [router]);
+    clearAuthState(true);
+  }, [clearAuthState]);
 
   const login = useCallback(
     async (username: string, password: string) => {

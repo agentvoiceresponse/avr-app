@@ -14,6 +14,7 @@ import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ServerCog, Pencil, Trash2, Shield } from 'lucide-react';
 import { apiFetch, ApiError, type PaginatedResponse } from '@/lib/api';
+import { resolveApiErrorMessage } from '@/lib/resolve-api-error';
 import { useI18n, type Dictionary } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import {
@@ -111,6 +112,13 @@ export default function ProvidersPage() {
   const { dictionary } = useI18n();
   const { user } = useAuth();
   const isReadOnly = user?.role === 'viewer';
+  const apiErrorOptions = useMemo(
+    () => ({
+      authRequired: dictionary.common.errors.authRequired,
+      forbidden: dictionary.common.errors.forbidden,
+    }),
+    [dictionary.common.errors.authRequired, dictionary.common.errors.forbidden],
+  );
 
   const providerTemplates: ProviderTemplate[] = [
     {
@@ -739,15 +747,16 @@ export default function ProvidersPage() {
       });
       setError(null);
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(dictionary.providers.errors.loadProviders);
-      }
+      setError(
+        resolveApiErrorMessage(err, {
+          ...apiErrorOptions,
+          fallback: dictionary.providers.errors.loadProviders,
+        }),
+      );
     } finally {
       setLoading(false);
     }
-  }, [dictionary.providers.errors.loadProviders, pagination.limit, pagination.page]);
+  }, [apiErrorOptions, dictionary.providers.errors.loadProviders, pagination.limit, pagination.page]);
 
   useEffect(() => {
     loadProviders();
@@ -774,12 +783,15 @@ export default function ProvidersPage() {
       });
       await loadProviders();
     } catch (err) {
-      if (err instanceof ApiError) {
+      if (err instanceof ApiError && err.status !== 401 && err.status !== 403) {
         form.setError('name', { message: err.message });
-      } else if (err instanceof Error) {
-        setError(err.message);
       } else {
-        setError(dictionary.providers.errors.create);
+        setError(
+          resolveApiErrorMessage(err, {
+            ...apiErrorOptions,
+            fallback: dictionary.providers.errors.create,
+          }),
+        );
       }
     } finally {
       setSubmitting(false);
@@ -826,12 +838,15 @@ export default function ProvidersPage() {
       setEditingProvider(null);
       await loadProviders();
     } catch (err) {
-      if (err instanceof ApiError) {
+      if (err instanceof ApiError && err.status !== 401 && err.status !== 403) {
         editForm.setError('root', { message: err.message });
-      } else if (err instanceof Error) {
-        setError(err.message);
       } else {
-        setError(dictionary.providers.errors.update);
+        setError(
+          resolveApiErrorMessage(err, {
+            ...apiErrorOptions,
+            fallback: dictionary.providers.errors.update,
+          }),
+        );
       }
     } finally {
       setUpdating(false);
@@ -855,11 +870,12 @@ export default function ProvidersPage() {
       setDeleteDialogOpen(false);
       await loadProviders();
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(dictionary.providers.errors.delete);
-      }
+      setError(
+        resolveApiErrorMessage(err, {
+          ...apiErrorOptions,
+          fallback: dictionary.providers.errors.delete,
+        }),
+      );
     } finally {
       setDeleting(false);
     }

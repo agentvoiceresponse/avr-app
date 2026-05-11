@@ -15,6 +15,7 @@ import {
   PaginatedResult,
   PaginationQuery,
 } from '../common/pagination';
+import { buildProvisioningSyncException } from '../common/provisioning-sync';
 
 @Injectable()
 export class PhonesService {
@@ -42,7 +43,7 @@ export class PhonesService {
       await this.asteriskService.provisionPhone(saved);
     } catch (error) {
       await this.phoneRepository.delete(saved.id);
-      throw error;
+      throw buildProvisioningSyncException('phone', 'create', error);
     }
 
     return saved;
@@ -64,6 +65,7 @@ export class PhonesService {
     if (!phone) {
       throw new NotFoundException('Phone not found');
     }
+    const previous = { ...phone };
 
     if (dto.fullName !== undefined) {
       const fullName = dto.fullName.trim();
@@ -81,8 +83,12 @@ export class PhonesService {
     }
 
     const saved = await this.phoneRepository.save(phone);
-
-    await this.asteriskService.provisionPhone(saved);
+    try {
+      await this.asteriskService.provisionPhone(saved);
+    } catch (error) {
+      await this.phoneRepository.save(previous);
+      throw buildProvisioningSyncException('phone', 'update', error);
+    }
 
     return saved;
   }
@@ -94,8 +100,11 @@ export class PhonesService {
       throw new NotFoundException('Phone not found');
     }
 
+    try {
+      await this.asteriskService.removePhone(id);
+    } catch (error) {
+      throw buildProvisioningSyncException('phone', 'remove', error);
+    }
     await this.phoneRepository.remove(client);
-
-    await this.asteriskService.removePhone(id);
   }
 }

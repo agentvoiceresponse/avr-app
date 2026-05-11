@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart3, RefreshCcw } from 'lucide-react';
-import { apiFetch, type PaginatedResponse } from '@/lib/api';
+import { ApiError, apiFetch } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useI18n } from '@/lib/i18n';
+import { useAuth } from '@/lib/auth';
 import {
   Select,
   SelectContent,
@@ -16,35 +17,27 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { CockpitBanner } from '@/components/voiceops/cockpit-banner';
+import { fetchCockpitSnapshot } from '@/lib/voiceops-cockpit/transport';
+import { getExitedContainers, getFailingComponentsCount, getStoppedAgents, getTopFailure } from '@/lib/voiceops-cockpit/view-model';
+import type { AgentDto, CallSummaryDto, CallSummaryResponse, DockerContainerDto, TrunkDto } from '@/lib/voiceops-cockpit/types';
 
-interface AgentDto {
-  id: string;
-  name: string;
-  status: string;
-}
-
-interface CallSummaryDto {
-  id: string;
-  uuid: string;
-  agentId?: string | null;
-  startedAt: string | null;
-  endedAt: string | null;
-}
-
-interface CallSummaryResponse {
-  totalCalls: number;
-  averageDurationSeconds: number;
-}
+type CockpitActionStatus = 'idle' | 'pending' | 'success' | 'error';
 
 const timeRangeOptions = ['1', '3', '6', '12'] as const;
-
 type TimeRange = (typeof timeRangeOptions)[number];
 
 export default function DashboardPage() {
   const { dictionary } = useI18n();
+  const { user } = useAuth();
+  const isReadOnly = user?.role === 'viewer';
+
   const [runningAgents, setRunningAgents] = useState(0);
   const [agents, setAgents] = useState<AgentDto[]>([]);
+  const [trunks, setTrunks] = useState<TrunkDto[]>([]);
+  const [containers, setContainers] = useState<DockerContainerDto[]>([]);
   const [calls, setCalls] = useState<CallSummaryDto[]>([]);
+  const [callErrorCount, setCallErrorCount] = useState(0);
   const [summary, setSummary] = useState<CallSummaryResponse>({
     totalCalls: 0,
     averageDurationSeconds: 0,
@@ -54,43 +47,21 @@ export default function DashboardPage() {
   const [range, setRange] = useState<TimeRange>('1');
   const [agentFilter, setAgentFilter] = useState<string>('all');
 
-  useEffect(() => {
-    async function loadAgents() {
-      try {
-        const response = await apiFetch<PaginatedResponse<AgentDto>>('/agents', {
-          query: { page: 1, limit: 100 },
-          paginated: true,
-        });
-        setAgents(response.data);
-        setRunningAgents(
-          response.data.filter((agent) => agent.status === 'running').length,
-        );
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    loadAgents();
-  }, []);
+  const [actionStatus, setActionStatus] = useState<CockpitActionStatus>('idle');
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
-  const fetchCallData = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams();
-      params.append('range', range);
-      if (agentFilter !== 'all') {
-        params.append('agentId', agentFilter);
-      }
-
-      const query = params.toString();
-      const [summaryData, callsResponse] = await Promise.all([
-        apiFetch<CallSummaryResponse>(`/webhooks/summary?${query}`),
-        apiFetch<PaginatedResponse<CallSummaryDto>>(`/webhooks/calls?${query}&page=1&limit=100`, {
-          paginated: true,
-        }),
-      ]);
-      setSummary(summaryData);
-      setCalls(callsResponse.data ?? []);
+      const snapshot = await fetchCockpitSnapshot(range, agentFilter);
+      setAgents(snapshot.agents);
+      setRunningAgents(snapshot.agents.filter((agent) => agent.status === 'running').length);
+      setSummary(snapshot.summary);
+      setCalls(snapshot.calls);
+      setTrunks(snapshot.trunks);
+      setContainers(snapshot.containers);
+      setCallErrorCount(snapshot.callErrorCount);
     } catch (err) {
       console.error(err);
       setError(dictionary.dashboard.errors.load);
@@ -100,8 +71,99 @@ export default function DashboardPage() {
   }, [agentFilter, dictionary.dashboard.errors.load, range]);
 
   useEffect(() => {
-    void fetchCallData();
-  }, [fetchCallData]);
+    void fetchData();
+  }, [fetchData]);
+
+  const stoppedAgents = useMemo(() => getStoppedAgents(agents), [agents]);
+  const exitedContainers = useMemo(() => getExitedContainers(containers), [containers]);
+
+  const topFailure = useMemo(
+    () =>
+      getTopFailure({
+        stoppedAgentsCount: stoppedAgents.length,
+        exitedContainersCount: exitedContainers.length,
+        callErrorCount,
+        trunksCount: trunks.length,
+      }),
+    [callErrorCount, exitedContainers.length, stoppedAgents.length, trunks.length],
+  );
+
+  const failureTitle = useMemo(() => {
+    if (!topFailure) {
+      return dictionary.dashboard.cockpit.noFailures;
+    }
+    switch (topFailure.key) {
+      case 'agents':
+        return dictionary.dashboard.cockpit.topFailures.agents(topFailure.count);
+      case 'containers':
+        return dictionary.dashboard.cockpit.topFailures.containers(topFailure.count);
+      case 'calls':
+        return dictionary.dashboard.cockpit.topFailures.calls(topFailure.count);
+      case 'trunks':
+        return dictionary.dashboard.cockpit.topFailures.noTrunks;
+      default:
+        return dictionary.dashboard.cockpit.noFailures;
+    }
+  }, [dictionary.dashboard.cockpit, topFailure]);
+
+  const failureGuidance = useMemo(() => {
+    if (!topFailure) {
+      return dictionary.dashboard.cockpit.healthyGuidance;
+    }
+    switch (topFailure.key) {
+      case 'agents':
+        return dictionary.dashboard.cockpit.guidance.restartAgent;
+      case 'containers':
+        return dictionary.dashboard.cockpit.guidance.retryContainer;
+      case 'calls':
+        return dictionary.dashboard.cockpit.guidance.inspectCallErrors;
+      case 'trunks':
+        return dictionary.dashboard.cockpit.guidance.configureTrunk;
+      default:
+        return dictionary.dashboard.cockpit.healthyGuidance;
+    }
+  }, [dictionary.dashboard.cockpit, topFailure]);
+
+  const actionLabel = useMemo(() => {
+    if (!topFailure) {
+      return null;
+    }
+    if (topFailure.key === 'agents') {
+      return dictionary.dashboard.cockpit.actions.restart;
+    }
+    if (topFailure.key === 'containers') {
+      return dictionary.dashboard.cockpit.actions.retry;
+    }
+    return dictionary.dashboard.cockpit.actions.refresh;
+  }, [dictionary.dashboard.cockpit.actions, topFailure]);
+
+  const runTopFailureAction = useCallback(async () => {
+    if (!topFailure) {
+      return;
+    }
+    setActionStatus('pending');
+    setActionMessage(null);
+    try {
+      if (topFailure.key === 'agents' && stoppedAgents[0]) {
+        await apiFetch(`/agents/${stoppedAgents[0].id}/run`, {
+          method: 'POST',
+          body: JSON.stringify({}),
+        });
+      } else if (topFailure.key === 'containers' && exitedContainers[0]) {
+        await apiFetch(`/docker/containers/${exitedContainers[0].id}/pull`, {
+          method: 'POST',
+        });
+      }
+      await fetchData();
+      setActionStatus('success');
+      setActionMessage(dictionary.dashboard.cockpit.actionState.success);
+    } catch (err) {
+      setActionStatus('error');
+      setActionMessage(
+        err instanceof ApiError ? err.message : dictionary.dashboard.cockpit.actionState.error,
+      );
+    }
+  }, [dictionary.dashboard.cockpit.actionState.error, dictionary.dashboard.cockpit.actionState.success, exitedContainers, fetchData, stoppedAgents, topFailure]);
 
   const stats = useMemo(
     () => [
@@ -117,8 +179,16 @@ export default function DashboardPage() {
         title: dictionary.dashboard.stats.runningAgents,
         value: runningAgents,
       },
+      {
+        title: dictionary.dashboard.cockpit.metrics.failingComponents,
+        value: getFailingComponentsCount({
+          stoppedAgentsCount: stoppedAgents.length,
+          exitedContainersCount: exitedContainers.length,
+          callErrorCount,
+        }),
+      },
     ],
-    [dictionary.dashboard.stats, runningAgents, summary.averageDurationSeconds, summary.totalCalls],
+    [callErrorCount, dictionary.dashboard.cockpit.metrics.failingComponents, dictionary.dashboard.stats, exitedContainers.length, runningAgents, stoppedAgents.length, summary.averageDurationSeconds, summary.totalCalls],
   );
 
   const agentOptions = useMemo(() => {
@@ -195,7 +265,7 @@ export default function DashboardPage() {
               </SelectContent>
             </Select>
           </div>
-          <Button variant="outline" onClick={fetchCallData} disabled={loading}>
+          <Button variant="outline" onClick={fetchData} disabled={loading}>
             <RefreshCcw className="mr-2 h-4 w-4" /> {dictionary.dashboard.filters.refresh}
           </Button>
         </div>
@@ -203,7 +273,23 @@ export default function DashboardPage() {
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <CockpitBanner
+        isReadOnly={isReadOnly}
+        topFailure={topFailure}
+        failureTitle={failureTitle}
+        failureGuidance={failureGuidance}
+        actionLabel={actionLabel}
+        actionStatus={actionStatus}
+        actionMessage={actionMessage}
+        readOnlyLabel={dictionary.dashboard.cockpit.readOnly}
+        alertTitle={dictionary.dashboard.cockpit.alertTitle}
+        healthyTitle={dictionary.dashboard.cockpit.healthyTitle}
+        noFailuresLabel={dictionary.dashboard.cockpit.noFailures}
+        healthyGuidance={dictionary.dashboard.cockpit.healthyGuidance}
+        onAction={runTopFailureAction}
+      />
+
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.title} className="border-border/60">
             <CardHeader className="pb-2">

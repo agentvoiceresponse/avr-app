@@ -9,6 +9,8 @@ import { Trunk } from '../trunks/trunk.entity';
 @Injectable()
 export class AsteriskService {
   private readonly logger = new Logger(AsteriskService.name);
+  private readonly managedSectionStart = '; BEGIN AVR-MANAGED';
+  private readonly managedSectionEnd = '; END AVR-MANAGED';
   private ari: Client | null = null;
   private ariPromise: Promise<Client> | null = null;
   private readonly basePath =
@@ -98,6 +100,11 @@ export class AsteriskService {
     await this.reloadModule('res_pjsip.so');
   }
 
+  async syncDialplan(): Promise<void> {
+    await this.reloadModule('pbx_config.so');
+    await this.reloadModule('res_pjsip.so');
+  }
+
   private async upsertBlock(
     filePath: string,
     identifier: string,
@@ -105,43 +112,51 @@ export class AsteriskService {
   ) {
     await this.ensureFile(filePath);
     const content = await fs.readFile(filePath, 'utf8');
+    const sections = this.parseManagedSection(content);
     const [beginMarker, endMarker] = this.getMarkers(identifier);
     const blockWithMarkers = `${beginMarker}\n${block}\n${endMarker}\n`;
     const regex = new RegExp(
       `${this.escapeRegex(beginMarker)}[\\s\\S]*?${this.escapeRegex(endMarker)}(?:\\r?\\n|$)`,
       'g',
     );
-    let nextContent: string;
-    if (regex.test(content)) {
-      nextContent = content.replace(regex, blockWithMarkers);
+    let nextManagedContent: string;
+    if (regex.test(sections.managedContent)) {
+      nextManagedContent = sections.managedContent.replace(
+        regex,
+        blockWithMarkers,
+      );
     } else {
       const separator =
-        content.length === 0 || content.endsWith('\n') ? '' : '\n';
-      nextContent = `${content}${separator}${blockWithMarkers}`;
+        sections.managedContent.length === 0 ||
+        sections.managedContent.endsWith('\n')
+          ? ''
+          : '\n';
+      nextManagedContent = `${sections.managedContent}${separator}${blockWithMarkers}`;
     }
+    this.assertManagedRegionSafe(nextManagedContent, filePath);
+    const nextContent = this.stringifyManagedSection(
+      sections,
+      nextManagedContent,
+    );
     await fs.writeFile(filePath, nextContent);
   }
 
   private async removeBlock(filePath: string, identifier: string) {
-    try {
-      await this.ensureFile(filePath);
-      const content = await fs.readFile(filePath, 'utf8');
-      const [beginMarker, endMarker] = this.getMarkers(identifier);
-      const regex = new RegExp(
-        `${this.escapeRegex(beginMarker)}[\\s\\S]*?${this.escapeRegex(endMarker)}(?:\\r?\\n|$)`,
-        'g',
-      );
-      const nextContent = content.replace(regex, '');
-      await fs.writeFile(
-        filePath,
-        nextContent.trimEnd() + (nextContent.trimEnd().length ? '\n' : ''),
-      );
-    } catch (error) {
-      this.logger.error(
-        `Failed to remove Asterisk block for ${identifier}`,
-        error as Error,
-      );
-    }
+    await this.ensureFile(filePath);
+    const content = await fs.readFile(filePath, 'utf8');
+    const sections = this.parseManagedSection(content);
+    const [beginMarker, endMarker] = this.getMarkers(identifier);
+    const regex = new RegExp(
+      `${this.escapeRegex(beginMarker)}[\\s\\S]*?${this.escapeRegex(endMarker)}(?:\\r?\\n|$)`,
+      'g',
+    );
+    const nextManagedContent = sections.managedContent.replace(regex, '');
+    this.assertManagedRegionSafe(nextManagedContent, filePath);
+    const nextContent = this.stringifyManagedSection(
+      sections,
+      nextManagedContent,
+    );
+    await fs.writeFile(filePath, nextContent);
   }
 
   private async ensureFile(filePath: string) {
@@ -155,6 +170,83 @@ export class AsteriskService {
 
   private getMarkers(identifier: string): [string, string] {
     return [`; BEGIN ${identifier}`, `; END ${identifier}`];
+  }
+
+  private parseManagedSection(content: string): {
+    prefix: string;
+    managedContent: string;
+    suffix: string;
+  } {
+    const start = content.indexOf(this.managedSectionStart);
+    const end = content.indexOf(this.managedSectionEnd);
+
+    if (start === -1 && end === -1) {
+      return { prefix: content, managedContent: '', suffix: '' };
+    }
+
+    if (start === -1 || end === -1 || end < start) {
+      throw new Error(
+        'Asterisk config managed section is malformed. Refusing to edit telephony config.',
+      );
+    }
+
+    const secondStart = content.indexOf(
+      this.managedSectionStart,
+      start + this.managedSectionStart.length,
+    );
+    const secondEnd = content.indexOf(
+      this.managedSectionEnd,
+      end + this.managedSectionEnd.length,
+    );
+    if (secondStart !== -1 || secondEnd !== -1) {
+      throw new Error(
+        'Asterisk config has duplicate managed section markers. Refusing to edit telephony config.',
+      );
+    }
+
+    const managedStart = content.indexOf('\n', start);
+    const managedBodyStart =
+      managedStart === -1
+        ? start + this.managedSectionStart.length
+        : managedStart + 1;
+    const managedContent = content.slice(managedBodyStart, end);
+    const suffixStart = end + this.managedSectionEnd.length;
+
+    return {
+      prefix: content.slice(0, start),
+      managedContent,
+      suffix: content.slice(suffixStart),
+    };
+  }
+
+  private stringifyManagedSection(
+    sections: { prefix: string; managedContent: string; suffix: string },
+    managedContent: string,
+  ): string {
+    const normalizedPrefix =
+      sections.prefix.endsWith('\n') || sections.prefix.length === 0
+        ? sections.prefix
+        : `${sections.prefix}\n`;
+    const normalizedBody = managedContent.trimEnd();
+    const managedBlock = `${this.managedSectionStart}\n${normalizedBody}${normalizedBody.length ? '\n' : ''}${this.managedSectionEnd}\n`;
+    const normalizedSuffix = sections.suffix.trimStart();
+    return (
+      `${normalizedPrefix}${managedBlock}${normalizedSuffix}`.trimEnd() + '\n'
+    );
+  }
+
+  private assertManagedRegionSafe(
+    managedContent: string,
+    filePath: string,
+  ): void {
+    const cleaned = managedContent
+      .replace(/; BEGIN [^\n]+\n[\s\S]*?; END [^\n]+(?:\r?\n|$)/g, '')
+      .trim();
+    if (cleaned.length > 0) {
+      throw new Error(
+        `Asterisk config drift detected in managed section for ${filePath}. Refusing to overwrite unmanaged lines.`,
+      );
+    }
   }
 
   private escapeRegex(value: string): string {
