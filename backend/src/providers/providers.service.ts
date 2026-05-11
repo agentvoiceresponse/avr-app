@@ -14,6 +14,7 @@ import {
   PaginatedResult,
   PaginationQuery,
 } from '../common/pagination';
+import { assertProviderContract } from './provider-contracts';
 
 @Injectable()
 export class ProvidersService {
@@ -30,6 +31,12 @@ export class ProvidersService {
     if (existing) {
       throw new ConflictException('Provider name already exists');
     }
+
+    assertProviderContract({
+      name: createProviderDto.name,
+      type: createProviderDto.type,
+      config: createProviderDto.config ?? null,
+    });
 
     const provider = this.providerRepository.create(createProviderDto);
     return this.providerRepository.save(provider);
@@ -78,6 +85,8 @@ export class ProvidersService {
     if (updateProviderDto.config !== undefined) {
       provider.config = updateProviderDto.config;
     }
+
+    assertProviderContract(provider);
 
     return this.providerRepository.save(provider);
   }

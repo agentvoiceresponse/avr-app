@@ -73,7 +73,9 @@ export function AppShell({ children }: PropsWithChildren) {
   const { user, logout } = useAuth();
   const { dictionary } = useI18n();
   const webRtcClientUrl = env("NEXT_PUBLIC_WEBRTC_CLIENT_URL");
+  const telephonyStatusUrl = env("NEXT_PUBLIC_TELEPHONY_STATUS_URL");
   const [isPhoneOpen, setIsPhoneOpen] = useState(false);
+  const isTelephonyAvailable = useServiceAvailable(telephonyStatusUrl);
 
   const navPrimaryItems = useMemo<NavItem[]>(
     () => [
@@ -149,6 +151,7 @@ export function AppShell({ children }: PropsWithChildren) {
         navPrimaryItems={navPrimaryItems}
         navBuildItems={navBuildItems}
         navTelephonyItems={navTelephonyItems}
+        isTelephonyAvailable={isTelephonyAvailable}
         navAdministrationItems={navAdministrationItems}
         navObserveItems={navObserveItems}
         socialLinks={socialLinks}
@@ -171,6 +174,7 @@ type AppShellContentProps = {
   navObserveItems: NavItem[];
   navBuildItems: NavItem[];
   navTelephonyItems: NavItem[];
+  isTelephonyAvailable: boolean;
   navAdministrationItems: NavItem[];
   socialLinks: SocialLink[];
   userName: string;
@@ -188,6 +192,7 @@ function AppShellContent({
   navPrimaryItems,
   navBuildItems,
   navTelephonyItems,
+  isTelephonyAvailable,
   navAdministrationItems,
   navObserveItems,
   socialLinks,
@@ -203,14 +208,15 @@ function AppShellContent({
   const { setOpen } = useSidebar();
   const isMobile = useMediaQuery("(max-width: 767px)");
   const isViewer = userRole === "viewer";
-  const displayednavBuildItems = isViewer ? navBuildItems : navBuildItems;
-  const displayednavAdministrationItems = isViewer
-    ? navAdministrationItems
-    : navAdministrationItems;
-  const displayednavTelephonyItems = isViewer
-    ? navTelephonyItems.filter((item) => item.href !== "/trunks")
-    : navTelephonyItems;
-  const displayednavObserveItems = isViewer ? navObserveItems : navObserveItems;
+  const isAdmin = userRole === "admin";
+  const displayednavBuildItems = navBuildItems;
+  const displayednavAdministrationItems = isAdmin ? navAdministrationItems : [];
+  const displayednavTelephonyItems = !isTelephonyAvailable
+    ? []
+    : isViewer
+      ? navTelephonyItems.filter((item) => item.href !== "/trunks")
+      : navTelephonyItems;
+  const displayednavObserveItems = navObserveItems;
 
   const handleNavigate = () => {
     if (isMobile) {
@@ -531,4 +537,48 @@ function useMediaQuery(query: string) {
   }, [query]);
 
   return matches;
+}
+
+function useServiceAvailable(url?: string) {
+  const [isAvailable, setIsAvailable] = useState(false);
+
+  useEffect(() => {
+    if (!url) {
+      setIsAvailable(false);
+      return;
+    }
+
+    let isMounted = true;
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 4000);
+
+    const checkStatus = async () => {
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (isMounted) {
+          setIsAvailable(response.status === 200);
+        }
+      } catch {
+        if (isMounted) {
+          setIsAvailable(false);
+        }
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+    };
+
+    void checkStatus();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+      window.clearTimeout(timeoutId);
+    };
+  }, [url]);
+
+  return isAvailable;
 }

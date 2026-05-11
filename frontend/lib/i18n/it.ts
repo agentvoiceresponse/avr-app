@@ -29,6 +29,10 @@ export const itDictionary = {
       openWebrtc: 'Apri client WebRTC',
       hidePhone: 'Nascondi telefono',
     },
+    errors: {
+      authRequired: 'La sessione è scaduta. Effettua nuovamente il login.',
+      forbidden: "Non hai i permessi per completare questa azione.",
+    },
   },
   navigation: {
     dashboard: 'Panoramica',
@@ -71,6 +75,37 @@ export const itDictionary = {
     charts: {
       callsPerMonth: 'Chiamate per mese',
       empty: 'Nessuna attività nel periodo selezionato.',
+    },
+    cockpit: {
+      alertTitle: 'VoiceOps richiede attenzione',
+      healthyTitle: 'VoiceOps operativo',
+      noFailures: 'Nessun guasto attivo rilevato su agenti, container o chiamate recenti.',
+      healthyGuidance: 'Continua il monitoraggio da questo cockpit e aggiorna durante la risposta agli incidenti.',
+      readOnly: 'Il ruolo viewer non può eseguire azioni di recovery',
+      actions: {
+        restart: 'Riavvia guasto principale',
+        retry: 'Riprova guasto principale',
+        refresh: 'Aggiorna diagnostica',
+      },
+      metrics: {
+        failingComponents: 'Componenti in errore',
+      },
+      guidance: {
+        restartAgent: 'Riavvia prima l\'agente fermo, poi verifica il flusso chiamata e la raggiungibilità dei provider.',
+        retryContainer: 'Riprova il pull/restart del container e controlla i log se fallisce di nuovo.',
+        inspectCallErrors: 'Analizza gli errori recenti di chiamata e verifica la salute di provider/container prima di riprovare.',
+        configureTrunk: 'Crea e assegna almeno un trunk per abilitare i trasferimenti in uscita.',
+      },
+      topFailures: {
+        agents: (count: number) => `${count} agent${count === 1 ? 'e fermo' : 'i fermi'} rilevat${count === 1 ? 'o' : 'i'}.`,
+        containers: (count: number) => `${count} container non in esecuzione.`,
+        calls: (count: number) => `${count} chiamat${count === 1 ? 'a recente con segnali di errore' : 'e recenti con segnali di errore'}.`,
+        noTrunks: 'Nessun trunk configurato nella telefonia.',
+      },
+      actionState: {
+        success: 'Azione di recovery completata con successo.',
+        error: 'Azione di recovery fallita. Controlla i log e riprova.',
+      },
     },
     errors: {
       load: 'Impossibile caricare i dati',

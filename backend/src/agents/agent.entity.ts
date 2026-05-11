@@ -12,6 +12,23 @@ import { PhoneNumber } from '../numbers/number.entity';
 export enum AgentStatus {
   RUNNING = 'running',
   STOPPED = 'stopped',
+  ERROR = 'error',
+  STARTING = 'starting',
+  STOPPING = 'stopping',
+}
+
+export enum AgentFailureStatus {
+  NONE = 'none',
+  RETRYABLE = 'retryable',
+  TERMINAL = 'terminal',
+}
+
+export enum AgentFailureReason {
+  NONE = 'none',
+  DEPENDENCY_UNAVAILABLE = 'dependency_unavailable',
+  COMPENSATION_FAILED = 'compensation_failed',
+  CONFIGURATION_INVALID = 'configuration_invalid',
+  UNKNOWN = 'unknown',
 }
 
 export enum AgentMode {
@@ -38,6 +55,18 @@ export class Agent {
 
   @Column({ type: 'text', default: AgentMode.PIPELINE })
   mode: AgentMode;
+
+  @Column({ type: 'text', nullable: true })
+  lastError?: string | null;
+
+  @Column({ type: 'text', default: AgentFailureStatus.NONE })
+  failureStatus: AgentFailureStatus;
+
+  @Column({ type: 'text', nullable: true })
+  failureReason?: AgentFailureReason | null;
+
+  @Column({ type: 'boolean', nullable: true })
+  retryable?: boolean | null;
 
   @ManyToOne(() => Provider, { nullable: true, eager: true })
   @JoinColumn({ name: 'provider_asr_id' })

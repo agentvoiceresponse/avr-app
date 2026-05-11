@@ -16,6 +16,7 @@ import {
   PaginatedResult,
   PaginationQuery,
 } from '../common/pagination';
+import { buildProvisioningSyncException } from '../common/provisioning-sync';
 
 @Injectable()
 export class TrunksService {
@@ -50,7 +51,7 @@ export class TrunksService {
       await this.asteriskService.provisionTrunk(saved);
     } catch (error) {
       await this.trunksRepository.delete(saved.id);
-      throw error;
+      throw buildProvisioningSyncException('trunk', 'create', error);
     }
 
     return saved;
@@ -72,6 +73,7 @@ export class TrunksService {
     if (!trunk) {
       throw new NotFoundException('Trunk not found');
     }
+    const previous = { ...trunk };
 
     if (dto.name && dto.name.trim() !== trunk.name) {
       const newName = dto.name.trim();
@@ -95,7 +97,12 @@ export class TrunksService {
     }
 
     const saved = await this.trunksRepository.save(trunk);
-    await this.asteriskService.provisionTrunk(saved);
+    try {
+      await this.asteriskService.provisionTrunk(saved);
+    } catch (error) {
+      await this.trunksRepository.save(previous);
+      throw buildProvisioningSyncException('trunk', 'update', error);
+    }
     return saved;
   }
 
@@ -105,8 +112,12 @@ export class TrunksService {
       throw new NotFoundException('Trunk not found');
     }
 
+    try {
+      await this.asteriskService.removeTrunk(id);
+    } catch (error) {
+      throw buildProvisioningSyncException('trunk', 'remove', error);
+    }
     await this.trunksRepository.remove(trunk);
-    await this.asteriskService.removeTrunk(id);
   }
 
   private normalizeCodecs(input?: string): string {

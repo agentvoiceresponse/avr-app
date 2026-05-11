@@ -7,6 +7,7 @@ import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Play, Square, PlusCircle, Waves, Pencil, Trash2, Shield } from 'lucide-react';
 import { apiFetch, type PaginatedResponse } from '@/lib/api';
+import { resolveApiErrorMessage } from '@/lib/resolve-api-error';
 import { useI18n, type Dictionary } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import {
@@ -201,6 +202,13 @@ export default function AgentsPage() {
   const { dictionary } = useI18n();
   const { user } = useAuth();
   const isReadOnly = user?.role === 'viewer';
+  const apiErrorOptions = useMemo(
+    () => ({
+      authRequired: dictionary.common.errors.authRequired,
+      forbidden: dictionary.common.errors.forbidden,
+    }),
+    [dictionary.common.errors.authRequired, dictionary.common.errors.forbidden],
+  );
 
   const agentSchema = useMemo(() => createAgentSchema(dictionary), [dictionary]);
 
@@ -288,18 +296,24 @@ export default function AgentsPage() {
       setProviders(providersRes.data);
       setError(null);
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(dictionary.agents.errors.load);
-      }
+      setError(resolveApiErrorMessage(err, { ...apiErrorOptions, fallback: dictionary.agents.errors.load }));
     } finally {
       setLoading(false);
     }
-  }, [dictionary.agents.errors.load, pagination.limit, pagination.page]);
+  }, [apiErrorOptions, dictionary.agents.errors.load, pagination.limit, pagination.page]);
 
   useEffect(() => {
     loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      void loadData();
+    }, 5000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
   }, [loadData]);
 
   const toRequestBody = (values: AgentFormValues) => ({
@@ -332,11 +346,7 @@ export default function AgentsPage() {
       });
       await loadData();
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(dictionary.agents.errors.create);
-      }
+      setError(resolveApiErrorMessage(err, { ...apiErrorOptions, fallback: dictionary.agents.errors.create }));
     } finally {
       setSubmitting(false);
     }
@@ -376,11 +386,7 @@ export default function AgentsPage() {
       setEditingAgent(null);
       await loadData();
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(dictionary.agents.errors.update);
-      }
+      setError(resolveApiErrorMessage(err, { ...apiErrorOptions, fallback: dictionary.agents.errors.update }));
     } finally {
       setUpdating(false);
     }
@@ -403,11 +409,7 @@ export default function AgentsPage() {
       setDeleteDialogOpen(false);
       await loadData();
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(dictionary.agents.errors.delete);
-      }
+      setError(resolveApiErrorMessage(err, { ...apiErrorOptions, fallback: dictionary.agents.errors.delete }));
     } finally {
       setDeleting(false);
     }
@@ -425,11 +427,7 @@ export default function AgentsPage() {
       });
       await loadData();
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(dictionary.agents.errors.action);
-      }
+      setError(resolveApiErrorMessage(err, { ...apiErrorOptions, fallback: dictionary.agents.errors.action }));
     } finally {
       setActionMap((prev) => ({ ...prev, [id]: false }));
     }

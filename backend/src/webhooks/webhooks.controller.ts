@@ -16,6 +16,7 @@ import { PaginatedResult, PaginationQuery } from '../common/pagination';
 @Controller('webhooks')
 export class WebhooksController {
   private readonly logger = new Logger(WebhooksController.name);
+  private static readonly DEFAULT_FORWARD_TIMEOUT_MS = 2000;
 
   constructor(private readonly webhooksService: WebhooksService) {}
 
@@ -145,6 +146,10 @@ export class WebhooksController {
       this.logger.warn('WEBHOOK_SECRET not set; skipping webhook forwarding');
       return;
     }
+    const timeoutMs = this.resolveForwardTimeoutMs();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
     try {
       const response = await fetch(forwardUrl, {
         method: 'POST',
@@ -154,6 +159,7 @@ export class WebhooksController {
           ...(agentId ? { 'x-avr-agent-id': agentId } : {}),
         },
         body: JSON.stringify(event),
+        signal: controller.signal,
       });
       if (!response.ok) {
         this.logger.warn(
@@ -161,7 +167,26 @@ export class WebhooksController {
         );
       }
     } catch (error) {
+      if ((error as Error).name === 'AbortError') {
+        this.logger.warn(
+          `Webhook forward timed out after ${timeoutMs}ms; continuing local processing`,
+        );
+        return;
+      }
       this.logger.error('Failed to forward webhook', error as Error);
+    } finally {
+      clearTimeout(timeout);
     }
+  }
+
+  private resolveForwardTimeoutMs(): number {
+    const configured = Number.parseInt(
+      process.env.WEBHOOK_FORWARD_TIMEOUT_MS ?? '',
+      10,
+    );
+    if (!Number.isFinite(configured) || configured <= 0) {
+      return WebhooksController.DEFAULT_FORWARD_TIMEOUT_MS;
+    }
+    return configured;
   }
 }

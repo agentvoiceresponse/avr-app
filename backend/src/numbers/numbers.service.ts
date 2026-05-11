@@ -18,6 +18,7 @@ import {
   PaginatedResult,
   PaginationQuery,
 } from '../common/pagination';
+import { buildProvisioningSyncException } from '../common/provisioning-sync';
 
 @Injectable()
 export class NumbersService {
@@ -59,7 +60,7 @@ export class NumbersService {
       await this.asteriskService.provisionNumber(saved);
     } catch (error) {
       await this.numbersRepository.delete(saved.id);
-      throw error;
+      throw buildProvisioningSyncException('number', 'create', error);
     }
 
     return saved;
@@ -82,6 +83,7 @@ export class NumbersService {
     if (!number) {
       throw new NotFoundException('Number not found');
     }
+    const previous = { ...number };
 
     if (dto.value) {
       const nextValue = dto.value.trim();
@@ -121,8 +123,12 @@ export class NumbersService {
     }
 
     const saved = await this.numbersRepository.save(number);
-
-    await this.asteriskService.provisionNumber(saved);
+    try {
+      await this.asteriskService.provisionNumber(saved);
+    } catch (error) {
+      await this.numbersRepository.save(previous);
+      throw buildProvisioningSyncException('number', 'update', error);
+    }
 
     return saved;
   }
@@ -134,9 +140,12 @@ export class NumbersService {
       throw new NotFoundException('Number not found');
     }
 
+    try {
+      await this.asteriskService.removeNumber(id);
+    } catch (error) {
+      throw buildProvisioningSyncException('number', 'remove', error);
+    }
     await this.numbersRepository.remove(number);
-
-    await this.asteriskService.removeNumber(id);
   }
 
   private async buildAssociations(
