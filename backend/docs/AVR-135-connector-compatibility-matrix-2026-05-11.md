@@ -29,7 +29,9 @@ Reserved env keys rejected at runtime:
 | STS | `agentvoiceresponse/avr-sts-elevenlabs[:tag]` | `ELEVENLABS_AGENT_ID`, `ELEVENLABS_API_KEY` | none |
 | STS | `agentvoiceresponse/avr-sts-gemini[:tag]` | `GEMINI_API_KEY`, `GEMINI_MODEL` | none |
 | STS | `agentvoiceresponse/avr-sts-ultravox[:tag]` | `ULTRAVOX_API_KEY` | if `ULTRAVOX_CALL_TYPE=agent`, require `ULTRAVOX_AGENT_ID` |
-| STS | `agentvoiceresponse/avr-sts-deepgram[:tag]` | `DEEPGRAM_API_KEY` | none |
+| STS | `agentvoiceresponse/avr-sts-deepgram[:tag]` | `DEEPGRAM_API_KEY`, `AGENT_PROMPT` | none |
+| STS | `agentvoiceresponse/avr-sts-speechmatics[:tag]` | `SPEECHMATICS_API_KEY` | none |
+| STS | `agentvoiceresponse/avr-sts-humeai[:tag]` | `HUMEAI_API_KEY` | none |
 
 Unknown images still require generic contract checks (`image` present + valid `env` map).
 

@@ -59,7 +59,20 @@ const STS_CONTRACTS: ProviderContract[] = [
   {
     imageName: 'agentvoiceresponse/avr-sts-deepgram',
     type: ProviderType.STS,
-    requiredEnv: [{ key: 'DEEPGRAM_API_KEY', required: true }],
+    requiredEnv: [
+      { key: 'DEEPGRAM_API_KEY', required: true },
+      { key: 'AGENT_PROMPT', required: true },
+    ],
+  },
+  {
+    imageName: 'agentvoiceresponse/avr-sts-speechmatics',
+    type: ProviderType.STS,
+    requiredEnv: [{ key: 'SPEECHMATICS_API_KEY', required: true }],
+  },
+  {
+    imageName: 'agentvoiceresponse/avr-sts-humeai',
+    type: ProviderType.STS,
+    requiredEnv: [{ key: 'HUMEAI_API_KEY', required: true }],
   },
 ];
 

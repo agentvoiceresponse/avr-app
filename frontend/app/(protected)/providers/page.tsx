@@ -106,6 +106,24 @@ type FormValues = {
   env?: Record<string, string | undefined>;
 };
 
+const HUMEAI_CONFIG_OVERRIDE_KEYS = new Set([
+  'HUMEAI_INSTRUCTIONS',
+  'HUMEAI_VOICE_ID',
+  'HUMEAI_WELCOME_MESSAGE',
+]);
+
+function isHumeaiFieldOverriddenByConfig(
+  templateId: string | undefined,
+  fieldKey: string,
+  configId: string | undefined,
+): boolean {
+  return (
+    templateId === 'sts-humeai' &&
+    HUMEAI_CONFIG_OVERRIDE_KEYS.has(fieldKey) &&
+    Boolean(configId?.trim())
+  );
+}
+
 // Utility functions will be moved inside the component to access providerTemplates
 
 export default function ProvidersPage() {
@@ -392,6 +410,76 @@ export default function ProvidersPage() {
         },
       ],
     },
+    {
+      id: 'sts-speechmatics',
+      type: 'STS',
+      label: dictionary.providers.templates.stsSpeechmatics.label,
+      description: dictionary.providers.templates.stsSpeechmatics.description,
+      defaultImage: 'agentvoiceresponse/avr-sts-speechmatics',
+      defaults: {
+        SPEECHMATICS_REGION: 'eu',
+      },
+      fields: [
+        {
+          key: 'SPEECHMATICS_API_KEY',
+          label: dictionary.providers.fieldsExtra.speechmaticsApiKey,
+          placeholder: 'sm-...',
+          required: true,
+          inputType: 'password',
+        },
+        {
+          key: 'SPEECHMATICS_REGION',
+          label: dictionary.providers.fieldsExtra.speechmaticsRegion,
+          widget: 'select',
+          options: [
+            { value: 'eu', label: dictionary.providers.speechmaticsRegionOptions.eu },
+            { value: 'us', label: dictionary.providers.speechmaticsRegionOptions.us },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'sts-humeai',
+      type: 'STS',
+      label: dictionary.providers.templates.stsHumeai.label,
+      description: dictionary.providers.templates.stsHumeai.description,
+      defaultImage: 'agentvoiceresponse/avr-sts-humeai',
+      fields: [
+        {
+          key: 'HUMEAI_API_KEY',
+          label: dictionary.providers.fieldsExtra.humeaiApiKey,
+          placeholder: 'hume-...',
+          required: true,
+          inputType: 'password',
+        },
+        {
+          key: 'HUMEAI_CONFIG_ID',
+          label: dictionary.providers.fieldsExtra.humeaiConfigId,
+          placeholder: 'cfg-...',
+        },
+        {
+          key: 'HUMEAI_VOICE_ID',
+          label: dictionary.providers.fieldsExtra.humeaiVoiceId,
+          placeholder: dictionary.providers.placeholders.humeaiVoiceId,
+        },
+        {
+          key: 'HUMEAI_WELCOME_MESSAGE',
+          label: dictionary.providers.fieldsExtra.humeaiWelcomeMessage,
+          placeholder: dictionary.providers.placeholders.humeaiWelcomeMessage,
+        },
+        {
+          key: 'HUMEAI_INSTRUCTIONS',
+          label: dictionary.providers.fieldsExtra.humeaiInstructions,
+          placeholder: dictionary.providers.placeholders.humeaiInstructions,
+          widget: 'textarea',
+        },
+        {
+          key: 'HUMEAI_WS_URL',
+          label: dictionary.providers.fieldsExtra.humeaiWsUrl,
+          placeholder: dictionary.providers.placeholders.humeaiWsUrl,
+        },
+      ],
+    },
   ];
 
   const createProviderSchema = (dict: Dictionary, templates: ProviderTemplate[]) => z
@@ -517,6 +605,15 @@ export default function ProvidersPage() {
             return acc;
           }
 
+          if (
+            template.id === 'sts-speechmatics' &&
+            field.key === 'SPEECHMATICS_REGION' &&
+            (rawValue === undefined || rawValue === null || String(rawValue).trim().length === 0)
+          ) {
+            acc[field.key] = String(template.defaults?.[field.key] ?? 'eu');
+            return acc;
+          }
+
           acc[field.key] = String(rawValue ?? '');
           return acc;
         }, {} as Record<string, string>)
@@ -553,6 +650,13 @@ export default function ProvidersPage() {
             template.id === 'sts-ultravox' &&
             field.key === 'ULTRAVOX_AGENT_ID' &&
             (values.env?.ULTRAVOX_CALL_TYPE?.trim() || 'agent') !== 'agent'
+          ) {
+            return null;
+          }
+          if (
+            template.id === 'sts-humeai' &&
+            HUMEAI_CONFIG_OVERRIDE_KEYS.has(field.key) &&
+            values.env?.HUMEAI_CONFIG_ID?.trim()
           ) {
             return null;
           }
@@ -729,6 +833,9 @@ export default function ProvidersPage() {
     useProviderTemplateController(form, { resetImageOnTemplateChange: true });
   const { filteredTemplates: editTemplates, selectedTemplate: editSelectedTemplate } =
     useProviderTemplateController(editForm, { skipInitialPopulate: true });
+
+  const createHumeaiConfigId = form.watch('env.HUMEAI_CONFIG_ID');
+  const editHumeaiConfigId = editForm.watch('env.HUMEAI_CONFIG_ID');
 
   const loadProviders = useCallback(async () => {
     setLoading(true);
@@ -1002,19 +1109,30 @@ export default function ProvidersPage() {
                           </FormItem>
                         )}
                       />
-                      {createSelectedTemplate.fields.map((fieldConfig) => (
+                      {createSelectedTemplate.fields.map((fieldConfig) => {
+                        const humeaiOverridden = isHumeaiFieldOverriddenByConfig(
+                          createSelectedTemplate.id,
+                          fieldConfig.key,
+                          createHumeaiConfigId,
+                        );
+                        return (
                         <FormField
                           key={fieldConfig.key}
                           control={form.control}
                           name={`env.${fieldConfig.key}` as const}
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className={humeaiOverridden ? 'opacity-60' : undefined}>
                               <FormLabel>
                                 {fieldConfig.label}
                                 {fieldConfig.required ? (
                                   <span className="text-destructive"> *</span>
                                 ) : null}
                               </FormLabel>
+                              {humeaiOverridden ? (
+                                <p className="text-xs text-muted-foreground">
+                                  {dictionary.providers.notices.humeaiConfigOverridesField}
+                                </p>
+                              ) : null}
                               <FormControl>
                                 {fieldConfig.widget === 'textarea' ? (
                                   <Textarea
@@ -1055,7 +1173,8 @@ export default function ProvidersPage() {
                             </FormItem>
                           )}
                         />
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : null}
                 </div>
@@ -1262,17 +1381,28 @@ export default function ProvidersPage() {
                         </FormItem>
                       )}
                     />
-                    {editSelectedTemplate.fields.map((fieldConfig) => (
+                    {editSelectedTemplate.fields.map((fieldConfig) => {
+                      const humeaiOverridden = isHumeaiFieldOverriddenByConfig(
+                        editSelectedTemplate.id,
+                        fieldConfig.key,
+                        editHumeaiConfigId,
+                      );
+                      return (
                       <FormField
                         key={fieldConfig.key}
                         control={editForm.control}
                         name={`env.${fieldConfig.key}` as const}
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className={humeaiOverridden ? 'opacity-60' : undefined}>
                             <FormLabel>
                               {fieldConfig.label}
                               {fieldConfig.required ? <span className="text-destructive"> *</span> : null}
                             </FormLabel>
+                            {humeaiOverridden ? (
+                              <p className="text-xs text-muted-foreground">
+                                {dictionary.providers.notices.humeaiConfigOverridesField}
+                              </p>
+                            ) : null}
                             <FormControl>
                               {fieldConfig.widget === 'textarea' ? (
                                 <Textarea
@@ -1306,7 +1436,8 @@ export default function ProvidersPage() {
                           </FormItem>
                         )}
                       />
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : null}
               </div>

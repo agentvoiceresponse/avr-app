@@ -233,6 +233,8 @@ export const itDictionary = {
       noTemplateEdit: 'Nessun template disponibile per questa tipologia. Puoi comunque aggiornare nome e tipo.',
       stsInfo:
         "Configurazione per l'agente STS. Il container userà l'immagine indicata e valorizzerà le variabili d'ambiente.",
+      humeaiConfigOverridesField:
+        "Ignorato quando è impostato un ID config HumeAI — la config remota controlla voce, saluto e istruzioni.",
     },
     fieldsExtra: {
       openaiApiKey: 'API key OpenAI',
@@ -255,11 +257,23 @@ export const itDictionary = {
       ultravoxCallType: 'Tipo chiamata Ultravox',
       ultravoxAgentId: 'ID agente Ultravox',
       ultravoxSystemPrompt: 'System prompt Ultravox',
+      speechmaticsApiKey: 'API key Speechmatics',
+      speechmaticsRegion: 'Regione Speechmatics',
+      humeaiApiKey: 'API key HumeAI',
+      humeaiConfigId: 'ID config HumeAI',
+      humeaiVoiceId: 'ID voce HumeAI',
+      humeaiWelcomeMessage: 'Messaggio di benvenuto HumeAI',
+      humeaiInstructions: 'Istruzioni HumeAI',
+      humeaiWsUrl: 'URL WebSocket HumeAI',
       agentPrompt: "Prompt dell'agente",
     },
     ultravoxCallTypeOptions: {
       agent: 'Agent',
       generic: 'Generic',
+    },
+    speechmaticsRegionOptions: {
+      eu: 'EU',
+      us: 'US',
     },
     geminiThinkingBudgetOptions: {
       turnOff: 'Disattiva thinking',
@@ -346,6 +360,16 @@ export const itDictionary = {
         label: 'Deepgram Speech-to-Speech',
         description: 'Container AVR basato su Deepgram. Richiede API key e impostazioni modello.',
       },
+      stsSpeechmatics: {
+        label: 'Speechmatics Speech-to-Speech',
+        description:
+          'Container AVR basato su Speechmatics. Richiede API key; la regione predefinita è EU.',
+      },
+      stsHumeai: {
+        label: 'HumeAI Speech-to-Speech',
+        description:
+          "Container AVR basato su HumeAI EVI. API key obbligatoria; l'ID config remoto sostituisce voce e istruzioni.",
+      },
     },
     placeholders: {
       openaiInstructions: 'Istruzioni opzionali per guidare il comportamento',
@@ -354,6 +378,10 @@ export const itDictionary = {
       agentPrompt: 'Istruzioni opzionali per guidare il comportamento',
       deepgramGreeting: 'Messaggio di saluto facoltativo',
       ultravoxSystemPrompt: 'Istruzioni opzionali per guidare il comportamento',
+      humeaiVoiceId: 'es. b89de4b1-3df6-4e4f-a054-9aed4351092d',
+      humeaiWelcomeMessage: 'Ciao, come posso aiutarti oggi?',
+      humeaiInstructions: 'Sei un assistente utile',
+      humeaiWsUrl: 'wss://api.hume.ai/v0/evi/chat',
       name: 'es. avr-sts-nome-provider',
     },
     validation: {

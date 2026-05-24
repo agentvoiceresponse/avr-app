@@ -233,6 +233,8 @@ export const enDictionary = {
       noTemplateEdit: 'No template available for this type. You can still update name and type.',
       stsInfo:
         'Configuration for STS agent. The container will use the indicated image and environment variables.',
+      humeaiConfigOverridesField:
+        'Ignored when a HumeAI config ID is set — the remote config controls voice, greeting, and instructions.',
     },
     fieldsExtra: {
       openaiApiKey: 'OpenAI API key',
@@ -255,11 +257,23 @@ export const enDictionary = {
       ultravoxCallType: 'Ultravox call type',
       ultravoxAgentId: 'Ultravox agent ID',
       ultravoxSystemPrompt: 'Ultravox system prompt',
+      speechmaticsApiKey: 'Speechmatics API key',
+      speechmaticsRegion: 'Speechmatics region',
+      humeaiApiKey: 'HumeAI API key',
+      humeaiConfigId: 'HumeAI config ID',
+      humeaiVoiceId: 'HumeAI voice ID',
+      humeaiWelcomeMessage: 'HumeAI welcome message',
+      humeaiInstructions: 'HumeAI instructions',
+      humeaiWsUrl: 'HumeAI WebSocket URL',
       agentPrompt: 'Agent prompt',
     },
     ultravoxCallTypeOptions: {
       agent: 'Agent',
       generic: 'Generic',
+    },
+    speechmaticsRegionOptions: {
+      eu: 'EU',
+      us: 'US',
     },
     geminiThinkingBudgetOptions: {
       turnOff: 'Turn off thinking',
@@ -346,6 +360,15 @@ export const enDictionary = {
         label: 'Deepgram Speech-to-Speech',
         description: 'AVR container powered by Deepgram. Requires API key and model settings.',
       },
+      stsSpeechmatics: {
+        label: 'Speechmatics Speech-to-Speech',
+        description: 'AVR container powered by Speechmatics. Requires API key; region defaults to EU.',
+      },
+      stsHumeai: {
+        label: 'HumeAI Speech-to-Speech',
+        description:
+          'AVR container powered by HumeAI EVI. API key required; optional config ID overrides voice and instructions.',
+      },
     },
     placeholders: {
       openaiInstructions: 'Optional instructions to guide behavior',
@@ -354,6 +377,10 @@ export const enDictionary = {
       agentPrompt: 'Optional instructions to guide behavior',
       deepgramGreeting: 'Optional greeting message',
       ultravoxSystemPrompt: 'Optional instructions to guide behavior',
+      humeaiVoiceId: 'e.g. b89de4b1-3df6-4e4f-a054-9aed4351092d',
+      humeaiWelcomeMessage: 'Hello, how can I help you today?',
+      humeaiInstructions: 'You are a helpful assistant',
+      humeaiWsUrl: 'wss://api.hume.ai/v0/evi/chat',
       name: 'e.g. avr-sts-provider-name',
     },
     validation: {

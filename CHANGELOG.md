@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.5.5] - 2026-05-24
+
+### Added
+- Admin provider templates for **Speechmatics** and **HumeAI** STS connectors with region, config-id gating, and EN/IT i18n ([AVR-281](https://github.com/agentvoiceresponse/avr-app/issues/281)).
+- Backend runtime contracts for `avr-sts-speechmatics` and `avr-sts-humeai`; `AGENT_PROMPT` required for `avr-sts-deepgram` ([AVR-282](https://github.com/agentvoiceresponse/avr-app/issues/282), [AVR-284](https://github.com/agentvoiceresponse/avr-app/issues/284)).
+- STS environment parity matrix at `backend/docs/AVR-281-sts-env-parity.md` covering all seven STS images.
+
+### Changed
+- OpenAI STS template default model updated to `gpt-realtime-2` to match GA Realtime connector default.
+- Connector compatibility matrix extended with Speechmatics, HumeAI, and Deepgram `AGENT_PROMPT` contract rows.
+
 ## [1.5.4] - 2026-05-24
 
 ### Fixed
