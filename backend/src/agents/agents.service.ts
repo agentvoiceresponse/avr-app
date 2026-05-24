@@ -213,12 +213,12 @@ export class AgentsService {
         const port = Math.floor(Math.random() * 1000) + 6000;
         const image = this.extractImage(provider);
         const providerEnv = this.extendEnv(env, provider, type, port);
-        if (type == ProviderType.STS) {
+        if (type === ProviderType.STS) {
           coreEnv.push(`STS_URL=ws://${containerName}:${port}`);
         } else {
-          coreEnv.push(
-            `${type.toLowerCase()}_URL=http://${containerName}:${port}`,
-          );
+          const envKey = `${type}_URL`;
+          const envUrl = this.buildCoreUrl(type, containerName, port);
+          coreEnv.push(`${envKey}=${envUrl}`);
         }
 
         let binds: string[] = [];
@@ -466,6 +466,29 @@ export class AgentsService {
 
     const envSet = new Set([...baseEnv, ...additional]);
     return Array.from(envSet);
+  }
+
+  private buildCoreUrl(
+    type: ProviderType,
+    containerName: string,
+    port: number,
+  ): string {
+    const baseUrl = `http://${containerName}:${port}`;
+    const suffix = this.getCoreUrlSuffix(type);
+    return suffix ? `${baseUrl}${suffix}` : baseUrl;
+  }
+
+  private getCoreUrlSuffix(type: ProviderType): string | undefined {
+    switch (type) {
+      case ProviderType.ASR:
+        return '/speech-to-text-stream';
+      case ProviderType.LLM:
+        return '/prompt-stream';
+      case ProviderType.TTS:
+        return '/text-to-speech-stream';
+      default:
+        return undefined;
+    }
   }
 
   private isValidUrl(str) {

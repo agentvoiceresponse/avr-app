@@ -123,6 +123,79 @@ describe('AgentsService', () => {
     expect(agentRepositoryMock.save).not.toHaveBeenCalled();
   });
 
+  it('appends canonical core URLs for pipeline providers', async () => {
+    const asrProvider = {
+      id: 'asr-core',
+      name: 'asr-core',
+      type: ProviderType.ASR,
+      config: { image: 'repo/asr:latest', env: {} },
+    } as Provider;
+    const llmProvider = {
+      id: 'llm-core',
+      name: 'llm-core',
+      type: ProviderType.LLM,
+      config: { image: 'repo/llm:latest', env: {} },
+    } as Provider;
+    const ttsProvider = {
+      id: 'tts-core',
+      name: 'tts-core',
+      type: ProviderType.TTS,
+      config: { image: 'repo/tts:latest', env: {} },
+    } as Provider;
+
+    const agent = {
+      id: 'agent-core',
+      name: 'Agent Core',
+      mode: AgentMode.PIPELINE,
+      status: AgentStatus.STOPPED,
+      port: 5090,
+      httpPort: 7090,
+      providerAsr: asrProvider,
+      providerLlm: llmProvider,
+      providerTts: ttsProvider,
+      providerSts: null,
+    } as Agent;
+
+    jest.spyOn(service, 'findOne').mockResolvedValue(agent);
+    dockerServiceMock.runContainer
+      .mockResolvedValueOnce('cid-asr-core')
+      .mockResolvedValueOnce('cid-llm-core')
+      .mockResolvedValueOnce('cid-tts-core')
+      .mockResolvedValueOnce('cid-core');
+    dockerServiceMock.getContainerInspect.mockResolvedValue({
+      State: { Running: true },
+    });
+    agentRepositoryMock.save.mockImplementation(async (payload) => payload);
+
+    await expect(service.runAgent(agent.id, { env: [] })).resolves.toEqual(
+      expect.objectContaining({ status: AgentStatus.RUNNING }),
+    );
+
+    const coreCall = dockerServiceMock.runContainer.mock.calls.find(
+      ([name]) => name === `avr-core-${agent.id}`,
+    );
+    expect(coreCall).toBeDefined();
+    const coreEnv = coreCall![2] as string[];
+    const asrEntry = coreEnv.find((entry) =>
+      entry.startsWith(`ASR_URL=http://avr-asr-${agent.id}:`),
+    );
+    const llmEntry = coreEnv.find((entry) =>
+      entry.startsWith(`LLM_URL=http://avr-llm-${agent.id}:`),
+    );
+    const ttsEntry = coreEnv.find((entry) =>
+      entry.startsWith(`TTS_URL=http://avr-tts-${agent.id}:`),
+    );
+
+    expect(asrEntry).toBeDefined();
+    expect(asrEntry).toContain('/speech-to-text-stream');
+
+    expect(llmEntry).toBeDefined();
+    expect(llmEntry).toContain('/prompt-stream');
+
+    expect(ttsEntry).toBeDefined();
+    expect(ttsEntry).toContain('/text-to-speech-stream');
+  });
+
   it('marks error and cleans up when startup fails after first provider', async () => {
     const asrProvider = {
       id: 'asr1',
