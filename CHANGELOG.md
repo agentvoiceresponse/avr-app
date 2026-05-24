@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.5.7] - 2026-05-24
+
+### Fixed
+- Pipeline `runAgent` now injects canonical streaming paths into `ASR_URL`, `LLM_URL`, and `TTS_URL` for avr-core (`/speech-to-text-stream`, `/prompt-stream`, `/text-to-speech-stream`) instead of bare `http://container:port` roots ([AVR-291](https://github.com/agentvoiceresponse/avr-app/issues/291)).
+
 ## [1.5.6] - 2026-05-24
 
 ### Added
