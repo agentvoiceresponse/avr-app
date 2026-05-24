@@ -12,6 +12,7 @@ All notable changes to this project are documented in this file.
 ### Changed
 - OpenAI STS template default model updated to `gpt-realtime-2` to match GA Realtime connector default.
 - Connector compatibility matrix extended with Speechmatics, HumeAI, and Deepgram `AGENT_PROMPT` contract rows.
+- **Breaking:** existing Deepgram STS providers must set `AGENT_PROMPT` in provider config before `runAgent` after upgrading to `1.5.5`; the backend now enforces this at startup (template pre-fills on new providers).
 
 ## [1.5.4] - 2026-05-24
 

@@ -146,7 +146,7 @@ export default function ProvidersPage() {
       description: dictionary.providers.templates.stsOpenai.description,
       defaultImage: 'agentvoiceresponse/avr-sts-openai',
       defaults: {
-        OPENAI_MODEL: 'gpt-4o-realtime-preview',
+        OPENAI_MODEL: 'gpt-realtime-2',
         OPENAI_VOICE: 'alloy',
         OPENAI_LANGUAGE: 'auto',
       },
@@ -161,7 +161,7 @@ export default function ProvidersPage() {
         {
           key: 'OPENAI_MODEL',
           label: dictionary.providers.fieldsExtra.openaiModel,
-          placeholder: 'gpt-4o-realtime-preview',
+          placeholder: 'gpt-realtime-2',
           required: true,
         },
         {
