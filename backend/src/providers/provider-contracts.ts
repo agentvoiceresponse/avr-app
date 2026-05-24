@@ -76,7 +76,25 @@ const STS_CONTRACTS: ProviderContract[] = [
   },
 ];
 
-const CONTRACTS = [...STS_CONTRACTS];
+const ASR_CONTRACTS: ProviderContract[] = [
+  {
+    imageName: 'agentvoiceresponse/avr-asr-deepgram',
+    type: ProviderType.ASR,
+    requiredEnv: [{ key: 'DEEPGRAM_API_KEY', required: true }],
+  },
+  {
+    imageName: 'agentvoiceresponse/avr-asr-sarvam',
+    type: ProviderType.ASR,
+    requiredEnv: [{ key: 'SARVAM_API_KEY', required: true }],
+  },
+  {
+    imageName: 'agentvoiceresponse/avr-asr-soniox',
+    type: ProviderType.ASR,
+    requiredEnv: [{ key: 'SONIOX_API_KEY', required: true }],
+  },
+];
+
+const CONTRACTS = [...STS_CONTRACTS, ...ASR_CONTRACTS];
 
 function findContract(
   provider: Pick<Provider, 'type' | 'config'>,

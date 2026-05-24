@@ -33,6 +33,14 @@ Reserved env keys rejected at runtime:
 | STS | `agentvoiceresponse/avr-sts-speechmatics[:tag]` | `SPEECHMATICS_API_KEY` | none |
 | STS | `agentvoiceresponse/avr-sts-humeai[:tag]` | `HUMEAI_API_KEY` | none |
 
+## ASR Image Compatibility Matrix
+
+| Provider Type | Expected Image | Required Env Keys | Conditional Rules |
+|---|---|---|---|
+| ASR | `agentvoiceresponse/avr-asr-deepgram[:tag]` | `DEEPGRAM_API_KEY` | none |
+| ASR | `agentvoiceresponse/avr-asr-sarvam[:tag]` | `SARVAM_API_KEY` | none |
+| ASR | `agentvoiceresponse/avr-asr-soniox[:tag]` | `SONIOX_API_KEY` | none |
+
 Unknown images still require generic contract checks (`image` present + valid `env` map).
 
 ## Startup Readiness and Timeout Policy

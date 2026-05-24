@@ -156,6 +156,126 @@ describe('ProvidersService', () => {
     expect(created.id).toBe('hume-1');
   });
 
+  it('rejects asr-deepgram provider create when DEEPGRAM_API_KEY is missing', async () => {
+    providerRepositoryMock.findOne.mockResolvedValueOnce(null);
+
+    await expect(
+      service.create({
+        name: 'asr-deepgram',
+        type: ProviderType.ASR,
+        config: {
+          image: 'agentvoiceresponse/avr-asr-deepgram:latest',
+          env: {},
+        },
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        message: expect.stringContaining('DEEPGRAM_API_KEY'),
+      },
+    });
+  });
+
+  it('creates asr-deepgram provider when contract is satisfied', async () => {
+    const dto = {
+      name: 'asr-deepgram',
+      type: ProviderType.ASR,
+      config: {
+        image: 'agentvoiceresponse/avr-asr-deepgram',
+        env: { DEEPGRAM_API_KEY: 'dg-test-key' },
+      },
+    };
+    providerRepositoryMock.findOne.mockResolvedValueOnce(null);
+    providerRepositoryMock.create.mockReturnValueOnce(dto);
+    providerRepositoryMock.save.mockResolvedValueOnce({
+      id: 'asr-dg-1',
+      ...dto,
+    });
+
+    const created = await service.create(dto);
+
+    expect(created.id).toBe('asr-dg-1');
+  });
+
+  it('rejects asr-sarvam provider create when SARVAM_API_KEY is missing', async () => {
+    providerRepositoryMock.findOne.mockResolvedValueOnce(null);
+
+    await expect(
+      service.create({
+        name: 'asr-sarvam',
+        type: ProviderType.ASR,
+        config: {
+          image: 'agentvoiceresponse/avr-asr-sarvam:latest',
+          env: {},
+        },
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        message: expect.stringContaining('SARVAM_API_KEY'),
+      },
+    });
+  });
+
+  it('creates asr-sarvam provider when contract is satisfied', async () => {
+    const dto = {
+      name: 'asr-sarvam',
+      type: ProviderType.ASR,
+      config: {
+        image: 'agentvoiceresponse/avr-asr-sarvam',
+        env: { SARVAM_API_KEY: 'sarvam-test-key' },
+      },
+    };
+    providerRepositoryMock.findOne.mockResolvedValueOnce(null);
+    providerRepositoryMock.create.mockReturnValueOnce(dto);
+    providerRepositoryMock.save.mockResolvedValueOnce({
+      id: 'asr-sv-1',
+      ...dto,
+    });
+
+    const created = await service.create(dto);
+
+    expect(created.id).toBe('asr-sv-1');
+  });
+
+  it('rejects asr-soniox provider create when SONIOX_API_KEY is missing', async () => {
+    providerRepositoryMock.findOne.mockResolvedValueOnce(null);
+
+    await expect(
+      service.create({
+        name: 'asr-soniox',
+        type: ProviderType.ASR,
+        config: {
+          image: 'agentvoiceresponse/avr-asr-soniox:latest',
+          env: {},
+        },
+      }),
+    ).rejects.toMatchObject({
+      response: {
+        message: expect.stringContaining('SONIOX_API_KEY'),
+      },
+    });
+  });
+
+  it('creates asr-soniox provider when contract is satisfied', async () => {
+    const dto = {
+      name: 'asr-soniox',
+      type: ProviderType.ASR,
+      config: {
+        image: 'agentvoiceresponse/avr-asr-soniox',
+        env: { SONIOX_API_KEY: 'soniox-test-key' },
+      },
+    };
+    providerRepositoryMock.findOne.mockResolvedValueOnce(null);
+    providerRepositoryMock.create.mockReturnValueOnce(dto);
+    providerRepositoryMock.save.mockResolvedValueOnce({
+      id: 'asr-sx-1',
+      ...dto,
+    });
+
+    const created = await service.create(dto);
+
+    expect(created.id).toBe('asr-sx-1');
+  });
+
   it('rejects deepgram provider create when AGENT_PROMPT is missing', async () => {
     providerRepositoryMock.findOne.mockResolvedValueOnce(null);
 
