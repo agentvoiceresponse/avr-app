@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.5.6] - 2026-05-24
+
+### Added
+- Backend runtime contracts for **Deepgram**, **Sarvam**, and **Soniox** ASR connectors (`DEEPGRAM_API_KEY`, `SARVAM_API_KEY`, `SONIOX_API_KEY`) validated at provider create/update time ([AVR-292](https://github.com/agentvoiceresponse/avr-app/issues/292)).
+- Unit test coverage for each ASR contract (reject missing key, accept satisfied contract).
+- ASR image compatibility rows in `backend/docs/AVR-135-connector-compatibility-matrix-2026-05-11.md`.
+
 ## [1.5.5] - 2026-05-24
 
 ### Added
