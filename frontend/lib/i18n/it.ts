@@ -266,6 +266,19 @@ export const itDictionary = {
       humeaiInstructions: 'Istruzioni HumeAI',
       humeaiWsUrl: 'URL WebSocket HumeAI',
       agentPrompt: "Prompt dell'agente",
+      speechRecognitionModel: 'Modello riconoscimento vocale',
+      speechRecognitionLanguage: 'Lingua riconoscimento vocale',
+      sarvamApiKey: 'API key Sarvam',
+      sarvamSpeechRecognitionModel: 'Modello riconoscimento vocale Sarvam',
+      sarvamSpeechRecognitionLanguage: 'Lingua riconoscimento vocale Sarvam',
+      sarvamSpeechRecognitionMode: 'Modalità riconoscimento vocale Sarvam',
+      sonioxApiKey: 'API key Soniox',
+      sonioxSpeechRecognitionModel: 'Modello riconoscimento vocale Soniox',
+      sonioxSpeechRecognitionLanguage: 'Lingua riconoscimento vocale Soniox',
+    },
+    sarvamSpeechRecognitionModeOptions: {
+      transcribe: 'Trascrizione',
+      translate: 'Traduzione',
     },
     ultravoxCallTypeOptions: {
       agent: 'Agent',
@@ -369,6 +382,21 @@ export const itDictionary = {
         label: 'HumeAI Speech-to-Speech',
         description:
           "Container AVR basato su HumeAI EVI. API key obbligatoria; l'ID config remoto sostituisce voce e istruzioni.",
+      },
+      asrDeepgram: {
+        label: 'Deepgram ASR',
+        description:
+          'Speech-to-text in streaming AVR con Deepgram. Richiede API key; modello e lingua sono opzionali.',
+      },
+      asrSarvam: {
+        label: 'Sarvam ASR',
+        description:
+          'Speech-to-text in streaming AVR con Sarvam. Richiede API key; configura modello, lingua e modalità.',
+      },
+      asrSoniox: {
+        label: 'Soniox ASR',
+        description:
+          'Speech-to-text in streaming AVR con Soniox. Richiede API key; modello e lingua predefiniti stt-rt-v3 e en.',
       },
     },
     placeholders: {

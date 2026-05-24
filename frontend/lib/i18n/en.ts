@@ -266,6 +266,19 @@ export const enDictionary = {
       humeaiInstructions: 'HumeAI instructions',
       humeaiWsUrl: 'HumeAI WebSocket URL',
       agentPrompt: 'Agent prompt',
+      speechRecognitionModel: 'Speech recognition model',
+      speechRecognitionLanguage: 'Speech recognition language',
+      sarvamApiKey: 'Sarvam API key',
+      sarvamSpeechRecognitionModel: 'Sarvam speech recognition model',
+      sarvamSpeechRecognitionLanguage: 'Sarvam speech recognition language',
+      sarvamSpeechRecognitionMode: 'Sarvam speech recognition mode',
+      sonioxApiKey: 'Soniox API key',
+      sonioxSpeechRecognitionModel: 'Soniox speech recognition model',
+      sonioxSpeechRecognitionLanguage: 'Soniox speech recognition language',
+    },
+    sarvamSpeechRecognitionModeOptions: {
+      transcribe: 'Transcribe',
+      translate: 'Translate',
     },
     ultravoxCallTypeOptions: {
       agent: 'Agent',
@@ -368,6 +381,21 @@ export const enDictionary = {
         label: 'HumeAI Speech-to-Speech',
         description:
           'AVR container powered by HumeAI EVI. API key required; optional config ID overrides voice and instructions.',
+      },
+      asrDeepgram: {
+        label: 'Deepgram ASR',
+        description:
+          'AVR streaming speech-to-text powered by Deepgram. Requires API key; model and language are optional.',
+      },
+      asrSarvam: {
+        label: 'Sarvam ASR',
+        description:
+          'AVR streaming speech-to-text powered by Sarvam. Requires API key; configure model, language, and mode.',
+      },
+      asrSoniox: {
+        label: 'Soniox ASR',
+        description:
+          'AVR streaming speech-to-text powered by Soniox. Requires API key; model and language default to stt-rt-v3 and en.',
       },
     },
     placeholders: {

@@ -140,6 +140,112 @@ export default function ProvidersPage() {
 
   const providerTemplates: ProviderTemplate[] = [
     {
+      id: 'asr-deepgram',
+      type: 'ASR',
+      label: dictionary.providers.templates.asrDeepgram.label,
+      description: dictionary.providers.templates.asrDeepgram.description,
+      defaultImage: 'agentvoiceresponse/avr-asr-deepgram',
+      defaults: {
+        DEEPGRAM_API_KEY: '',
+        SPEECH_RECOGNITION_MODEL: 'nova',
+        SPEECH_RECOGNITION_LANGUAGE: 'en',
+      },
+      fields: [
+        {
+          key: 'DEEPGRAM_API_KEY',
+          label: dictionary.providers.fieldsExtra.deepgramApiKey,
+          required: true,
+          inputType: 'password',
+        },
+        {
+          key: 'SPEECH_RECOGNITION_MODEL',
+          label: dictionary.providers.fieldsExtra.speechRecognitionModel,
+          placeholder: 'nova',
+        },
+        {
+          key: 'SPEECH_RECOGNITION_LANGUAGE',
+          label: dictionary.providers.fieldsExtra.speechRecognitionLanguage,
+          placeholder: 'en',
+        },
+      ],
+    },
+    {
+      id: 'asr-sarvam',
+      type: 'ASR',
+      label: dictionary.providers.templates.asrSarvam.label,
+      description: dictionary.providers.templates.asrSarvam.description,
+      defaultImage: 'agentvoiceresponse/avr-asr-sarvam',
+      defaults: {
+        SARVAM_API_KEY: '',
+        SARVAM_SPEECH_RECOGNITION_MODEL: 'saarika:v2.5',
+        SARVAM_SPEECH_RECOGNITION_LANGUAGE: 'en-IN',
+        SARVAM_SPEECH_RECOGNITION_MODE: 'transcribe',
+      },
+      fields: [
+        {
+          key: 'SARVAM_API_KEY',
+          label: dictionary.providers.fieldsExtra.sarvamApiKey,
+          required: true,
+          inputType: 'password',
+        },
+        {
+          key: 'SARVAM_SPEECH_RECOGNITION_MODEL',
+          label: dictionary.providers.fieldsExtra.sarvamSpeechRecognitionModel,
+          placeholder: 'saarika:v2.5',
+        },
+        {
+          key: 'SARVAM_SPEECH_RECOGNITION_LANGUAGE',
+          label: dictionary.providers.fieldsExtra.sarvamSpeechRecognitionLanguage,
+          placeholder: 'en-IN',
+        },
+        {
+          key: 'SARVAM_SPEECH_RECOGNITION_MODE',
+          label: dictionary.providers.fieldsExtra.sarvamSpeechRecognitionMode,
+          widget: 'select',
+          options: [
+            {
+              value: 'transcribe',
+              label: dictionary.providers.sarvamSpeechRecognitionModeOptions.transcribe,
+            },
+            {
+              value: 'translate',
+              label: dictionary.providers.sarvamSpeechRecognitionModeOptions.translate,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'asr-soniox',
+      type: 'ASR',
+      label: dictionary.providers.templates.asrSoniox.label,
+      description: dictionary.providers.templates.asrSoniox.description,
+      defaultImage: 'agentvoiceresponse/avr-asr-soniox',
+      defaults: {
+        SONIOX_API_KEY: '',
+        SONIOX_SPEECH_RECOGNITION_MODEL: 'stt-rt-v3',
+        SONIOX_SPEECH_RECOGNITION_LANGUAGE: 'en',
+      },
+      fields: [
+        {
+          key: 'SONIOX_API_KEY',
+          label: dictionary.providers.fieldsExtra.sonioxApiKey,
+          required: true,
+          inputType: 'password',
+        },
+        {
+          key: 'SONIOX_SPEECH_RECOGNITION_MODEL',
+          label: dictionary.providers.fieldsExtra.sonioxSpeechRecognitionModel,
+          placeholder: 'stt-rt-v3',
+        },
+        {
+          key: 'SONIOX_SPEECH_RECOGNITION_LANGUAGE',
+          label: dictionary.providers.fieldsExtra.sonioxSpeechRecognitionLanguage,
+          placeholder: 'en',
+        },
+      ],
+    },
+    {
       id: 'sts-openai',
       type: 'STS',
       label: dictionary.providers.templates.stsOpenai.label,
