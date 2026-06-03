@@ -383,6 +383,7 @@ export const itDictionary = {
         description:
           "Container AVR basato su HumeAI EVI. API key obbligatoria; l'ID config remoto sostituisce voce e istruzioni.",
       },
+<<<<<<< HEAD
       asrDeepgram: {
         label: 'Deepgram ASR',
         description:
@@ -398,6 +399,8 @@ export const itDictionary = {
         description:
           'Speech-to-text in streaming AVR con Soniox. Richiede API key; modello e lingua predefiniti stt-rt-v3 e en.',
       },
+=======
+>>>>>>> avr-281-sts-provider-integration
     },
     placeholders: {
       openaiInstructions: 'Istruzioni opzionali per guidare il comportamento',

@@ -32,6 +32,7 @@ Reserved env keys rejected at runtime:
 | STS | `agentvoiceresponse/avr-sts-deepgram[:tag]` | `DEEPGRAM_API_KEY`, `AGENT_PROMPT` | none |
 | STS | `agentvoiceresponse/avr-sts-speechmatics[:tag]` | `SPEECHMATICS_API_KEY` | none |
 | STS | `agentvoiceresponse/avr-sts-humeai[:tag]` | `HUMEAI_API_KEY` | none |
+<<<<<<< HEAD
 
 ## ASR Image Compatibility Matrix
 
@@ -40,6 +41,8 @@ Reserved env keys rejected at runtime:
 | ASR | `agentvoiceresponse/avr-asr-deepgram[:tag]` | `DEEPGRAM_API_KEY` | none |
 | ASR | `agentvoiceresponse/avr-asr-sarvam[:tag]` | `SARVAM_API_KEY` | none |
 | ASR | `agentvoiceresponse/avr-asr-soniox[:tag]` | `SONIOX_API_KEY` | none |
+=======
+>>>>>>> avr-281-sts-provider-integration
 
 Unknown images still require generic contract checks (`image` present + valid `env` map).
 

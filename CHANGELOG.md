@@ -4,6 +4,7 @@ All notable changes to this project are documented in this file.
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> release/avr-app-1.5.7-pipeline-core-urls
@@ -23,6 +24,8 @@ All notable changes to this project are documented in this file.
 - Unit test coverage for each ASR contract (reject missing key, accept satisfied contract).
 - ASR image compatibility rows in `backend/docs/AVR-135-connector-compatibility-matrix-2026-05-11.md`.
 
+=======
+>>>>>>> avr-281-sts-provider-integration
 ## [1.5.5] - 2026-05-24
 
 ### Added

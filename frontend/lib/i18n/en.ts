@@ -382,6 +382,7 @@ export const enDictionary = {
         description:
           'AVR container powered by HumeAI EVI. API key required; optional config ID overrides voice and instructions.',
       },
+<<<<<<< HEAD
       asrDeepgram: {
         label: 'Deepgram ASR',
         description:
@@ -397,6 +398,8 @@ export const enDictionary = {
         description:
           'AVR streaming speech-to-text powered by Soniox. Requires API key; model and language default to stt-rt-v3 and en.',
       },
+=======
+>>>>>>> avr-281-sts-provider-integration
     },
     placeholders: {
       openaiInstructions: 'Optional instructions to guide behavior',

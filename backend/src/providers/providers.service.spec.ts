@@ -156,6 +156,7 @@ describe('ProvidersService', () => {
     expect(created.id).toBe('hume-1');
   });
 
+<<<<<<< HEAD
   it('rejects asr-deepgram provider create when DEEPGRAM_API_KEY is missing', async () => {
     providerRepositoryMock.findOne.mockResolvedValueOnce(null);
 
@@ -276,6 +277,8 @@ describe('ProvidersService', () => {
     expect(created.id).toBe('asr-sx-1');
   });
 
+=======
+>>>>>>> avr-281-sts-provider-integration
   it('rejects deepgram provider create when AGENT_PROMPT is missing', async () => {
     providerRepositoryMock.findOne.mockResolvedValueOnce(null);
 
